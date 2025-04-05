@@ -20,7 +20,7 @@
  * - Implements "Add Context Line" button to save cursor position and open modal.
  * - Implements Up/Down arrow buttons for navigating context lines ("## ").
  * - Implements "Clean ✨" button using 'useTranscriptCleaner' hook.
- * - Implements "Undo" button by dispatching 'revertTranscriptToOriginal'.
+ * - Implements "Undo" button by dispatching 'revertTranscriptToOriginal'. Includes success toast.
  * - Implements enablement logic for the "Generate Note Builder Prompt..." button.
  * - Uses 'useRef' for the textarea element.
  *
@@ -42,6 +42,7 @@
  * @notes
  * - Generate Prompt button now opens the modal and has enablement logic.
  * - Button disabling logic is implemented for Clean and Undo.
+ * - Added success toast for Undo action.
  */
 import {
   setTranscriptDisplayText,
@@ -203,10 +204,11 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Undo" button.
-   * Dispatches the action to revert to the original text.
+   * Dispatches the action to revert to the original text and shows a success toast.
    */
   const handleUndo = () => {
     dispatch(revertTranscriptToOriginal());
+    toast.success("Reverted to original transcript."); // Added success toast
   };
 
   /**

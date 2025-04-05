@@ -1922,7 +1922,7 @@ File: src/components/ImageExtractModal.tsx
  * - Calls 'extractTextFromImage' utility.
  * - Manages local state for loading status, extracted text, and errors.
  * - Displays loading indicators and error messages.
- * - Uses 'react-hot-toast' for error notifications.
+ * - Uses 'react-hot-toast' for error and success notifications.
  * - "Add" button inserts extracted text + separator into slide notes at the stored cursor position.
  * - Resets local state on close.
  *
@@ -1941,6 +1941,7 @@ File: src/components/ImageExtractModal.tsx
  * @notes
  * - The actual image extraction logic resides in 'utils/imageExtractor.ts'.
  * - Cursor position for insertion is retrieved from Redux state ('slideNotes.lastKnownCursorPosition').
+ * - Added success toasts for extraction and adding text.
  */
 import React, { useState, useCallback } from "react";
 import {
@@ -2011,6 +2012,7 @@ export function ImageExtractModal() {
     try {
       const text = await extractTextFromImage(imageFile);
       setExtractedText(text);
+      toast.success("Image text extracted successfully!"); // Success toast for extraction
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error extracting text.";
@@ -2068,6 +2070,8 @@ export function ImageExtractModal() {
 
     // Dispatch action to insert text into the slide notes
     dispatch(insertSlideNotesText({ textToInsert, position }));
+
+    toast.success("Extracted text added to notes."); // Success toast for adding
 
     handleClose(); // Close modal after adding
   };
@@ -2527,7 +2531,7 @@ File: src/components/TranscriptPanel.tsx
  * - Implements "Add Context Line" button to save cursor position and open modal.
  * - Implements Up/Down arrow buttons for navigating context lines ("## ").
  * - Implements "Clean ✨" button using 'useTranscriptCleaner' hook.
- * - Implements "Undo" button by dispatching 'revertTranscriptToOriginal'.
+ * - Implements "Undo" button by dispatching 'revertTranscriptToOriginal'. Includes success toast.
  * - Implements enablement logic for the "Generate Note Builder Prompt..." button.
  * - Uses 'useRef' for the textarea element.
  *
@@ -2549,6 +2553,7 @@ File: src/components/TranscriptPanel.tsx
  * @notes
  * - Generate Prompt button now opens the modal and has enablement logic.
  * - Button disabling logic is implemented for Clean and Undo.
+ * - Added success toast for Undo action.
  */
 import {
   setTranscriptDisplayText,
@@ -2710,10 +2715,11 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Undo" button.
-   * Dispatches the action to revert to the original text.
+   * Dispatches the action to revert to the original text and shows a success toast.
    */
   const handleUndo = () => {
     dispatch(revertTranscriptToOriginal());
+    toast.success("Reverted to original transcript."); // Added success toast
   };
 
   /**

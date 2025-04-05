@@ -11,7 +11,7 @@
  * - Calls 'extractTextFromImage' utility.
  * - Manages local state for loading status, extracted text, and errors.
  * - Displays loading indicators and error messages.
- * - Uses 'react-hot-toast' for error notifications.
+ * - Uses 'react-hot-toast' for error and success notifications.
  * - "Add" button inserts extracted text + separator into slide notes at the stored cursor position.
  * - Resets local state on close.
  *
@@ -30,6 +30,7 @@
  * @notes
  * - The actual image extraction logic resides in 'utils/imageExtractor.ts'.
  * - Cursor position for insertion is retrieved from Redux state ('slideNotes.lastKnownCursorPosition').
+ * - Added success toasts for extraction and adding text.
  */
 import React, { useState, useCallback } from "react";
 import {
@@ -100,6 +101,7 @@ export function ImageExtractModal() {
     try {
       const text = await extractTextFromImage(imageFile);
       setExtractedText(text);
+      toast.success("Image text extracted successfully!"); // Success toast for extraction
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error extracting text.";
@@ -157,6 +159,8 @@ export function ImageExtractModal() {
 
     // Dispatch action to insert text into the slide notes
     dispatch(insertSlideNotesText({ textToInsert, position }));
+
+    toast.success("Extracted text added to notes."); // Success toast for adding
 
     handleClose(); // Close modal after adding
   };
