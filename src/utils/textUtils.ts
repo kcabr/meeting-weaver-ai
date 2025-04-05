@@ -2,24 +2,25 @@
  * @description
  * This file provides utility functions for common text manipulations required
  * across the MeetingWeaver AI application. This includes tasks like copying text
- * to the clipboard, inserting text at specific positions, and navigating within
- * text areas based on separators or prefixes.
+ * to the clipboard, saving text to a file, inserting text at specific positions,
+ * and navigating within text areas based on separators or prefixes.
  *
  * Key features:
  * - Copying text to the clipboard with user feedback.
+ * - Saving text content as a downloadable file.
  * - Inserting text at a given cursor position.
  * - Finding nearest separator/prefix lines for navigation.
  *
  * @dependencies
- * - react-hot-toast: For providing user feedback on clipboard operations.
+ * - react-hot-toast: For providing user feedback on clipboard and save operations.
  *
  * @notes
- * - Functions related to cursor manipulation and navigation will be added in subsequent steps.
- * - Error handling for clipboard operations is included.
+ * - Error handling for clipboard and save operations is included.
+ * - saveTextToFile uses Blob and Object URL for client-side file generation.
  */
 
 // BEGIN WRITING FILE CODE
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 /**
  * @description Copies the provided text to the user's clipboard using the
@@ -29,17 +30,17 @@ import toast from 'react-hot-toast';
  */
 export async function copyToClipboard(text: string): Promise<void> {
   if (!navigator.clipboard) {
-    toast.error('Clipboard API not available in this browser.');
-    console.error('Clipboard API not supported');
+    toast.error("Clipboard API not available in this browser.");
+    console.error("Clipboard API not supported");
     return;
   }
 
   try {
     await navigator.clipboard.writeText(text);
-    toast.success('Text copied to clipboard!');
+    toast.success("Text copied to clipboard!");
   } catch (err) {
-    toast.error('Failed to copy text to clipboard.');
-    console.error('Failed to copy text: ', err);
+    toast.error("Failed to copy text to clipboard.");
+    console.error("Failed to copy text: ", err);
   }
 }
 
@@ -77,7 +78,6 @@ export function insertTextAtCursor(
   return { newText, newCursorPosition };
 }
 
-
 /**
  * @description Finds the starting index of the nearest line that exactly matches the separator,
  * searching upwards or downwards from the current cursor position.
@@ -88,44 +88,47 @@ export function insertTextAtCursor(
  * @returns The starting index of the found line, or null if no such line is found.
  */
 export function findNearestSeparatorLine(
-    text: string,
-    currentPosition: number,
-    separator: string,
-    direction: 'up' | 'down'
+  text: string,
+  currentPosition: number,
+  separator: string,
+  direction: "up" | "down"
 ): number | null {
-    const lines = text.split('\n');
-    // Determine the line index the cursor is currently on or before
-    let currentLineIndex = text.substring(0, currentPosition).split('\n').length - 1;
+  const lines = text.split("\n");
+  // Determine the line index the cursor is currently on or before
+  let currentLineIndex =
+    text.substring(0, currentPosition).split("\n").length - 1;
 
-    if (direction === 'up') {
-        // Search backwards from the line *before* the current one
-        for (let i = currentLineIndex - 1; i >= 0; i--) {
-            if (lines[i].trim() === separator) { // Check if the line *exactly* matches the separator (ignoring potential whitespace)
-                // Calculate the starting index of this line
-                let index = 0;
-                for (let j = 0; j < i; j++) {
-                    index += lines[j].length + 1; // Add line length + 1 for newline character
-                }
-                return index;
-            }
+  if (direction === "up") {
+    // Search backwards from the line *before* the current one
+    for (let i = currentLineIndex - 1; i >= 0; i--) {
+      if (lines[i].trim() === separator) {
+        // Check if the line *exactly* matches the separator (ignoring potential whitespace)
+        // Calculate the starting index of this line
+        let index = 0;
+        for (let j = 0; j < i; j++) {
+          index += lines[j].length + 1; // Add line length + 1 for newline character
         }
-        return null; // No separator found above
-    } else { // direction === 'down'
-        // Search forwards from the line *after* the current one
-        for (let i = currentLineIndex + 1; i < lines.length; i++) {
-             if (lines[i].trim() === separator) { // Check if the line *exactly* matches the separator
-                // Calculate the starting index of this line
-                let index = 0;
-                for (let j = 0; j < i; j++) {
-                    index += lines[j].length + 1; // Add line length + 1 for newline character
-                }
-                return index;
-            }
-        }
-        return null; // No separator found below
+        return index;
+      }
     }
+    return null; // No separator found above
+  } else {
+    // direction === 'down'
+    // Search forwards from the line *after* the current one
+    for (let i = currentLineIndex + 1; i < lines.length; i++) {
+      if (lines[i].trim() === separator) {
+        // Check if the line *exactly* matches the separator
+        // Calculate the starting index of this line
+        let index = 0;
+        for (let j = 0; j < i; j++) {
+          index += lines[j].length + 1; // Add line length + 1 for newline character
+        }
+        return index;
+      }
+    }
+    return null; // No separator found below
+  }
 }
-
 
 /**
  * @description Finds the index of the nearest line starting with a specific prefix,
@@ -144,10 +147,35 @@ export function findNearestSeparatorLine(
 
 /**
  * @description Triggers a browser download for the given text content.
- * (To be implemented in Step 19)
+ * Creates a Blob, generates an object URL, simulates a click on a hidden link,
+ * and then revokes the object URL.
  * @param text - The text content to save.
  * @param filename - The desired name for the downloaded file.
  */
-// export function saveTextToFile(text: string, filename: string): void {
-//  // Implementation in Step 19
-// }
+export function saveTextToFile(text: string, filename: string): void {
+  try {
+    // Create a Blob from the text content
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+
+    // Create an object URL for the Blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+
+    // Append to the document, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Revoke the object URL to free up memory
+    URL.revokeObjectURL(url);
+
+    toast.success(`File "${filename}" download started.`);
+  } catch (error) {
+    console.error("Error saving text to file:", error);
+    toast.error("Failed to save file. See console for details.");
+  }
+}

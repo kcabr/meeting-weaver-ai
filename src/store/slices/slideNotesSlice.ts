@@ -2,14 +2,17 @@
  * @description
  * Redux slice for managing the state of the Slide/Meeting Notes panel.
  * This slice holds the text content entered by the user in the notes text area
- * and handles loading/saving this content from/to localStorage.
+ * and handles loading/saving this content from/to localStorage. It also stores
+ * the last known cursor position for inserting extracted image text.
  *
  * Key features:
  * - Manages the 'text' field for slide/meeting notes.
+ * - Stores 'lastKnownCursorPosition' for image text insertion.
  * - Provides a 'setSlideNotesText' action for immediate UI updates based on user input.
  * - Provides a 'persistSlideNotes' action, typically triggered on blur, to save state to localStorage.
- * - Provides an 'insertSlideNotesText' action for programmatically adding text (like separators), which also persists.
+ * - Provides an 'insertSlideNotesText' action for programmatically adding text (like separators or extracted text), which also persists.
  * - Provides a 'loadSlideNotes' action to initialize state from localStorage on app load.
+ * - Provides a 'setLastKnownCursorPosition' action.
  * - Initializes state by attempting to load from localStorage immediately.
  *
  * @dependencies
@@ -26,7 +29,7 @@
  */
 
 import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
-import type { SlideNotesState } from '~/types';
+import type { SlideNotesState } from '~/types'; // Ensure this path is correct
 import { getItem, setItem } from '~/utils/localStorage';
 import { LS_SLIDE_NOTES_KEY } from '~/utils/constants';
 import { insertTextAtCursor } from '~/utils/textUtils'; // Import the utility
@@ -46,9 +49,11 @@ export const persistSlideNotes = createAction<string>('slideNotes/persistSlideNo
 
 /**
  * @description Initial state for the slide notes slice. Tries to load from localStorage immediately.
+ * Includes lastKnownCursorPosition initialized to null.
  */
 const initialState: SlideNotesState = {
   text: getItem(LS_SLIDE_NOTES_KEY) ?? '', // Initialize from localStorage or default to empty
+  lastKnownCursorPosition: null,
 };
 
 /**
@@ -76,10 +81,21 @@ export const slideNotesSlice = createSlice({
      */
     insertText: (state, action: PayloadAction<{ textToInsert: string; position: number }>) => {
       const { textToInsert, position } = action.payload;
-      const { newText } = insertTextAtCursor(state.text, textToInsert, position);
+      // Ensure position is valid, fallback to end if necessary
+      const safePosition = Math.min(position, state.text.length);
+      const { newText } = insertTextAtCursor(state.text, textToInsert, safePosition);
       state.text = newText;
        // Persist the change immediately after insertion
        setItem(LS_SLIDE_NOTES_KEY, newText);
+    },
+    /**
+     * @description Sets the last known cursor position.
+     * This is typically dispatched just before opening a modal that needs this position.
+     * @param state - The current slide notes state.
+     * @param action - Payload contains the cursor position number or null.
+     */
+    setLastKnownCursorPosition: (state, action: PayloadAction<number | null>) => {
+      state.lastKnownCursorPosition = action.payload;
     },
   },
    extraReducers: (builder) => {
@@ -89,7 +105,8 @@ export const slideNotesSlice = createSlice({
         if (storedText !== null) {
           state.text = storedText;
         }
-        // If null, the initial state already handled it or it remains empty.
+        // lastKnownCursorPosition is always reset on load
+        state.lastKnownCursorPosition = null;
       })
       .addCase(persistSlideNotes, (_state, action) => {
         // Persists the text passed in the action payload (triggered by onBlur).
@@ -99,8 +116,11 @@ export const slideNotesSlice = createSlice({
 });
 
 // Export the action creators
-// Renamed 'setText' export to avoid naming collision if imported directly elsewhere
-export const { setText: setSlideNotesText, insertText: insertSlideNotesText } = slideNotesSlice.actions;
+export const {
+  setText: setSlideNotesText,
+  insertText: insertSlideNotesText,
+  setLastKnownCursorPosition, // Export the new action
+} = slideNotesSlice.actions;
 
 // Export the reducer
 export default slideNotesSlice.reducer;

@@ -34,6 +34,12 @@ export interface SlideNotesState {
    * @description The text content of the slide/meeting notes text area.
    */
   text: string;
+  /**
+   * @description Stores the cursor position from the SlideNotesPanel textarea
+   * right before the ImageExtractModal is opened. Used to insert the
+   * extracted text at the correct position. Null if not set.
+   */
+  lastKnownCursorPosition: number | null;
 }
 
 /**
@@ -87,4 +93,3 @@ export interface ModalState {
    */
   isGeneratePromptModalOpen: boolean;
 }
-

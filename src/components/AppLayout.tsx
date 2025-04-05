@@ -3,12 +3,13 @@
  * Defines the overall layout structure of the MeetingWeaver AI application.
  * It combines the Header and the MainContentLayout into a single cohesive view.
  * Includes logic to dispatch actions for loading persisted state from localStorage on mount.
+ * Renders global modal components.
  *
  * Key features:
  * - Uses flexbox to arrange Header and MainContentLayout vertically.
  * - Ensures the layout occupies the full screen height.
  * - Dispatches actions to load persisted context, slide notes, and transcript data on initial render.
- * - Includes modal components that can be shown throughout the application.
+ * - Includes modal components (ContextModal, ImageExtractModal) that can be shown throughout the application.
  *
  * @dependencies
  * - react: For component creation and useEffect hook.
@@ -16,6 +17,7 @@
  * - ./Header: The application header component.
  * - ./MainContentLayout: The main two-column content area component.
  * - ./ContextModal: The context modal component.
+ * - ./ImageExtractModal: The image extraction modal component.
  * - ~/store/hooks: Typed Redux dispatch hook.
  * - ~/store/slices/contextSlice: Action creator for loading context.
  * - ~/store/slices/slideNotesSlice: Action creator for loading slide notes.
@@ -24,17 +26,19 @@
  * @notes
  * - This component acts as the primary container rendered by the main route.
  * - The useEffect hook runs only once when the component mounts.
- * - Modals are placed here so they're available throughout the application.
+ * - Modals are placed here so they're available globally when triggered via Redux state.
  */
 import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { MainContentLayout } from "./MainContentLayout";
 import { ContextModal } from "./ContextModal";
+import { ImageExtractModal } from "./ImageExtractModal"; // Import the new modal
 import { useAppDispatch } from "~/store/hooks";
 import { loadContext } from "~/store/slices/contextSlice";
 import { loadSlideNotes } from "~/store/slices/slideNotesSlice";
 import { loadTranscript } from "~/store/slices/transcriptSlice";
 
+// BEGIN WRITING FILE CODE
 export function AppLayout() {
   const dispatch = useAppDispatch();
 
@@ -53,8 +57,10 @@ export function AppLayout() {
       <Header />
       <MainContentLayout />
 
-      {/* Modals */}
+      {/* Global Modals */}
       <ContextModal />
+      <ImageExtractModal /> {/* Add the ImageExtractModal here */}
+      {/* Add other global modals here as needed */}
     </div>
   );
 }

@@ -50,6 +50,7 @@ Directory Structure
 .prettierignore
 .repomix/bundles.json
 .repomixignore
+.support/ImageExtract.tsx
 app.config.ts
 components.json
 package.json
@@ -73,9 +74,11 @@ src/components/ContextModal.tsx
 src/components/DefaultCatchBoundary.tsx
 src/components/FeedbackModal.tsx
 src/components/Header.tsx
+src/components/ImageExtractModal.tsx
 src/components/MainContentLayout.tsx
 src/components/NotFound.tsx
 src/components/SlideNotesPanel.tsx
+src/components/TranscriptPanel.tsx
 src/components/ui/alert.tsx
 src/components/ui/avatar.tsx
 src/components/ui/badge.tsx
@@ -91,6 +94,7 @@ src/components/ui/textarea.tsx
 src/lib/utils.ts
 src/router.tsx
 src/routes/__root.tsx
+src/routes/api/ai/image-extract/index.ts
 src/routes/api/ai/magic-text.ts
 src/routes/api/stripe/webhooks.ts
 src/routes/form.tsx
@@ -98,6 +102,7 @@ src/routes/grid.tsx
 src/routes/index.tsx
 src/routes/test.tsx
 src/routeTree.gen.ts
+src/server/imageProcessor.ts
 src/services/ai.ts
 src/ssr.tsx
 src/store/hooks.ts
@@ -115,7 +120,9 @@ src/types/index.ts
 src/utils/cn.ts
 src/utils/constants.ts
 src/utils/feedback.ts
+src/utils/imageExtractor.ts
 src/utils/localStorage.ts
+src/utils/README.md
 src/utils/seo.ts
 src/utils/textUtils.ts
 tailwind.config.mjs
@@ -130,7 +137,7 @@ Files
 File: .env.example
 ================
 VITE_ENABLE_FEEDBACK=true
-VITE_LANGDOCK_API_KEY=
+VITE_LANGDOCK_API_KEY=your_openai_api_key_here
 VITE_LANGDOCK_CLEAN_ENDPOINT=
 
 ================
@@ -189,6 +196,168 @@ File: .repomixignore
 .netlify/
 .docs/
 do_work.ps1
+
+================
+File: .support/ImageExtract.tsx
+================
+import { postAiToolzTextFromImage } from '@/services/TcTkAPI/ai';
+import { RootState } from '@/store';
+import { PageContainer } from '@ant-design/pro-components';
+import { useQuery } from '@tanstack/react-query';
+import { useModel } from '@umijs/max';
+import { Card, Col, message, Row, Spin } from 'antd';
+import TextArea from 'antd/lib/input/TextArea';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
+const TextExtractor: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  const environment = useSelector((state: RootState) => state.environment.environment);
+  const [pastedImage, setPastedImage] = useState<string | null>(null);
+  const [extractedText, setExtractedText] = useState<string>('');
+
+  useEffect(() => {
+    if (!pastedImage) return;
+
+    console.log('Getting image text.');
+
+    getImageText();
+
+    return () => {};
+  }, [pastedImage]);
+
+  const fetchIt = async () => {
+    try {
+      if (!pastedImage) return;
+
+      const res = await postAiToolzTextFromImage({ imageData: pastedImage ?? '' });
+      return res ?? '';
+    } catch (error) {
+      message.error('Failed to fetch Extract Image Text');
+    }
+
+    return null;
+  };
+
+  const {
+    isLoading: isLoading,
+    isError: isError,
+    data: data,
+    error: error,
+    refetch: getImageText,
+  } = useQuery({
+    queryKey: ['toolz-image-extractor-text', pastedImage],
+    queryFn: fetchIt,
+    enabled: !!pastedImage,
+    staleTime: 0,
+    //refetchOnWindowFocus: false,
+  });
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    const items = event.clipboardData.items;
+    for (const item of items) {
+      if (item.type.indexOf('image') !== -1) {
+        const blob = item.getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            setPastedImage(result);
+            // TODO: Call your OCR extraction API here using the blob or base64 data.
+            // For now, we simulate this by setting placeholder text.
+
+            // To get only the base64 part (without the data URL prefix), use:
+            const base64Data = result.split(',')[1];
+            //console.log('Base64 data:', base64Data);
+
+            //setExtractedText("Extracted text from image will appear here.");
+          };
+          reader.readAsDataURL(blob);
+          break; // only process the first pasted image
+        }
+      }
+    }
+  };
+
+  // function handleExtractText(): void {
+  //   getImageText();
+  // }
+
+  return (
+    <PageContainer title={''}>
+      <Row gutter={16}>
+        <Col xs={24} sm={24} md={12}>
+          <Card
+            style={{
+              borderRadius: 8,
+              marginBottom: 16,
+            }}
+            styles={{
+              body: {
+                backgroundImage:
+                  initialState?.settings?.navTheme === 'realDark'
+                    ? 'linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
+                    : 'linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
+              },
+            }}
+          >
+            <div
+              onPaste={handlePaste}
+              style={{
+                border: '2px dashed #d9d9d9',
+                borderRadius: 8,
+                padding: 20,
+                textAlign: 'center',
+                minHeight: 200,
+                maxHeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {pastedImage ? (
+                <img src={pastedImage} alt="Pasted" style={{ maxWidth: '100%', maxHeight: 596 }} />
+              ) : (
+                <p>CTRL + V your clipboard image here</p>
+              )}
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={24} md={12}>
+          <Card
+            style={{
+              borderRadius: 8,
+            }}
+            styles={{
+              body: {
+                backgroundImage:
+                  initialState?.settings?.navTheme === 'realDark'
+                    ? 'linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
+                    : 'linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
+              },
+            }}
+          >
+            <div style={{ marginTop: 0 }}>
+              <h3>Extracted Text</h3>
+              <Spin spinning={isLoading}>
+                <TextArea
+                  value={data ?? ''}
+                  readOnly
+                  onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                  autoSize={{ minRows: 25, maxRows: 25 }}
+                  style={{ cursor: 'pointer' }}
+                />
+              </Spin>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </PageContainer>
+  );
+};
+
+export default TextExtractor;
 
 ================
 File: app.config.ts
@@ -717,12 +886,13 @@ File: src/components/AppLayout.tsx
  * Defines the overall layout structure of the MeetingWeaver AI application.
  * It combines the Header and the MainContentLayout into a single cohesive view.
  * Includes logic to dispatch actions for loading persisted state from localStorage on mount.
+ * Renders global modal components.
  *
  * Key features:
  * - Uses flexbox to arrange Header and MainContentLayout vertically.
  * - Ensures the layout occupies the full screen height.
  * - Dispatches actions to load persisted context, slide notes, and transcript data on initial render.
- * - Includes modal components that can be shown throughout the application.
+ * - Includes modal components (ContextModal, ImageExtractModal) that can be shown throughout the application.
  *
  * @dependencies
  * - react: For component creation and useEffect hook.
@@ -730,6 +900,7 @@ File: src/components/AppLayout.tsx
  * - ./Header: The application header component.
  * - ./MainContentLayout: The main two-column content area component.
  * - ./ContextModal: The context modal component.
+ * - ./ImageExtractModal: The image extraction modal component.
  * - ~/store/hooks: Typed Redux dispatch hook.
  * - ~/store/slices/contextSlice: Action creator for loading context.
  * - ~/store/slices/slideNotesSlice: Action creator for loading slide notes.
@@ -738,17 +909,19 @@ File: src/components/AppLayout.tsx
  * @notes
  * - This component acts as the primary container rendered by the main route.
  * - The useEffect hook runs only once when the component mounts.
- * - Modals are placed here so they're available throughout the application.
+ * - Modals are placed here so they're available globally when triggered via Redux state.
  */
 import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { MainContentLayout } from "./MainContentLayout";
 import { ContextModal } from "./ContextModal";
+import { ImageExtractModal } from "./ImageExtractModal"; // Import the new modal
 import { useAppDispatch } from "~/store/hooks";
 import { loadContext } from "~/store/slices/contextSlice";
 import { loadSlideNotes } from "~/store/slices/slideNotesSlice";
 import { loadTranscript } from "~/store/slices/transcriptSlice";
 
+// BEGIN WRITING FILE CODE
 export function AppLayout() {
   const dispatch = useAppDispatch();
 
@@ -767,8 +940,10 @@ export function AppLayout() {
       <Header />
       <MainContentLayout />
 
-      {/* Modals */}
+      {/* Global Modals */}
       <ContextModal />
+      <ImageExtractModal /> {/* Add the ImageExtractModal here */}
+      {/* Add other global modals here as needed */}
     </div>
   );
 }
@@ -1419,6 +1594,241 @@ export function Header() {
 }
 
 ================
+File: src/components/ImageExtractModal.tsx
+================
+/**
+ * @description
+ * Renders the modal dialog for extracting text from a pasted image.
+ * Handles image pasting, calls an external extraction function, displays results,
+ * and allows adding the extracted text (with separator) to the Slide Notes panel
+ * at the previously stored cursor position.
+ *
+ * Key features:
+ * - Controlled by 'isImageExtractModalOpen' state.
+ * - Handles image pasting via 'onPaste'.
+ * - Calls 'extractTextFromImage' utility.
+ * - Manages local state for loading status, extracted text, and errors.
+ * - Displays loading indicators and error messages.
+ * - Uses 'react-hot-toast' for error notifications.
+ * - "Add" button inserts extracted text + separator into slide notes at the stored cursor position.
+ * - Resets local state on close.
+ *
+ * @dependencies
+ * - react: For component creation and hooks (useState, useCallback).
+ * - react-redux: For accessing Redux state (useAppSelector) and dispatching actions (useAppDispatch).
+ * - react-hot-toast: For displaying notifications.
+ * - ~/components/ui/*: Shadcn UI components (Dialog, Label, Textarea, Button).
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/modalSlice: Action 'closeImageExtractModal'.
+ * - ~/store/slices/slideNotesSlice: Action 'insertSlideNotesText'.
+ * - ~/utils/imageExtractor: The function (placeholder or real) to call for OCR.
+ * - ~/utils/constants: Constant 'SLIDE_NOTES_SEPARATOR'.
+ * - lucide-react: For 'Loader2' icon.
+ *
+ * @notes
+ * - The actual image extraction logic resides in 'utils/imageExtractor.ts'.
+ * - Cursor position for insertion is retrieved from Redux state ('slideNotes.lastKnownCursorPosition').
+ */
+import React, { useState, useCallback } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import { Button } from "~/components/ui/button";
+import { useAppSelector, useAppDispatch } from "~/store/hooks";
+import { closeImageExtractModal } from "~/store/slices/modalSlice";
+import { insertSlideNotesText } from "~/store/slices/slideNotesSlice";
+import { extractTextFromImage } from "~/utils/imageExtractor"; // Import the extractor function
+import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants"; // Import separator constant
+import { Loader2 } from "lucide-react"; // Import Loader icon
+import toast from "react-hot-toast"; // Import toast
+
+// BEGIN WRITING FILE CODE
+export function ImageExtractModal() {
+  const dispatch = useAppDispatch();
+  const isOpen = useAppSelector(
+    (state) => state.modals.isImageExtractModalOpen
+  );
+  // Get the cursor position stored in Redux state
+  const lastKnownCursorPosition = useAppSelector(
+    (state) => state.slideNotes.lastKnownCursorPosition
+  );
+  // Fallback position if Redux state is null (e.g., append to end)
+  const slideNotesLength = useAppSelector(
+    (state) => state.slideNotes.text.length
+  );
+
+  // Local state for managing extracted text, loading, and errors
+  const [extractedText, setExtractedText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * @description Resets local state variables.
+   */
+  const resetLocalState = useCallback(() => {
+    setExtractedText("");
+    setIsLoading(false);
+    setError(null);
+  }, []);
+
+  /**
+   * @description Handles the closing of the dialog, dispatched via onOpenChange or Cancel button.
+   * Also resets the local component state.
+   */
+  const handleClose = useCallback(() => {
+    dispatch(closeImageExtractModal());
+    resetLocalState();
+  }, [dispatch, resetLocalState]);
+
+  /**
+   * @description Processes an image file: calls extraction and updates state.
+   * @param imageFile - The image file blob to process.
+   */
+  const processImage = useCallback(async (imageFile: Blob) => {
+    setIsLoading(true);
+    setError(null);
+    setExtractedText(""); // Clear previous text
+    try {
+      const text = await extractTextFromImage(imageFile);
+      setExtractedText(text);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error extracting text.";
+      setError(errorMessage);
+      toast.error(`Image Extraction Failed: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  /**
+   * @description Handles the paste event on the designated paste area.
+   * Checks for image data in the clipboard and initiates processing.
+   * @param e - The React ClipboardEvent.
+   */
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLDivElement>) => {
+      setError(null); // Clear previous errors on new paste
+      const items = e.clipboardData.items;
+      let imageFound = false;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            imageFound = true;
+            processImage(file);
+            break; // Process only the first image found
+          }
+        }
+      }
+      if (!imageFound) {
+        setError("No image found in clipboard data.");
+        toast.error("Paste operation didn't contain a recognizable image.");
+      }
+    },
+    [processImage]
+  );
+
+  /**
+   * @description Handles the "Add" button click.
+   * Constructs the text to insert (extracted text + separator) and dispatches
+   * the 'insertSlideNotesText' action with the correct position from Redux state.
+   */
+  const handleAddText = () => {
+    if (!extractedText.trim()) {
+      toast.error("No extracted text to add.");
+      return;
+    }
+
+    // Use the stored cursor position, fallback to end of text if null
+    const position = lastKnownCursorPosition ?? slideNotesLength;
+
+    // Construct the text to insert, ensuring separators are added correctly
+    const textToInsert = `${extractedText.trim()}\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
+
+    // Dispatch action to insert text into the slide notes
+    dispatch(insertSlideNotesText({ textToInsert, position }));
+
+    handleClose(); // Close modal after adding
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Image-to-Text Extraction</DialogTitle>
+          <DialogDescription>
+            Paste an image below to extract text. Review the extracted text
+            before adding it to your notes.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          {/* Paste Area */}
+          <div className="grid gap-2">
+            <Label htmlFor="paste-area">Paste Image Here</Label>
+            <div
+              id="paste-area"
+              className="border-2 border-dashed rounded-md p-4 text-center min-h-[100px] flex items-center justify-center text-muted-foreground bg-secondary/30 cursor-copy focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              onPaste={handlePaste} // Attach paste handler
+              tabIndex={0} // Make it focusable for paste
+              role="button"
+              aria-label="Paste image area"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span>Processing image...</span>
+                </div>
+              ) : error ? (
+                <span className="text-destructive">{error}</span>
+              ) : (
+                "Paste Image Here" // Keep simple instructions
+              )}
+            </div>
+          </div>
+
+          {/* Review Area */}
+          <div className="grid gap-2">
+            <Label htmlFor="extracted-text-review">
+              Extracted Text (Review)
+            </Label>
+            <Textarea
+              id="extracted-text-review"
+              value={extractedText}
+              onChange={(e) => setExtractedText(e.target.value)} // Allow editing of extracted text
+              placeholder="Extracted text will appear here..."
+              className="min-h-[200px] resize-y bg-background" // Use standard background
+              aria-live="polite" // Announce changes for screen readers
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddText}
+            disabled={isLoading || !extractedText.trim()} // Disable if loading or no text
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Add to Notes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+================
 File: src/components/MainContentLayout.tsx
 ================
 /**
@@ -1430,35 +1840,37 @@ File: src/components/MainContentLayout.tsx
  * Key features:
  * - Uses CSS Grid for a two-column layout with a gap.
  * - Designed to fill the remaining vertical space below the header.
- * - Renders the SlideNotesPanel and a placeholder for the TranscriptPanel.
+ * - Renders the SlideNotesPanel and the TranscriptPanel components.
  *
  * @dependencies
  * - react: For component creation.
  * - ./SlideNotesPanel: The component for the left panel.
+ * - ./TranscriptPanel: The component for the right panel.
  *
  * @notes
- * - The 'flex-grow' class ensures this component expands vertically.
- * - TranscriptPanel placeholder will be replaced later.
+ * - The 'flex-grow' class ensures this component expands vertically within its flex container.
+ * - Each panel is wrapped in a div to apply consistent styling (border, padding, background, shadow) and internal flex layout.
  */
-import React from "react";
-import { SlideNotesPanel } from "./SlideNotesPanel"; // Import the SlideNotesPanel
+import React from 'react';
+import { SlideNotesPanel } from './SlideNotesPanel';
+import { TranscriptPanel } from './TranscriptPanel'; // Import the TranscriptPanel
 
+// BEGIN WRITING FILE CODE
 export function MainContentLayout() {
   return (
     // Use flex-grow to take available vertical space, grid for columns
-    // Set an explicit height or min-height on the parent container if needed
-    // Adding h-0 to flex-grow allows it to shrink correctly if content overflows
+    // h-0 is important for flex-grow children within a flex container to allow shrinking
     <main className="grid grid-cols-2 gap-4 p-4 flex-grow h-0">
       {/* Left Panel: Slide / Meeting Notes */}
-      {/* Wrap panel in a div that allows internal flex-grow */}
-      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm">
+      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm overflow-hidden">
+        {/* overflow-hidden prevents content from breaking out */}
         <SlideNotesPanel />
       </div>
 
-      {/* Right Panel Placeholder */}
-      <div className="border rounded p-4 bg-card text-card-foreground shadow-sm">
-        {/* Placeholder for TranscriptPanel */}
-        Right Panel: Meeting Transcript (Placeholder)
+      {/* Right Panel: Meeting Transcript */}
+      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm overflow-hidden">
+        {/* overflow-hidden prevents content from breaking out */}
+        <TranscriptPanel />
       </div>
     </main>
   );
@@ -1502,17 +1914,19 @@ File: src/components/SlideNotesPanel.tsx
  * Includes a labeled text area and a vertical stack of action buttons.
  * Connects the text area to the Redux store for state management and persists on blur.
  * Implements the "Copy Text", "Add Line", and separator navigation functionalities.
+ * Dispatches the current cursor position when opening the Image Extract modal.
  *
  * Key features:
  * - Displays a labeled multi-line text area for notes input.
  * - Shows action buttons with icons.
- * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage text area content.
+ * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage text area content and cursor position state.
  * - Updates Redux state on text area change ('onChange').
  * - Persists text area content to localStorage on blur ('onBlur').
  * - Implements "Copy Text" button functionality using utility function and toast feedback.
  * - Implements "Add Line" button to insert a separator using a Redux action.
  * - Implements Up/Down arrow buttons to navigate between separator lines.
  * - Uses 'useRef' to hold a reference to the textarea element for cursor manipulation.
+ * - Dispatches 'setLastKnownCursorPosition' action before opening the image modal.
  *
  * @dependencies
  * - react: For component creation, 'useRef', 'useEffect', 'useState'.
@@ -1522,7 +1936,8 @@ File: src/components/SlideNotesPanel.tsx
  * - ~/components/ui/textarea: Shadcn Textarea component.
  * - ~/components/ui/button: Shadcn Button component.
  * - ~/store/hooks: Typed Redux hooks.
- * - ~/store/slices/slideNotesSlice: Action creators 'setSlideNotesText', 'persistSlideNotes', 'insertSlideNotesText'.
+ * - ~/store/slices/slideNotesSlice: Action creators 'setSlideNotesText', 'persistSlideNotes', 'insertSlideNotesText', 'setLastKnownCursorPosition'.
+ * - ~/store/slices/modalSlice: Action creator 'openImageExtractModal'.
  * - ~/utils/textUtils: Utility functions 'copyToClipboard', 'findNearestSeparatorLine'.
  * - ~/utils/constants: Constants like 'SLIDE_NOTES_SEPARATOR'.
  * - lucide-react: For icons (Image, Copy, ArrowUp, Plus, ArrowDown).
@@ -1530,6 +1945,7 @@ File: src/components/SlideNotesPanel.tsx
  * @notes
  * - Cursor position setting after 'Add Line' uses a state variable and useEffect for better reliability.
  * - Navigation uses the findNearestSeparatorLine utility to move the cursor.
+ * - Image Extract button now dispatches Redux actions to open the modal and save cursor position.
  */
 
 import React, { useRef, useEffect, useState } from "react";
@@ -1541,8 +1957,10 @@ import {
   setSlideNotesText,
   persistSlideNotes,
   insertSlideNotesText,
+  setLastKnownCursorPosition, // Import the action
 } from "~/store/slices/slideNotesSlice";
-import { copyToClipboard, findNearestSeparatorLine } from "~/utils/textUtils"; // Import navigation util
+import { openImageExtractModal } from "~/store/slices/modalSlice";
+import { copyToClipboard, findNearestSeparatorLine } from "~/utils/textUtils";
 import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants";
 import toast from "react-hot-toast";
 import {
@@ -1551,10 +1969,10 @@ import {
   ArrowUp,
   Plus,
   ArrowDown,
+  Loader2, // Keep Loader2 for potential future use
 } from "lucide-react";
 
 // BEGIN WRITING FILE CODE
-
 export function SlideNotesPanel() {
   const dispatch = useAppDispatch();
   const slideNotesText = useAppSelector((state) => state.slideNotes.text);
@@ -1599,19 +2017,22 @@ export function SlideNotesPanel() {
     if (textareaRef.current) {
       const cursorPosition = textareaRef.current.selectionStart;
       const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
+      // Calculate based on insertion point
       const calculatedNextPosition = cursorPosition + textToInsert.length;
 
       dispatch(
         insertSlideNotesText({ textToInsert, position: cursorPosition })
       );
+      // Schedule cursor update after state changes
       setNextCursorPosition(calculatedNextPosition);
     } else {
       console.warn("Textarea ref not available for Add Line action.");
+      // Fallback if ref is not available (less likely but safe)
       const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
-      const calculatedNextPosition =
-        slideNotesText.length + textToInsert.length;
+      const cursorPosition = slideNotesText.length; // Append at the end
+      const calculatedNextPosition = cursorPosition + textToInsert.length;
       dispatch(
-        insertSlideNotesText({ textToInsert, position: slideNotesText.length })
+        insertSlideNotesText({ textToInsert, position: cursorPosition })
       );
       setNextCursorPosition(calculatedNextPosition);
     }
@@ -1619,22 +2040,20 @@ export function SlideNotesPanel() {
 
   /**
    * @description Effect to set the cursor position after the text state has updated
-   * from an insertion action.
+   * from an insertion action. Checks if the requested position is valid.
    */
   useEffect(() => {
     if (nextCursorPosition !== null && textareaRef.current) {
-      if (textareaRef.current.value.length >= nextCursorPosition) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(
-          nextCursorPosition,
-          nextCursorPosition
-        );
-      } else {
-        console.warn("Could not set cursor position, text length mismatch.");
-      }
-      setNextCursorPosition(null);
+      // Ensure the position is valid before setting
+      const currentLength = textareaRef.current.value.length;
+      const targetPosition = Math.min(nextCursorPosition, currentLength);
+
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(targetPosition, targetPosition);
+
+      setNextCursorPosition(null); // Reset after attempting to set
     }
-  }, [slideNotesText, nextCursorPosition]);
+  }, [slideNotesText, nextCursorPosition]); // Depend on text change and the trigger
 
   /**
    * @description Handles the click event for the "Navigate Up" button.
@@ -1648,15 +2067,14 @@ export function SlideNotesPanel() {
         text,
         currentPosition,
         SLIDE_NOTES_SEPARATOR,
-        'up'
+        "up"
       );
 
       if (newPosition !== null) {
         textareaRef.current.focus();
         textareaRef.current.setSelectionRange(newPosition, newPosition);
       } else {
-        // Optional: Add feedback if no separator is found above
-         toast('No separator found above.', { icon: '🤷', duration: 1500 });
+        toast("No separator found above.", { icon: "🤷", duration: 1500 });
       }
     }
   };
@@ -1666,30 +2084,36 @@ export function SlideNotesPanel() {
    * Finds the nearest separator line below the cursor and moves the cursor there.
    */
   const handleNavigateDown = () => {
-      if (textareaRef.current) {
-        const currentPosition = textareaRef.current.selectionStart;
-        const text = textareaRef.current.value;
-        const newPosition = findNearestSeparatorLine(
-          text,
-          currentPosition,
-          SLIDE_NOTES_SEPARATOR,
-          'down'
-        );
+    if (textareaRef.current) {
+      const currentPosition = textareaRef.current.selectionStart;
+      const text = textareaRef.current.value;
+      const newPosition = findNearestSeparatorLine(
+        text,
+        currentPosition,
+        SLIDE_NOTES_SEPARATOR,
+        "down"
+      );
 
-        if (newPosition !== null) {
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(newPosition, newPosition);
-        } else {
-          // Optional: Add feedback if no separator is found below
-           toast('No separator found below.', { icon: '🤷', duration: 1500 });
-        }
+      if (newPosition !== null) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      } else {
+        toast("No separator found below.", { icon: "🤷", duration: 1500 });
       }
+    }
   };
 
-  // Placeholder handler for Image Extract button
-  const handleImageExtract = () =>
-    console.log("Image Extract clicked (Placeholder)");
-
+  /**
+   * @description Handles the click event for the "Img-Txt Extract (Modal)" button.
+   * Saves the current cursor position to Redux state and then opens the modal.
+   */
+  const handleImageExtract = () => {
+    // Save cursor position before opening modal
+    const currentPosition =
+      textareaRef.current?.selectionStart ?? slideNotesText.length;
+    dispatch(setLastKnownCursorPosition(currentPosition));
+    dispatch(openImageExtractModal());
+  };
 
   return (
     <div className="flex gap-2 h-full">
@@ -1709,7 +2133,6 @@ export function SlideNotesPanel() {
           onBlur={handleBlur}
           placeholder="Paste slide content or enter meeting notes here..."
           className="flex-grow resize-none text-sm"
-          // Add spellCheck false if desired
           spellCheck={false}
         />
       </div>
@@ -1737,7 +2160,7 @@ export function SlideNotesPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateUp} // Connect handler
+          onClick={handleNavigateUp}
           title="Navigate Up (Separator)"
         >
           <ArrowUp className="h-4 w-4" />
@@ -1755,11 +2178,218 @@ export function SlideNotesPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateDown} // Connect handler
+          onClick={handleNavigateDown}
           title="Navigate Down (Separator)"
         >
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+================
+File: src/components/TranscriptPanel.tsx
+================
+/**
+ * @description
+ * Renders the right panel dedicated to the Meeting Transcript input.
+ * Includes a labeled text area and a vertical stack of action buttons.
+ * Connects the text area to the Redux store ('transcriptSlice') for state management.
+ * Handles 'onChange' to update the displayed text and reset cleaning status.
+ * Persists both display and original text to localStorage on blur.
+ * Implements "Copy Text" and "Save" button functionalities.
+ *
+ * Key features:
+ * - Displays a labeled multi-line text area for transcript input.
+ * - Shows action buttons (Copy and Save are now functional).
+ * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage transcript state.
+ * - Updates Redux state on text area change ('onChange').
+ * - Persists state to localStorage on blur ('onBlur').
+ * - Implements "Copy Text" button using 'copyToClipboard' utility.
+ * - Implements "Save" button using 'saveTextToFile' utility.
+ * - Uses 'useRef' to hold a reference to the textarea element.
+ *
+ * @dependencies
+ * - react: For component creation and 'useRef'.
+ * - react-redux: For hooks 'useAppSelector', 'useAppDispatch'.
+ * - ~/components/ui/label: Shadcn Label component.
+ * - ~/components/ui/textarea: Shadcn Textarea component.
+ * - ~/components/ui/button: Shadcn Button component.
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/transcriptSlice: Action creators 'setTranscriptDisplayText', 'persistTranscript'.
+ * - ~/utils/textUtils: Utilities 'copyToClipboard', 'saveTextToFile'.
+ * - lucide-react: For icons.
+ *
+ * @notes
+ * - Other button functionalities (Clean, Undo, Navigate, Add Context, Generate) will be implemented in subsequent steps.
+ * - Copy and Save buttons are now enabled.
+ */
+import React, { useRef } from 'react';
+import { Label } from '~/components/ui/label';
+import { Textarea } from '~/components/ui/textarea';
+import { Button } from '~/components/ui/button';
+import { useAppSelector, useAppDispatch } from '~/store/hooks';
+import { setTranscriptDisplayText, persistTranscript } from '~/store/slices/transcriptSlice';
+import { copyToClipboard, saveTextToFile } from '~/utils/textUtils'; // Import utilities
+import {
+  Sparkles, // Clean ✨
+  Undo2,    // Undo
+  Save,     // Save
+  Copy,     // Copy Text
+  ArrowUp,  // Up Arrow
+  MessageSquarePlus, // Add Context Line
+  ArrowDown,// Down Arrow
+  Send,     // Generate Note Builder Prompt...
+} from 'lucide-react';
+
+// BEGIN WRITING FILE CODE
+export function TranscriptPanel() {
+  const dispatch = useAppDispatch();
+  const displayText = useAppSelector((state) => state.transcript.displayText);
+  const originalText = useAppSelector((state) => state.transcript.originalText);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /**
+   * @description Handles changes in the textarea input.
+   */
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    dispatch(setTranscriptDisplayText(e.target.value));
+  };
+
+  /**
+   * @description Handles the blur event on the textarea.
+   */
+  const handleBlur = () => {
+    dispatch(persistTranscript({ displayText, originalText }));
+  };
+
+  /**
+   * @description Handles the click event for the "Copy Text" button.
+   */
+  const handleCopyText = () => {
+    copyToClipboard(displayText);
+  };
+
+  /**
+   * @description Handles the click event for the "Save" button.
+   */
+  const handleSave = () => {
+    saveTextToFile(displayText, 'meeting_transcript.txt');
+  };
+
+  // Placeholder handlers for other buttons
+  const handleClean = () => console.log('Clean button clicked (not implemented)');
+  const handleUndo = () => console.log('Undo button clicked (not implemented)');
+  const handleNavigateUp = () => console.log('Navigate Up button clicked (not implemented)');
+  const handleAddContextLine = () => console.log('Add Context Line button clicked (not implemented)');
+  const handleNavigateDown = () => console.log('Navigate Down button clicked (not implemented)');
+  const handleGeneratePrompt = () => console.log('Generate Prompt button clicked (not implemented)');
+
+  return (
+    <div className="flex gap-2 h-full">
+      {/* Text Area Section */}
+      <div className="flex flex-col flex-grow h-full">
+        <Label
+          htmlFor="transcript-textarea"
+          className="mb-2 text-sm font-medium"
+        >
+          Meeting Transcript Text Area
+        </Label>
+        <Textarea
+          id="transcript-textarea"
+          ref={textareaRef}
+          value={displayText}
+          onChange={handleTextChange}
+          onBlur={handleBlur}
+          placeholder="Paste or type the meeting transcript here..."
+          className="flex-grow resize-none text-sm"
+          spellCheck={false}
+        />
+      </div>
+
+      {/* Action Buttons Section */}
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleClean}
+          title="Clean ✨ Transcript"
+          disabled // Disabled until implemented
+        >
+          <Sparkles className="h-4 w-4" />
+          <span className="sr-only">Clean ✨</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleUndo}
+          title="Undo Clean"
+          disabled // Disabled until implemented
+        >
+          <Undo2 className="h-4 w-4" />
+          <span className="sr-only">Undo</span>
+        </Button>
+         <Button
+          variant="outline"
+          size="icon"
+          onClick={handleSave} // Attach handler
+          title="Save Transcript"
+          // No longer disabled
+        >
+          <Save className="h-4 w-4" />
+          <span className="sr-only">Save</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleCopyText} // Attach handler
+          title="Copy Transcript"
+          // No longer disabled
+        >
+          <Copy className="h-4 w-4" />
+          <span className="sr-only">Copy Text</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNavigateUp}
+          title="Navigate Up (Context Line)"
+          disabled // Disabled until implemented
+        >
+          <ArrowUp className="h-4 w-4" />
+          <span className="sr-only">Up Arrow (↑)</span>
+        </Button>
+         <Button
+          variant="outline"
+          size="icon"
+          onClick={handleAddContextLine}
+          title="Add Context Line (Modal)"
+          disabled // Disabled until implemented
+        >
+          <MessageSquarePlus className="h-4 w-4" />
+          <span className="sr-only">Add Context Line (Modal)</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNavigateDown}
+          title="Navigate Down (Context Line)"
+          disabled // Disabled until implemented
+        >
+          <ArrowDown className="h-4 w-4" />
+          <span className="sr-only">Down Arrow (↓)</span>
+        </Button>
+         <Button
+          variant="outline"
+          size="icon"
+          onClick={handleGeneratePrompt}
+          title="Generate Note Builder Prompt..."
+          disabled // Disabled until implemented
+        >
+          <Send className="h-4 w-4" />
+          <span className="sr-only">Generate Note Builder Prompt...</span>
         </Button>
       </div>
     </div>
@@ -2764,6 +3394,79 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 ================
+File: src/routes/api/ai/image-extract/index.ts
+================
+import { z } from "zod";
+import OpenAI from "openai";
+import { createAPIFileRoute } from "@tanstack/react-start/api";
+
+// Schema for validating request body
+const imageExtractRequestSchema = z.object({
+  imageData: z.string().min(1, "Image data is required"),
+});
+
+// Create OpenAI client with API key from environment variables
+const openai = new OpenAI({
+  apiKey: process.env.VITE_LANGDOCK_API_KEY,
+});
+
+export const APIRoute = createAPIFileRoute("/api/ai/image-extract")({
+  POST: async ({ request }) => {
+    try {
+      // Parse and validate the request body
+      const body = await request.json();
+      const { imageData } = imageExtractRequestSchema.parse(body);
+
+      // Ensure the imageData is properly formatted as a data URL
+      const dataUrl = imageData.startsWith("data:")
+        ? imageData
+        : `data:image/jpeg;base64,${imageData}`;
+
+      // Call OpenAI's Vision model to extract text from the image
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // Using the same model as in the C# implementation
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Extract all the text from the attached image. Include newlines.",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: dataUrl,
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      // Extract the text from the response
+      const extractedText = response.choices[0].message.content || "";
+
+      // Return the extracted text
+      return Response.json(extractedText);
+    } catch (error) {
+      console.error("Error extracting text from image:", error);
+
+      // Return a proper error response
+      return Response.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to extract text from image",
+        },
+        { status: 500 }
+      );
+    }
+  },
+});
+
+================
 File: src/routes/api/ai/magic-text.ts
 ================
 import { z } from "zod";
@@ -3351,6 +4054,56 @@ export const routeTree = rootRoute
 ROUTE_MANIFEST_END */
 
 ================
+File: src/server/imageProcessor.ts
+================
+/**
+ * @description
+ * Server function for extracting text from an image using OpenAI's Vision model.
+ *
+ * Key features:
+ * - Takes a base64-encoded image as input.
+ * - Uses TanStack server functions to make the API call server-side.
+ * - Returns the extracted text as a string.
+ *
+ * @dependencies
+ * - TanStack Server Functions
+ */
+
+import { createServerFn } from "@tanstack/react-start";
+
+export const extractTextFromImageServer = createServerFn({
+  method: "POST",
+}).handler(async ({ data: imageBase64 }) => {
+  try {
+    // Make a fetch request to our API route
+    const response = await fetch(
+      `${window.location.origin}/api/ai/image-extract`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageData: imageBase64,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`API call failed with status: ${response.status}`);
+    }
+
+    // Return the extracted text
+    return await response.json();
+  } catch (error) {
+    console.error("Error in extractTextFromImageServer:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to extract text from image");
+  }
+});
+
+================
 File: src/services/ai.ts
 ================
 interface MagicTextInput {
@@ -3685,14 +4438,17 @@ File: src/store/slices/slideNotesSlice.ts
  * @description
  * Redux slice for managing the state of the Slide/Meeting Notes panel.
  * This slice holds the text content entered by the user in the notes text area
- * and handles loading/saving this content from/to localStorage.
+ * and handles loading/saving this content from/to localStorage. It also stores
+ * the last known cursor position for inserting extracted image text.
  *
  * Key features:
  * - Manages the 'text' field for slide/meeting notes.
+ * - Stores 'lastKnownCursorPosition' for image text insertion.
  * - Provides a 'setSlideNotesText' action for immediate UI updates based on user input.
  * - Provides a 'persistSlideNotes' action, typically triggered on blur, to save state to localStorage.
- * - Provides an 'insertSlideNotesText' action for programmatically adding text (like separators), which also persists.
+ * - Provides an 'insertSlideNotesText' action for programmatically adding text (like separators or extracted text), which also persists.
  * - Provides a 'loadSlideNotes' action to initialize state from localStorage on app load.
+ * - Provides a 'setLastKnownCursorPosition' action.
  * - Initializes state by attempting to load from localStorage immediately.
  *
  * @dependencies
@@ -3709,7 +4465,7 @@ File: src/store/slices/slideNotesSlice.ts
  */
 
 import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
-import type { SlideNotesState } from '~/types';
+import type { SlideNotesState } from '~/types'; // Ensure this path is correct
 import { getItem, setItem } from '~/utils/localStorage';
 import { LS_SLIDE_NOTES_KEY } from '~/utils/constants';
 import { insertTextAtCursor } from '~/utils/textUtils'; // Import the utility
@@ -3729,9 +4485,11 @@ export const persistSlideNotes = createAction<string>('slideNotes/persistSlideNo
 
 /**
  * @description Initial state for the slide notes slice. Tries to load from localStorage immediately.
+ * Includes lastKnownCursorPosition initialized to null.
  */
 const initialState: SlideNotesState = {
   text: getItem(LS_SLIDE_NOTES_KEY) ?? '', // Initialize from localStorage or default to empty
+  lastKnownCursorPosition: null,
 };
 
 /**
@@ -3759,10 +4517,21 @@ export const slideNotesSlice = createSlice({
      */
     insertText: (state, action: PayloadAction<{ textToInsert: string; position: number }>) => {
       const { textToInsert, position } = action.payload;
-      const { newText } = insertTextAtCursor(state.text, textToInsert, position);
+      // Ensure position is valid, fallback to end if necessary
+      const safePosition = Math.min(position, state.text.length);
+      const { newText } = insertTextAtCursor(state.text, textToInsert, safePosition);
       state.text = newText;
        // Persist the change immediately after insertion
        setItem(LS_SLIDE_NOTES_KEY, newText);
+    },
+    /**
+     * @description Sets the last known cursor position.
+     * This is typically dispatched just before opening a modal that needs this position.
+     * @param state - The current slide notes state.
+     * @param action - Payload contains the cursor position number or null.
+     */
+    setLastKnownCursorPosition: (state, action: PayloadAction<number | null>) => {
+      state.lastKnownCursorPosition = action.payload;
     },
   },
    extraReducers: (builder) => {
@@ -3772,7 +4541,8 @@ export const slideNotesSlice = createSlice({
         if (storedText !== null) {
           state.text = storedText;
         }
-        // If null, the initial state already handled it or it remains empty.
+        // lastKnownCursorPosition is always reset on load
+        state.lastKnownCursorPosition = null;
       })
       .addCase(persistSlideNotes, (_state, action) => {
         // Persists the text passed in the action payload (triggered by onBlur).
@@ -3782,8 +4552,11 @@ export const slideNotesSlice = createSlice({
 });
 
 // Export the action creators
-// Renamed 'setText' export to avoid naming collision if imported directly elsewhere
-export const { setText: setSlideNotesText, insertText: insertSlideNotesText } = slideNotesSlice.actions;
+export const {
+  setText: setSlideNotesText,
+  insertText: insertSlideNotesText,
+  setLastKnownCursorPosition, // Export the new action
+} = slideNotesSlice.actions;
 
 // Export the reducer
 export default slideNotesSlice.reducer;
@@ -3812,16 +4585,21 @@ File: src/store/slices/transcriptSlice.ts
  * - ~/types: Imports the TranscriptState interface for type safety.
  * - ~/utils/localStorage: For interacting with localStorage.
  * - ~/utils/constants: For localStorage key constants.
+ * - ~/utils/textUtils: For text insertion utility.
  *
  * @notes
- * - Persistence is handled within specific actions or via a dedicated persist action.
+ * - Persistence is handled within specific actions or via the dedicated persistTranscript action (typically called on blur).
  * - Initial state loading reads both display and original text from localStorage.
+ * - setTranscriptDisplayText reducer correctly resets originalText and isCleaned only if the state was previously isCleaned.
  */
 
 import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
 import type { TranscriptState } from '~/types';
 import { getItem, setItem } from '~/utils/localStorage';
 import { LS_TRANSCRIPT_DISPLAY_KEY, LS_TRANSCRIPT_ORIGINAL_KEY } from '~/utils/constants';
+import { insertTextAtCursor } from '~/utils/textUtils'; // Import the utility
+
+// BEGIN WRITING FILE CODE
 
 /**
  * @description Action creator for triggering the load from localStorage.
@@ -3829,7 +4607,7 @@ import { LS_TRANSCRIPT_DISPLAY_KEY, LS_TRANSCRIPT_ORIGINAL_KEY } from '~/utils/c
 export const loadTranscript = createAction('transcript/loadTranscript');
 /**
  * @description Action creator for explicitly triggering persistence, e.g., on blur.
- * The payload should contain both displayText and originalText.
+ * The payload should contain both the current displayText and originalText.
  */
 export const persistTranscript = createAction<{ displayText: string; originalText: string | null }>('transcript/persistTranscript');
 
@@ -3838,8 +4616,8 @@ export const persistTranscript = createAction<{ displayText: string; originalTex
  */
 const initialState: TranscriptState = {
   displayText: getItem(LS_TRANSCRIPT_DISPLAY_KEY) ?? '',
-  originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) ?? null, // originalText is nullable
-  isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it potentially 'cleaned' if original exists on load
+  originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) || null, // Use || null to handle empty string correctly
+  isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it 'cleaned' if original exists on load
   isLoading: false,
   error: null,
 };
@@ -3852,21 +4630,25 @@ export const transcriptSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * @description Sets the displayed text. Should also reset originalText and isCleaned status
-     * when called directly due to user typing. Persistence should be triggered separately (e.g., onBlur).
+     * @description Sets the displayed text. If the text was previously cleaned (isCleaned is true),
+     * this action (typically triggered by user typing) resets the originalText and isCleaned status.
+     * Persistence should be triggered separately (e.g., onBlur).
      * @param state - The current transcript state.
      * @param action - Payload contains the new display text string.
      */
     setDisplayText: (state, action: PayloadAction<string>) => {
+      const textChanged = state.displayText !== action.payload;
       state.displayText = action.payload;
-      // Reset cleaning status on manual edit ONLY if it was cleaned
-      if (state.isCleaned) {
-        state.originalText = null; // Clear original only if it was a cleaned state
-        state.isCleaned = false;
-        // Also persist the clearing of originalText
-         setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Use empty string or handle null appropriately in setItem/getItem
+      // Reset cleaning status on manual edit ONLY if it was previously cleaned AND text actually changed.
+      if (state.isCleaned && textChanged) {
+        state.originalText = null; // Clear the backup
+        state.isCleaned = false;   // Mark as not cleaned anymore
+        // Also persist the clearing of originalText since this action implies a manual edit invalidating the 'Undo'
+        setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Persist the reset state of originalText
       }
-      state.error = null; // Clear previous errors on new input
+      if (textChanged) {
+        state.error = null; // Clear previous errors on new input
+      }
       // Do NOT persist displayText here, wait for blur/persist action
     },
     /**
@@ -3899,12 +4681,18 @@ export const transcriptSlice = createSlice({
       state.isLoading = false; // Ensure loading is off if an error occurs
     },
     /**
-     * @description Sets the cleaned status flag, typically after a successful clean operation.
+     * @description Sets the cleaned status flag, typically after a successful clean operation. Also persists the cleaned text.
      * @param state - The current transcript state.
-     * @param action - Payload contains a boolean indicating cleaned status.
+     * @param action - Payload contains the cleaned text string.
      */
-    setIsCleaned: (state, action: PayloadAction<boolean>) => {
-      state.isCleaned = action.payload;
+    setCleanedText: (state, action: PayloadAction<string>) => {
+      state.displayText = action.payload;
+      state.isCleaned = true;
+      state.isLoading = false;
+      state.error = null;
+      // Persist the cleaned text as the new display text
+      setItem(LS_TRANSCRIPT_DISPLAY_KEY, action.payload);
+      // Note: originalText should have been set and persisted before calling this
     },
     /**
      * @description Reverts the displayText to the originalText and clears the cleaned status. Persists changes.
@@ -3924,18 +4712,19 @@ export const transcriptSlice = createSlice({
     },
      /**
      * @description Inserts text at a specific position in the displayText. Persists the change.
-     * Similar to slideNotesSlice action.
+     * Also resets the cleaning status.
      * @param state - The current transcript state.
      * @param action - Payload contains text to insert and position.
      */
     insertText: (state, action: PayloadAction<{ textToInsert: string; position: number }>) => {
       const { textToInsert, position } = action.payload;
       const currentText = state.displayText;
-      const newText =
-        currentText.slice(0, position) +
-        textToInsert +
-        currentText.slice(position);
+      // Ensure position is valid
+      const safePosition = Math.max(0, Math.min(position ?? currentText.length, currentText.length));
+      // Use utility to insert text
+      const { newText } = insertTextAtCursor(currentText, textToInsert, safePosition);
       state.displayText = newText;
+
       // Reset cleaning status if inserting manually
       if (state.isCleaned) {
         state.originalText = null;
@@ -3958,9 +4747,13 @@ export const transcriptSlice = createSlice({
         state.originalText = storedOriginalText || null;
         // Set isCleaned based on whether originalText was successfully loaded
         state.isCleaned = !!state.originalText;
+        // Reset loading/error on app load
+        state.isLoading = false;
+        state.error = null;
       })
       .addCase(persistTranscript, (_state, action) => {
-        // Persists the text passed in the action payload.
+        // Persists the text passed in the action payload (triggered by onBlur).
+        // This action only saves, it doesn't modify the state directly.
         setItem(LS_TRANSCRIPT_DISPLAY_KEY, action.payload.displayText);
         setItem(LS_TRANSCRIPT_ORIGINAL_KEY, action.payload.originalText ?? '');
       });
@@ -3973,7 +4766,7 @@ export const {
   setOriginalText: setTranscriptOriginalText,
   setLoading: setTranscriptLoading,
   setError: setTranscriptError,
-  setIsCleaned: setTranscriptIsCleaned,
+  setCleanedText: setTranscriptCleanedText, // Renamed for clarity
   revertToOriginal: revertTranscriptToOriginal,
   insertText: insertTranscriptText,
 } = transcriptSlice.actions;
@@ -4197,6 +4990,12 @@ export interface SlideNotesState {
    * @description The text content of the slide/meeting notes text area.
    */
   text: string;
+  /**
+   * @description Stores the cursor position from the SlideNotesPanel textarea
+   * right before the ImageExtractModal is opened. Used to insert the
+   * extracted text at the correct position. Null if not set.
+   */
+  lastKnownCursorPosition: number | null;
 }
 
 /**
@@ -4422,6 +5221,64 @@ export const submitFeedback = createServerFn({ method: 'POST' })
   });
 
 ================
+File: src/utils/imageExtractor.ts
+================
+/**
+ * @description
+ * Utility function for extracting text from an image blob using OpenAI's Vision model API.
+ * This implementation calls a TanStack server function that securely passes the image to
+ * the OpenAI API without exposing the API key to the client.
+ *
+ * Key features:
+ * - Accepts an image Blob as input.
+ * - Converts the image to base64 for API transmission.
+ * - Calls a server function to handle the actual API request.
+ * - Returns a Promise that resolves with the extracted text string.
+ *
+ * @dependencies
+ * - TanStack Server Functions
+ *
+ * @param imageData - The image file data as a Blob object.
+ * @returns A Promise resolving with the extracted text string, or rejecting with an error.
+ */
+
+import { extractTextFromImageServer } from "~/server/imageProcessor";
+
+export async function extractTextFromImage(imageData: Blob): Promise<string> {
+  try {
+    // Convert image to base64
+    const base64Data = await blobToBase64(imageData);
+
+    // Call the server function with the base64 image data
+    const extractedText = await extractTextFromImageServer(base64Data);
+
+    return extractedText;
+  } catch (error) {
+    console.error("Error extracting text from image:", error);
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to extract text from image");
+  }
+}
+
+/**
+ * Converts a Blob to a base64 string
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      // Extract the base64 part after the data URL prefix
+      const base64Data = base64String.split(",")[1];
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+================
 File: src/utils/localStorage.ts
 ================
 /**
@@ -4486,6 +5343,56 @@ export function setItem(key: string, value: string): void {
 }
 
 ================
+File: src/utils/README.md
+================
+# Image-to-Text Extraction
+
+This module provides functionality to extract text from images using OpenAI's Vision model (GPT-4o).
+
+## How It Works
+
+1. The client-side `extractTextFromImage` function in `imageExtractor.ts` takes an image Blob, converts it to base64, and sends it to the server.
+
+2. The server-side function `extractTextFromImageServer` in `server/imageProcessor.ts` handles the request securely and calls our API endpoint.
+
+3. The API endpoint at `/api/ai/image-extract/index.ts` uses the OpenAI API to perform the actual text extraction.
+
+## Setup
+
+1. Create a `.env` file based on `.env.example` and add your OpenAI API key:
+
+   ```
+   VITE_LANGDOCK_API_KEY=your_openai_api_key_here
+   ```
+
+2. Make sure the OpenAI npm package is installed:
+   ```
+   npm install openai
+   ```
+
+## Usage
+
+```typescript
+import { extractTextFromImage } from "~/utils/imageExtractor";
+
+// In an event handler:
+const handleImageBlob = async (imageBlob: Blob) => {
+  try {
+    const extractedText = await extractTextFromImage(imageBlob);
+    console.log("Extracted text:", extractedText);
+  } catch (error) {
+    console.error("Error extracting text:", error);
+  }
+};
+```
+
+## Notes
+
+- The implementation uses the OpenAI Vision model (GPT-4o) which is capable of processing images and extracting text.
+- The API key is stored server-side for security reasons.
+- Images are converted to base64 strings before being sent to the API.
+
+================
 File: src/utils/seo.ts
 ================
 export const seo = ({
@@ -4529,24 +5436,25 @@ File: src/utils/textUtils.ts
  * @description
  * This file provides utility functions for common text manipulations required
  * across the MeetingWeaver AI application. This includes tasks like copying text
- * to the clipboard, inserting text at specific positions, and navigating within
- * text areas based on separators or prefixes.
+ * to the clipboard, saving text to a file, inserting text at specific positions,
+ * and navigating within text areas based on separators or prefixes.
  *
  * Key features:
  * - Copying text to the clipboard with user feedback.
+ * - Saving text content as a downloadable file.
  * - Inserting text at a given cursor position.
  * - Finding nearest separator/prefix lines for navigation.
  *
  * @dependencies
- * - react-hot-toast: For providing user feedback on clipboard operations.
+ * - react-hot-toast: For providing user feedback on clipboard and save operations.
  *
  * @notes
- * - Functions related to cursor manipulation and navigation will be added in subsequent steps.
- * - Error handling for clipboard operations is included.
+ * - Error handling for clipboard and save operations is included.
+ * - saveTextToFile uses Blob and Object URL for client-side file generation.
  */
 
 // BEGIN WRITING FILE CODE
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 /**
  * @description Copies the provided text to the user's clipboard using the
@@ -4556,17 +5464,17 @@ import toast from 'react-hot-toast';
  */
 export async function copyToClipboard(text: string): Promise<void> {
   if (!navigator.clipboard) {
-    toast.error('Clipboard API not available in this browser.');
-    console.error('Clipboard API not supported');
+    toast.error("Clipboard API not available in this browser.");
+    console.error("Clipboard API not supported");
     return;
   }
 
   try {
     await navigator.clipboard.writeText(text);
-    toast.success('Text copied to clipboard!');
+    toast.success("Text copied to clipboard!");
   } catch (err) {
-    toast.error('Failed to copy text to clipboard.');
-    console.error('Failed to copy text: ', err);
+    toast.error("Failed to copy text to clipboard.");
+    console.error("Failed to copy text: ", err);
   }
 }
 
@@ -4604,7 +5512,6 @@ export function insertTextAtCursor(
   return { newText, newCursorPosition };
 }
 
-
 /**
  * @description Finds the starting index of the nearest line that exactly matches the separator,
  * searching upwards or downwards from the current cursor position.
@@ -4615,44 +5522,47 @@ export function insertTextAtCursor(
  * @returns The starting index of the found line, or null if no such line is found.
  */
 export function findNearestSeparatorLine(
-    text: string,
-    currentPosition: number,
-    separator: string,
-    direction: 'up' | 'down'
+  text: string,
+  currentPosition: number,
+  separator: string,
+  direction: "up" | "down"
 ): number | null {
-    const lines = text.split('\n');
-    // Determine the line index the cursor is currently on or before
-    let currentLineIndex = text.substring(0, currentPosition).split('\n').length - 1;
+  const lines = text.split("\n");
+  // Determine the line index the cursor is currently on or before
+  let currentLineIndex =
+    text.substring(0, currentPosition).split("\n").length - 1;
 
-    if (direction === 'up') {
-        // Search backwards from the line *before* the current one
-        for (let i = currentLineIndex - 1; i >= 0; i--) {
-            if (lines[i].trim() === separator) { // Check if the line *exactly* matches the separator (ignoring potential whitespace)
-                // Calculate the starting index of this line
-                let index = 0;
-                for (let j = 0; j < i; j++) {
-                    index += lines[j].length + 1; // Add line length + 1 for newline character
-                }
-                return index;
-            }
+  if (direction === "up") {
+    // Search backwards from the line *before* the current one
+    for (let i = currentLineIndex - 1; i >= 0; i--) {
+      if (lines[i].trim() === separator) {
+        // Check if the line *exactly* matches the separator (ignoring potential whitespace)
+        // Calculate the starting index of this line
+        let index = 0;
+        for (let j = 0; j < i; j++) {
+          index += lines[j].length + 1; // Add line length + 1 for newline character
         }
-        return null; // No separator found above
-    } else { // direction === 'down'
-        // Search forwards from the line *after* the current one
-        for (let i = currentLineIndex + 1; i < lines.length; i++) {
-             if (lines[i].trim() === separator) { // Check if the line *exactly* matches the separator
-                // Calculate the starting index of this line
-                let index = 0;
-                for (let j = 0; j < i; j++) {
-                    index += lines[j].length + 1; // Add line length + 1 for newline character
-                }
-                return index;
-            }
-        }
-        return null; // No separator found below
+        return index;
+      }
     }
+    return null; // No separator found above
+  } else {
+    // direction === 'down'
+    // Search forwards from the line *after* the current one
+    for (let i = currentLineIndex + 1; i < lines.length; i++) {
+      if (lines[i].trim() === separator) {
+        // Check if the line *exactly* matches the separator
+        // Calculate the starting index of this line
+        let index = 0;
+        for (let j = 0; j < i; j++) {
+          index += lines[j].length + 1; // Add line length + 1 for newline character
+        }
+        return index;
+      }
+    }
+    return null; // No separator found below
+  }
 }
-
 
 /**
  * @description Finds the index of the nearest line starting with a specific prefix,
@@ -4671,13 +5581,38 @@ export function findNearestSeparatorLine(
 
 /**
  * @description Triggers a browser download for the given text content.
- * (To be implemented in Step 19)
+ * Creates a Blob, generates an object URL, simulates a click on a hidden link,
+ * and then revokes the object URL.
  * @param text - The text content to save.
  * @param filename - The desired name for the downloaded file.
  */
-// export function saveTextToFile(text: string, filename: string): void {
-//  // Implementation in Step 19
-// }
+export function saveTextToFile(text: string, filename: string): void {
+  try {
+    // Create a Blob from the text content
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+
+    // Create an object URL for the Blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+
+    // Append to the document, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Revoke the object URL to free up memory
+    URL.revokeObjectURL(url);
+
+    toast.success(`File "${filename}" download started.`);
+  } catch (error) {
+    console.error("Error saving text to file:", error);
+    toast.error("Failed to save file. See console for details.");
+  }
+}
 
 ================
 File: tailwind.config.mjs

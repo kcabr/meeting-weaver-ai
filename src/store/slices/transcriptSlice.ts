@@ -19,16 +19,21 @@
  * - ~/types: Imports the TranscriptState interface for type safety.
  * - ~/utils/localStorage: For interacting with localStorage.
  * - ~/utils/constants: For localStorage key constants.
+ * - ~/utils/textUtils: For text insertion utility.
  *
  * @notes
- * - Persistence is handled within specific actions or via a dedicated persist action.
+ * - Persistence is handled within specific actions or via the dedicated persistTranscript action (typically called on blur).
  * - Initial state loading reads both display and original text from localStorage.
+ * - setTranscriptDisplayText reducer correctly resets originalText and isCleaned only if the state was previously isCleaned.
  */
 
 import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
 import type { TranscriptState } from '~/types';
 import { getItem, setItem } from '~/utils/localStorage';
 import { LS_TRANSCRIPT_DISPLAY_KEY, LS_TRANSCRIPT_ORIGINAL_KEY } from '~/utils/constants';
+import { insertTextAtCursor } from '~/utils/textUtils'; // Import the utility
+
+// BEGIN WRITING FILE CODE
 
 /**
  * @description Action creator for triggering the load from localStorage.
@@ -36,7 +41,7 @@ import { LS_TRANSCRIPT_DISPLAY_KEY, LS_TRANSCRIPT_ORIGINAL_KEY } from '~/utils/c
 export const loadTranscript = createAction('transcript/loadTranscript');
 /**
  * @description Action creator for explicitly triggering persistence, e.g., on blur.
- * The payload should contain both displayText and originalText.
+ * The payload should contain both the current displayText and originalText.
  */
 export const persistTranscript = createAction<{ displayText: string; originalText: string | null }>('transcript/persistTranscript');
 
@@ -45,8 +50,8 @@ export const persistTranscript = createAction<{ displayText: string; originalTex
  */
 const initialState: TranscriptState = {
   displayText: getItem(LS_TRANSCRIPT_DISPLAY_KEY) ?? '',
-  originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) ?? null, // originalText is nullable
-  isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it potentially 'cleaned' if original exists on load
+  originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) || null, // Use || null to handle empty string correctly
+  isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it 'cleaned' if original exists on load
   isLoading: false,
   error: null,
 };
@@ -59,21 +64,25 @@ export const transcriptSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * @description Sets the displayed text. Should also reset originalText and isCleaned status
-     * when called directly due to user typing. Persistence should be triggered separately (e.g., onBlur).
+     * @description Sets the displayed text. If the text was previously cleaned (isCleaned is true),
+     * this action (typically triggered by user typing) resets the originalText and isCleaned status.
+     * Persistence should be triggered separately (e.g., onBlur).
      * @param state - The current transcript state.
      * @param action - Payload contains the new display text string.
      */
     setDisplayText: (state, action: PayloadAction<string>) => {
+      const textChanged = state.displayText !== action.payload;
       state.displayText = action.payload;
-      // Reset cleaning status on manual edit ONLY if it was cleaned
-      if (state.isCleaned) {
-        state.originalText = null; // Clear original only if it was a cleaned state
-        state.isCleaned = false;
-        // Also persist the clearing of originalText
-         setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Use empty string or handle null appropriately in setItem/getItem
+      // Reset cleaning status on manual edit ONLY if it was previously cleaned AND text actually changed.
+      if (state.isCleaned && textChanged) {
+        state.originalText = null; // Clear the backup
+        state.isCleaned = false;   // Mark as not cleaned anymore
+        // Also persist the clearing of originalText since this action implies a manual edit invalidating the 'Undo'
+        setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Persist the reset state of originalText
       }
-      state.error = null; // Clear previous errors on new input
+      if (textChanged) {
+        state.error = null; // Clear previous errors on new input
+      }
       // Do NOT persist displayText here, wait for blur/persist action
     },
     /**
@@ -106,12 +115,18 @@ export const transcriptSlice = createSlice({
       state.isLoading = false; // Ensure loading is off if an error occurs
     },
     /**
-     * @description Sets the cleaned status flag, typically after a successful clean operation.
+     * @description Sets the cleaned status flag, typically after a successful clean operation. Also persists the cleaned text.
      * @param state - The current transcript state.
-     * @param action - Payload contains a boolean indicating cleaned status.
+     * @param action - Payload contains the cleaned text string.
      */
-    setIsCleaned: (state, action: PayloadAction<boolean>) => {
-      state.isCleaned = action.payload;
+    setCleanedText: (state, action: PayloadAction<string>) => {
+      state.displayText = action.payload;
+      state.isCleaned = true;
+      state.isLoading = false;
+      state.error = null;
+      // Persist the cleaned text as the new display text
+      setItem(LS_TRANSCRIPT_DISPLAY_KEY, action.payload);
+      // Note: originalText should have been set and persisted before calling this
     },
     /**
      * @description Reverts the displayText to the originalText and clears the cleaned status. Persists changes.
@@ -131,18 +146,19 @@ export const transcriptSlice = createSlice({
     },
      /**
      * @description Inserts text at a specific position in the displayText. Persists the change.
-     * Similar to slideNotesSlice action.
+     * Also resets the cleaning status.
      * @param state - The current transcript state.
      * @param action - Payload contains text to insert and position.
      */
     insertText: (state, action: PayloadAction<{ textToInsert: string; position: number }>) => {
       const { textToInsert, position } = action.payload;
       const currentText = state.displayText;
-      const newText =
-        currentText.slice(0, position) +
-        textToInsert +
-        currentText.slice(position);
+      // Ensure position is valid
+      const safePosition = Math.max(0, Math.min(position ?? currentText.length, currentText.length));
+      // Use utility to insert text
+      const { newText } = insertTextAtCursor(currentText, textToInsert, safePosition);
       state.displayText = newText;
+
       // Reset cleaning status if inserting manually
       if (state.isCleaned) {
         state.originalText = null;
@@ -165,9 +181,13 @@ export const transcriptSlice = createSlice({
         state.originalText = storedOriginalText || null;
         // Set isCleaned based on whether originalText was successfully loaded
         state.isCleaned = !!state.originalText;
+        // Reset loading/error on app load
+        state.isLoading = false;
+        state.error = null;
       })
       .addCase(persistTranscript, (_state, action) => {
-        // Persists the text passed in the action payload.
+        // Persists the text passed in the action payload (triggered by onBlur).
+        // This action only saves, it doesn't modify the state directly.
         setItem(LS_TRANSCRIPT_DISPLAY_KEY, action.payload.displayText);
         setItem(LS_TRANSCRIPT_ORIGINAL_KEY, action.payload.originalText ?? '');
       });
@@ -180,7 +200,7 @@ export const {
   setOriginalText: setTranscriptOriginalText,
   setLoading: setTranscriptLoading,
   setError: setTranscriptError,
-  setIsCleaned: setTranscriptIsCleaned,
+  setCleanedText: setTranscriptCleanedText, // Renamed for clarity
   revertToOriginal: revertTranscriptToOriginal,
   insertText: insertTranscriptText,
 } = transcriptSlice.actions;

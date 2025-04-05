@@ -7,35 +7,37 @@
  * Key features:
  * - Uses CSS Grid for a two-column layout with a gap.
  * - Designed to fill the remaining vertical space below the header.
- * - Renders the SlideNotesPanel and a placeholder for the TranscriptPanel.
+ * - Renders the SlideNotesPanel and the TranscriptPanel components.
  *
  * @dependencies
  * - react: For component creation.
  * - ./SlideNotesPanel: The component for the left panel.
+ * - ./TranscriptPanel: The component for the right panel.
  *
  * @notes
- * - The 'flex-grow' class ensures this component expands vertically.
- * - TranscriptPanel placeholder will be replaced later.
+ * - The 'flex-grow' class ensures this component expands vertically within its flex container.
+ * - Each panel is wrapped in a div to apply consistent styling (border, padding, background, shadow) and internal flex layout.
  */
-import React from "react";
-import { SlideNotesPanel } from "./SlideNotesPanel"; // Import the SlideNotesPanel
+import React from 'react';
+import { SlideNotesPanel } from './SlideNotesPanel';
+import { TranscriptPanel } from './TranscriptPanel'; // Import the TranscriptPanel
 
+// BEGIN WRITING FILE CODE
 export function MainContentLayout() {
   return (
     // Use flex-grow to take available vertical space, grid for columns
-    // Set an explicit height or min-height on the parent container if needed
-    // Adding h-0 to flex-grow allows it to shrink correctly if content overflows
+    // h-0 is important for flex-grow children within a flex container to allow shrinking
     <main className="grid grid-cols-2 gap-4 p-4 flex-grow h-0">
       {/* Left Panel: Slide / Meeting Notes */}
-      {/* Wrap panel in a div that allows internal flex-grow */}
-      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm">
+      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm overflow-hidden">
+        {/* overflow-hidden prevents content from breaking out */}
         <SlideNotesPanel />
       </div>
 
-      {/* Right Panel Placeholder */}
-      <div className="border rounded p-4 bg-card text-card-foreground shadow-sm">
-        {/* Placeholder for TranscriptPanel */}
-        Right Panel: Meeting Transcript (Placeholder)
+      {/* Right Panel: Meeting Transcript */}
+      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm overflow-hidden">
+        {/* overflow-hidden prevents content from breaking out */}
+        <TranscriptPanel />
       </div>
     </main>
   );
