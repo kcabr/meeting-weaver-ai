@@ -9,7 +9,8 @@
  * - Uses flexbox to arrange Header and MainContentLayout vertically.
  * - Ensures the layout occupies the full screen height.
  * - Dispatches actions to load persisted context, slide notes, and transcript data on initial render.
- * - Includes modal components (ContextModal, ImageExtractModal) that can be shown throughout the application.
+ * - Includes modal components (ContextModal, ImageExtractModal, AddContextLineModal, GeneratePromptModal)
+ *   that can be shown throughout the application.
  *
  * @dependencies
  * - react: For component creation and useEffect hook.
@@ -18,6 +19,8 @@
  * - ./MainContentLayout: The main two-column content area component.
  * - ./ContextModal: The context modal component.
  * - ./ImageExtractModal: The image extraction modal component.
+ * - ./AddContextLineModal: The context line modal component.
+ * - ./GeneratePromptModal: The prompt generation modal component.
  * - ~/store/hooks: Typed Redux dispatch hook.
  * - ~/store/slices/contextSlice: Action creator for loading context.
  * - ~/store/slices/slideNotesSlice: Action creator for loading slide notes.
@@ -32,8 +35,9 @@ import React, { useEffect } from "react";
 import { Header } from "./Header";
 import { MainContentLayout } from "./MainContentLayout";
 import { ContextModal } from "./ContextModal";
-import { ImageExtractModal } from "./ImageExtractModal"; // Import the new modal
-import { AddContextLineModal } from "./AddContextLineModal"; // Import the new modal
+import { ImageExtractModal } from "./ImageExtractModal";
+import { AddContextLineModal } from "./AddContextLineModal";
+import { GeneratePromptModal } from "./GeneratePromptModal"; // Import the new modal
 import { useAppDispatch } from "~/store/hooks";
 import { loadContext } from "~/store/slices/contextSlice";
 import { loadSlideNotes } from "~/store/slices/slideNotesSlice";
@@ -60,10 +64,11 @@ export function AppLayout() {
 
       {/* Global Modals */}
       <ContextModal />
-      <ImageExtractModal /> {/* Add the AddContextLineModal here */}
-      <AddContextLineModal /> {/* Add the ImageExtractModal here */}
+      <ImageExtractModal />
+      <AddContextLineModal />
+      <GeneratePromptModal /> {/* Render the Generate Prompt Modal */}
       {/* Add other global modals here as needed */}
     </div>
   );
 }
-
+// END WRITING FILE CODE

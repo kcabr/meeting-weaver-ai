@@ -43,7 +43,7 @@ export async function cleanTranscript(text: string): Promise<string> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: Bearer ,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         text,
@@ -59,7 +59,7 @@ export async function cleanTranscript(text: string): Promise<string> {
         // Ignore if response body is not JSON
         errorBody = await response.text();
       }
-      const errorMessage = Langdock API error:  . ;
+      const errorMessage = `Langdock API error: ${errorBody}`;
       console.error("API Error Details:", errorBody);
       throw new Error(errorMessage.trim());
     }
@@ -77,7 +77,9 @@ export async function cleanTranscript(text: string): Promise<string> {
   } catch (error) {
     console.error("Error during cleanTranscript API call:", error);
     // Rethrow the error to be caught by the calling hook/component
-    throw error instanceof Error ? error : new Error("An unknown network error occurred.");
+    throw error instanceof Error
+      ? error
+      : new Error("An unknown network error occurred.");
   }
 }
 // END WRITING FILE CODE

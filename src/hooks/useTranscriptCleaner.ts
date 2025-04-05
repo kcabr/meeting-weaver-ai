@@ -68,7 +68,7 @@ export function useTranscriptCleaner() {
       const errorMessage =
         error instanceof Error ? error.message : "Transcript cleaning failed.";
       dispatch(setTranscriptError(errorMessage)); // Set error state
-      toast.error(Error: );
+      toast.error(errorMessage);
       // No need to explicitly set loading false here, setError reducer handles it
     }
     // setLoading(false) is handled implicitly by setTranscriptCleanedText and setTranscriptError reducers

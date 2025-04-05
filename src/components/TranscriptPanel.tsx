@@ -5,73 +5,103 @@
  * Connects the text area to the Redux store ('transcriptSlice') for state management.
  * Handles 'onChange' to update the displayed text and reset cleaning status.
  * Persists both display and original text to localStorage on blur.
- * Implements "Copy Text", "Save", "Add Context Line", and context line navigation functionalities.
+ * Implements "Copy Text", "Save", "Add Context Line", context line navigation,
+ * AI cleaning ('Clean ✨'), and 'Undo' functionalities.
+ * Enables the "Generate Note Builder Prompt..." button when all inputs have text.
  *
  * Key features:
  * - Displays a labeled multi-line text area for transcript input.
- * - Shows action buttons (Copy, Save, Add Context Line, Navigate Up/Down now functional).
+ * - Shows action buttons with icons and tooltips.
  * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage transcript state.
  * - Updates Redux state on text area change ('onChange').
  * - Persists state to localStorage on blur ('onBlur').
- * - Implements "Copy Text" button using 'copyToClipboard' utility.
- * - Implements "Save" button using 'saveTextToFile' utility.
+ * - Implements "Copy Text" using 'copyToClipboard' utility.
+ * - Implements "Save" using 'saveTextToFile' utility.
  * - Implements "Add Context Line" button to save cursor position and open modal.
- * - Implements Up/Down arrow buttons for navigating between lines starting with "## ".
- * - Uses 'useRef' to hold a reference to the textarea element for cursor manipulation.
+ * - Implements Up/Down arrow buttons for navigating context lines ("## ").
+ * - Implements "Clean ✨" button using 'useTranscriptCleaner' hook.
+ * - Implements "Undo" button by dispatching 'revertTranscriptToOriginal'.
+ * - Implements enablement logic for the "Generate Note Builder Prompt..." button.
+ * - Uses 'useRef' for the textarea element.
  *
  * @dependencies
  * - react: For component creation and 'useRef'.
  * - react-redux: For hooks 'useAppSelector', 'useAppDispatch'.
- * - react-hot-toast: For user feedback on navigation.
- * - ~/components/ui/label: Shadcn Label component.
- * - ~/components/ui/textarea: Shadcn Textarea component.
- * - ~/components/ui/button: Shadcn Button component.
+ * - react-hot-toast: For user feedback.
+ * - ~/components/ui/*: Shadcn components (Label, Textarea, Button).
+ * - ~/hooks/useTranscriptCleaner: Hook for AI cleaning logic.
  * - ~/store/hooks: Typed Redux hooks.
- * - ~/store/slices/transcriptSlice: Action creators 'setTranscriptDisplayText', 'persistTranscript', 'setTranscriptLastKnownCursorPosition'.
- * - ~/store/slices/modalSlice: Action creator 'openAddContextLineModal'.
- * - ~/utils/textUtils: Utilities 'copyToClipboard', 'saveTextToFile', 'findNearestPrefixedLine'.
+ * - ~/store/slices/transcriptSlice: Actions and selectors for transcript state.
+ * - ~/store/slices/modalSlice: Action creators 'openAddContextLineModal', 'openGeneratePromptModal'.
+ * - ~/store/slices/contextSlice: Selector for context text.
+ * - ~/store/slices/slideNotesSlice: Selector for slide notes text.
+ * - ~/utils/textUtils: Utility functions for text manipulation and navigation.
  * - ~/utils/constants: Constants like 'TRANSCRIPT_CONTEXT_PREFIX'.
  * - lucide-react: For icons.
  *
  * @notes
- * - Clean, Undo, and Generate Prompt buttons are still placeholders.
- * - Navigation uses the findNearestPrefixedLine utility.
+ * - Generate Prompt button now opens the modal and has enablement logic.
+ * - Button disabling logic is implemented for Clean and Undo.
  */
 import {
   setTranscriptDisplayText,
   persistTranscript,
-  setTranscriptLastKnownCursorPosition, // Import action for cursor position
+  setTranscriptLastKnownCursorPosition,
+  revertTranscriptToOriginal, // Import Undo action
 } from "~/store/slices/transcriptSlice";
-import { openAddContextLineModal } from "~/store/slices/modalSlice"; // Import action to open modal
+import {
+  openAddContextLineModal,
+  openGeneratePromptModal, // Import action to open Generate Prompt modal
+} from "~/store/slices/modalSlice";
 import {
   copyToClipboard,
   saveTextToFile,
   findNearestPrefixedLine,
-} from "~/utils/textUtils"; // Import utilities
-import { TRANSCRIPT_CONTEXT_PREFIX } from "~/utils/constants"; // Import prefix constant
+} from "~/utils/textUtils";
+import { TRANSCRIPT_CONTEXT_PREFIX } from "~/utils/constants";
 import {
-  Sparkles, // Clean ✨
-  Undo2, // Undo
-  Save, // Save
-  Copy, // Copy Text
-  ArrowUp, // Up Arrow
-  MessageSquarePlus, // Add Context Line
-  ArrowDown, // Down Arrow
-  Send, // Generate Note Builder Prompt...
+  Sparkles,
+  Undo2,
+  Save,
+  Copy,
+  ArrowUp,
+  MessageSquarePlus,
+  ArrowDown,
+  Send,
+  Loader2, // Import Loader2 for Clean button
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "~/store/hooks";
 import { useRef } from "react";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import toast from "react-hot-toast"; // Import toast for navigation feedback
+import toast from "react-hot-toast";
+import { useTranscriptCleaner } from "~/hooks/useTranscriptCleaner"; // Import the hook
 
 // BEGIN WRITING FILE CODE
 export function TranscriptPanel() {
   const dispatch = useAppDispatch();
-  const displayText = useAppSelector((state) => state.transcript.displayText);
-  const originalText = useAppSelector((state) => state.transcript.originalText);
+  const {
+    displayText,
+    originalText,
+    isLoading,
+    isCleaned,
+  } = useAppSelector((state) => state.transcript);
+  // Selectors for enablement logic
+  const contextText = useAppSelector((state) => state.context.text);
+  const slideNotesText = useAppSelector((state) => state.slideNotes.text);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { cleanTranscriptHandler } = useTranscriptCleaner(); // Use the hook
+
+  /**
+   * @description Determines if the Generate Prompt button should be enabled.
+   * Checks if all three input areas (context, slide notes, transcript) contain non-whitespace text.
+   */
+  const isGenerateButtonEnabled =
+    contextText.trim().length > 0 &&
+    slideNotesText.trim().length > 0 &&
+    displayText.trim().length > 0;
 
   /**
    * @description Handles changes in the textarea input.
@@ -103,7 +133,6 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Navigate Up" (Context Line) button.
-   * Finds the nearest line above starting with "## " and moves the cursor there.
    */
   const handleNavigateUp = () => {
     if (textareaRef.current) {
@@ -130,7 +159,6 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Navigate Down" (Context Line) button.
-   * Finds the nearest line below starting with "## " and moves the cursor there.
    */
   const handleNavigateDown = () => {
     if (textareaRef.current) {
@@ -157,22 +185,37 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Add Context Line (Modal)" button.
-   * Saves the current cursor position and opens the modal.
    */
   const handleAddContextLine = () => {
-    // Save cursor position before opening modal
     const currentPosition =
       textareaRef.current?.selectionStart ?? displayText.length;
     dispatch(setTranscriptLastKnownCursorPosition(currentPosition));
-    dispatch(openAddContextLineModal()); // Dispatch action to open modal
+    dispatch(openAddContextLineModal());
   };
 
-  // Placeholder handlers for other buttons
-  const handleClean = () =>
-    console.log("Clean button clicked (not implemented)");
-  const handleUndo = () => console.log("Undo button clicked (not implemented)");
-  const handleGeneratePrompt = () =>
-    console.log("Generate Prompt button clicked (not implemented)");
+  /**
+   * @description Handles the click event for the "Clean ✨" button.
+   * Uses the handler from the useTranscriptCleaner hook.
+   */
+  const handleClean = () => {
+    cleanTranscriptHandler();
+  };
+
+  /**
+   * @description Handles the click event for the "Undo" button.
+   * Dispatches the action to revert to the original text.
+   */
+  const handleUndo = () => {
+    dispatch(revertTranscriptToOriginal());
+  };
+
+  /**
+   * @description Handles the click event for the "Generate Note Builder Prompt..." button.
+   * Dispatches the action to open the modal.
+   */
+  const handleGeneratePrompt = () => {
+    dispatch(openGeneratePromptModal());
+  };
 
   return (
     <div className="flex gap-2 h-full">
@@ -201,19 +244,23 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleClean}
-          title="Clean ✨ Transcript"
-          //disabled // Disabled until implemented
+          onClick={handleClean} // Connect to handler
+          title="Clean ✨ Transcript (AI)"
+          disabled={isLoading} // Disable while loading
         >
-          <Sparkles className="h-4 w-4" />
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
           <span className="sr-only">Clean ✨</span>
         </Button>
         <Button
           variant="outline"
           size="icon"
-          onClick={handleUndo}
+          onClick={handleUndo} // Connect to handler
           title="Undo Clean"
-          disabled // Disabled until implemented
+          disabled={!isCleaned || isLoading} // Disable if not cleaned or if loading
         >
           <Undo2 className="h-4 w-4" />
           <span className="sr-only">Undo</span>
@@ -239,9 +286,8 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateUp} // Attach handler
+          onClick={handleNavigateUp}
           title="Navigate Up (Context Line)"
-          // No longer disabled
         >
           <ArrowUp className="h-4 w-4" />
           <span className="sr-only">Up Arrow (↑)</span>
@@ -258,9 +304,8 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateDown} // Attach handler
+          onClick={handleNavigateDown}
           title="Navigate Down (Context Line)"
-          // No longer disabled
         >
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
@@ -270,7 +315,7 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleGeneratePrompt}
           title="Generate Note Builder Prompt..."
-          disabled // Disabled until implemented
+          disabled={!isGenerateButtonEnabled} // Enable/disable based on content
         >
           <Send className="h-4 w-4" />
           <span className="sr-only">Generate Note Builder Prompt...</span>
