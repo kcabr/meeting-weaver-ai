@@ -32,23 +32,28 @@
  * - Other button functionalities (Clean, Undo, Navigate, Add Context, Generate) will be implemented in subsequent steps.
  * - Copy and Save buttons are now enabled.
  */
-import React, { useRef } from 'react';
-import { Label } from '~/components/ui/label';
-import { Textarea } from '~/components/ui/textarea';
-import { Button } from '~/components/ui/button';
-import { useAppSelector, useAppDispatch } from '~/store/hooks';
-import { setTranscriptDisplayText, persistTranscript } from '~/store/slices/transcriptSlice';
-import { copyToClipboard, saveTextToFile } from '~/utils/textUtils'; // Import utilities
+import {
+  setTranscriptDisplayText,
+  persistTranscript,
+  setTranscriptLastKnownCursorPosition, // Import action for cursor position
+} from "~/store/slices/transcriptSlice";
+import { openAddContextLineModal } from "~/store/slices/modalSlice"; // Import action to open modal
+import { copyToClipboard, saveTextToFile } from "~/utils/textUtils"; // Import utilities // Import utilities
 import {
   Sparkles, // Clean ✨
-  Undo2,    // Undo
-  Save,     // Save
-  Copy,     // Copy Text
-  ArrowUp,  // Up Arrow
+  Undo2, // Undo
+  Save, // Save
+  Copy, // Copy Text
+  ArrowUp, // Up Arrow
   MessageSquarePlus, // Add Context Line
-  ArrowDown,// Down Arrow
-  Send,     // Generate Note Builder Prompt...
-} from 'lucide-react';
+  ArrowDown, // Down Arrow
+  Send, // Generate Note Builder Prompt...
+} from "lucide-react";
+import { useAppDispatch, useAppSelector } from "~/store/hooks";
+import { useRef } from "react";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
 
 // BEGIN WRITING FILE CODE
 export function TranscriptPanel() {
@@ -82,16 +87,30 @@ export function TranscriptPanel() {
    * @description Handles the click event for the "Save" button.
    */
   const handleSave = () => {
-    saveTextToFile(displayText, 'meeting_transcript.txt');
+    saveTextToFile(displayText, "meeting_transcript.txt");
   };
 
   // Placeholder handlers for other buttons
-  const handleClean = () => console.log('Clean button clicked (not implemented)');
-  const handleUndo = () => console.log('Undo button clicked (not implemented)');
-  const handleNavigateUp = () => console.log('Navigate Up button clicked (not implemented)');
-  const handleAddContextLine = () => console.log('Add Context Line button clicked (not implemented)');
-  const handleNavigateDown = () => console.log('Navigate Down button clicked (not implemented)');
-  const handleGeneratePrompt = () => console.log('Generate Prompt button clicked (not implemented)');
+  const handleClean = () =>
+    console.log("Clean button clicked (not implemented)");
+  const handleUndo = () => console.log("Undo button clicked (not implemented)");
+  const handleNavigateUp = () =>
+    console.log("Navigate Up button clicked (not implemented)");
+  /**
+   * @description Handles the click event for the "Add Context Line (Modal)" button.
+   * Saves the current cursor position and opens the modal.
+   */
+  const handleAddContextLine = () => {
+    // Save cursor position before opening modal
+    const currentPosition =
+      textareaRef.current?.selectionStart ?? displayText.length;
+    dispatch(setTranscriptLastKnownCursorPosition(currentPosition));
+    dispatch(openAddContextLineModal()); // Dispatch action to open modal
+  };
+  const handleNavigateDown = () =>
+    console.log("Navigate Down button clicked (not implemented)");
+  const handleGeneratePrompt = () =>
+    console.log("Generate Prompt button clicked (not implemented)");
 
   return (
     <div className="flex gap-2 h-full">
@@ -137,7 +156,7 @@ export function TranscriptPanel() {
           <Undo2 className="h-4 w-4" />
           <span className="sr-only">Undo</span>
         </Button>
-         <Button
+        <Button
           variant="outline"
           size="icon"
           onClick={handleSave} // Attach handler
@@ -167,12 +186,12 @@ export function TranscriptPanel() {
           <ArrowUp className="h-4 w-4" />
           <span className="sr-only">Up Arrow (↑)</span>
         </Button>
-         <Button
+        <Button
           variant="outline"
           size="icon"
           onClick={handleAddContextLine}
           title="Add Context Line (Modal)"
-          disabled // Disabled until implemented
+          // Disabled until implemented
         >
           <MessageSquarePlus className="h-4 w-4" />
           <span className="sr-only">Add Context Line (Modal)</span>
@@ -187,7 +206,7 @@ export function TranscriptPanel() {
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
         </Button>
-         <Button
+        <Button
           variant="outline"
           size="icon"
           onClick={handleGeneratePrompt}

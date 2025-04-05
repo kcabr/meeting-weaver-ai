@@ -70,6 +70,12 @@ export interface TranscriptState {
    * Null if there is no error.
    */
   error: string | null;
+  /**
+   * @description Stores the cursor position from the TranscriptPanel textarea
+   * right before the AddContextLineModal is opened. Used to insert the
+   * context line at the correct position. Null if not set.
+   */
+  lastKnownCursorPosition: number | null;
 }
 
 /**
@@ -93,3 +99,4 @@ export interface ModalState {
    */
   isGeneratePromptModalOpen: boolean;
 }
+

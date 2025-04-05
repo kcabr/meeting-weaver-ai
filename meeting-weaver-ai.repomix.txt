@@ -68,6 +68,7 @@ README.md
 repomix.config.json
 src/api.ts
 src/client.tsx
+src/components/AddContextLineModal.tsx
 src/components/AppLayout.tsx
 src/components/CizzleMagicText.tsx
 src/components/ContextModal.tsx
@@ -879,6 +880,166 @@ const router = createRouter()
 hydrateRoot(document, <StartClient router={router} />)
 
 ================
+File: src/components/AddContextLineModal.tsx
+================
+/**
+ * @description
+ * Renders the modal dialog for adding a formatted context line to the transcript.
+ * Allows the user to input text, which is then formatted and inserted into the
+ * transcript text area at the last known cursor position.
+ *
+ * Key features:
+ * - Controlled by 'isAddContextLineModalOpen' state from modalSlice.
+ * - Contains an Input field for user-provided context text.
+ * - "Add" button inserts the formatted string "\n## [User Input] ##########\n"
+ *   into the transcript using the 'insertTranscriptText' action.
+ * - Uses the 'lastKnownCursorPosition' from transcriptSlice to determine insertion point.
+ * - Resets local input state when the modal closes.
+ *
+ * @dependencies
+ * - react: For component creation and hooks (useState, useCallback).
+ * - react-redux: For accessing Redux state and dispatching actions (useAppSelector, useAppDispatch).
+ * - ~/components/ui/*: Shadcn UI components (Dialog, Label, Input, Button).
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/modalSlice: Action 'closeAddContextLineModal'.
+ * - ~/store/slices/transcriptSlice: Action 'insertTranscriptText', selector for cursor position.
+ * - ~/utils/constants: Constant 'SLIDE_NOTES_SEPARATOR'.
+ * - lucide-react: For Loader2 icon (optional for future async ops).
+ *
+ * @notes
+ * - Assumes 'lastKnownCursorPosition' is set in 'transcriptSlice' before this modal opens.
+ * - The formatting `## [User Input] ##########` includes the standard separator.
+ */
+
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { useAppSelector, useAppDispatch } from "~/store/hooks";
+import { closeAddContextLineModal } from "~/store/slices/modalSlice";
+import { insertTranscriptText } from "~/store/slices/transcriptSlice";
+import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants";
+// import { Loader2 } from 'lucide-react'; // Keep for potential future use
+
+// BEGIN WRITING FILE CODE
+export function AddContextLineModal() {
+  const dispatch = useAppDispatch();
+  const isOpen = useAppSelector(
+    (state) => state.modals.isAddContextLineModalOpen
+  );
+  // Retrieve last known cursor position from transcript state
+  const lastKnownCursorPosition = useAppSelector(
+    (state) => state.transcript.lastKnownCursorPosition
+  );
+  const transcriptLength = useAppSelector(
+    (state) => state.transcript.displayText.length
+  );
+
+  // Local state for the input field
+  const [contextText, setContextText] = useState("");
+
+  /**
+   * @description Resets the local input state.
+   */
+  const resetLocalState = useCallback(() => {
+    setContextText("");
+  }, []);
+
+  /**
+   * @description Handles closing the dialog and resetting state.
+   */
+  const handleClose = useCallback(() => {
+    dispatch(closeAddContextLineModal());
+    resetLocalState();
+  }, [dispatch, resetLocalState]);
+
+  /**
+   * @description Handles the change event for the input field.
+   * @param e - The React ChangeEvent for the input element.
+   */
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setContextText(e.target.value);
+  };
+
+  /**
+   * @description Handles the "Add" button click.
+   * Constructs the formatted context string and dispatches the insertion action.
+   */
+  const handleAddContext = () => {
+    if (!contextText.trim()) {
+      // Optionally add validation/toast message here
+      return;
+    }
+
+    // Determine insertion position, default to end if null
+    const position = lastKnownCursorPosition ?? transcriptLength;
+
+    // Construct the string to insert
+    const textToInsert = `\n\n## [${contextText.trim()}] ${SLIDE_NOTES_SEPARATOR}\n\n`;
+
+    // Dispatch the action to insert text into the transcript
+    dispatch(insertTranscriptText({ textToInsert, position }));
+
+    handleClose(); // Close the modal after adding
+  };
+
+  // Reset local state if the modal is closed externally
+  useEffect(() => {
+    if (!isOpen) {
+      resetLocalState();
+    }
+  }, [isOpen, resetLocalState]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add Transcript Context Line</DialogTitle>
+          <DialogDescription>
+            Enter the context text you want to add. It will be formatted and
+            inserted into the transcript at the current cursor position.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="context-input" className="text-right col-span-1">
+              Context
+            </Label>
+            <Input
+              id="context-input"
+              value={contextText}
+              onChange={handleInputChange}
+              placeholder="Enter context text..."
+              className="col-span-3"
+              aria-label="Context text input"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddContext}
+            disabled={!contextText.trim()} // Disable if input is empty
+          >
+            Add Context Line
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+================
 File: src/components/AppLayout.tsx
 ================
 /**
@@ -916,6 +1077,7 @@ import { Header } from "./Header";
 import { MainContentLayout } from "./MainContentLayout";
 import { ContextModal } from "./ContextModal";
 import { ImageExtractModal } from "./ImageExtractModal"; // Import the new modal
+import { AddContextLineModal } from "./AddContextLineModal"; // Import the new modal
 import { useAppDispatch } from "~/store/hooks";
 import { loadContext } from "~/store/slices/contextSlice";
 import { loadSlideNotes } from "~/store/slices/slideNotesSlice";
@@ -942,7 +1104,8 @@ export function AppLayout() {
 
       {/* Global Modals */}
       <ContextModal />
-      <ImageExtractModal /> {/* Add the ImageExtractModal here */}
+      <ImageExtractModal /> {/* Add the AddContextLineModal here */}
+      <AddContextLineModal /> {/* Add the ImageExtractModal here */}
       {/* Add other global modals here as needed */}
     </div>
   );
@@ -2226,23 +2389,28 @@ File: src/components/TranscriptPanel.tsx
  * - Other button functionalities (Clean, Undo, Navigate, Add Context, Generate) will be implemented in subsequent steps.
  * - Copy and Save buttons are now enabled.
  */
-import React, { useRef } from 'react';
-import { Label } from '~/components/ui/label';
-import { Textarea } from '~/components/ui/textarea';
-import { Button } from '~/components/ui/button';
-import { useAppSelector, useAppDispatch } from '~/store/hooks';
-import { setTranscriptDisplayText, persistTranscript } from '~/store/slices/transcriptSlice';
-import { copyToClipboard, saveTextToFile } from '~/utils/textUtils'; // Import utilities
+import {
+  setTranscriptDisplayText,
+  persistTranscript,
+  setTranscriptLastKnownCursorPosition, // Import action for cursor position
+} from "~/store/slices/transcriptSlice";
+import { openAddContextLineModal } from "~/store/slices/modalSlice"; // Import action to open modal
+import { copyToClipboard, saveTextToFile } from "~/utils/textUtils"; // Import utilities // Import utilities
 import {
   Sparkles, // Clean ✨
-  Undo2,    // Undo
-  Save,     // Save
-  Copy,     // Copy Text
-  ArrowUp,  // Up Arrow
+  Undo2, // Undo
+  Save, // Save
+  Copy, // Copy Text
+  ArrowUp, // Up Arrow
   MessageSquarePlus, // Add Context Line
-  ArrowDown,// Down Arrow
-  Send,     // Generate Note Builder Prompt...
-} from 'lucide-react';
+  ArrowDown, // Down Arrow
+  Send, // Generate Note Builder Prompt...
+} from "lucide-react";
+import { useAppDispatch, useAppSelector } from "~/store/hooks";
+import { useRef } from "react";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
 
 // BEGIN WRITING FILE CODE
 export function TranscriptPanel() {
@@ -2276,16 +2444,30 @@ export function TranscriptPanel() {
    * @description Handles the click event for the "Save" button.
    */
   const handleSave = () => {
-    saveTextToFile(displayText, 'meeting_transcript.txt');
+    saveTextToFile(displayText, "meeting_transcript.txt");
   };
 
   // Placeholder handlers for other buttons
-  const handleClean = () => console.log('Clean button clicked (not implemented)');
-  const handleUndo = () => console.log('Undo button clicked (not implemented)');
-  const handleNavigateUp = () => console.log('Navigate Up button clicked (not implemented)');
-  const handleAddContextLine = () => console.log('Add Context Line button clicked (not implemented)');
-  const handleNavigateDown = () => console.log('Navigate Down button clicked (not implemented)');
-  const handleGeneratePrompt = () => console.log('Generate Prompt button clicked (not implemented)');
+  const handleClean = () =>
+    console.log("Clean button clicked (not implemented)");
+  const handleUndo = () => console.log("Undo button clicked (not implemented)");
+  const handleNavigateUp = () =>
+    console.log("Navigate Up button clicked (not implemented)");
+  /**
+   * @description Handles the click event for the "Add Context Line (Modal)" button.
+   * Saves the current cursor position and opens the modal.
+   */
+  const handleAddContextLine = () => {
+    // Save cursor position before opening modal
+    const currentPosition =
+      textareaRef.current?.selectionStart ?? displayText.length;
+    dispatch(setTranscriptLastKnownCursorPosition(currentPosition));
+    dispatch(openAddContextLineModal()); // Dispatch action to open modal
+  };
+  const handleNavigateDown = () =>
+    console.log("Navigate Down button clicked (not implemented)");
+  const handleGeneratePrompt = () =>
+    console.log("Generate Prompt button clicked (not implemented)");
 
   return (
     <div className="flex gap-2 h-full">
@@ -2331,7 +2513,7 @@ export function TranscriptPanel() {
           <Undo2 className="h-4 w-4" />
           <span className="sr-only">Undo</span>
         </Button>
-         <Button
+        <Button
           variant="outline"
           size="icon"
           onClick={handleSave} // Attach handler
@@ -2361,12 +2543,12 @@ export function TranscriptPanel() {
           <ArrowUp className="h-4 w-4" />
           <span className="sr-only">Up Arrow (↑)</span>
         </Button>
-         <Button
+        <Button
           variant="outline"
           size="icon"
           onClick={handleAddContextLine}
           title="Add Context Line (Modal)"
-          disabled // Disabled until implemented
+          // Disabled until implemented
         >
           <MessageSquarePlus className="h-4 w-4" />
           <span className="sr-only">Add Context Line (Modal)</span>
@@ -2381,7 +2563,7 @@ export function TranscriptPanel() {
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
         </Button>
-         <Button
+        <Button
           variant="outline"
           size="icon"
           onClick={handleGeneratePrompt}
@@ -4619,6 +4801,7 @@ const initialState: TranscriptState = {
   originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) || null, // Use || null to handle empty string correctly
   isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it 'cleaned' if original exists on load
   isLoading: false,
+    lastKnownCursorPosition: null, // Add cursor position state
   error: null,
 };
 
@@ -4733,8 +4916,16 @@ export const transcriptSlice = createSlice({
       }
        setItem(LS_TRANSCRIPT_DISPLAY_KEY, newText); // Persist after insertion
     },
-  },
-   extraReducers: (builder) => {
+      /**
+     * @description Sets the last known cursor position in the transcript textarea.
+     * @param state - The current transcript state.
+     * @param action - Payload contains the cursor position number or null.
+     */
+    setLastKnownCursorPosition: (state, action: PayloadAction<number | null>) => {
+      state.lastKnownCursorPosition = action.payload;
+    },
+},
+  extraReducers: (builder) => {
     builder
       .addCase(loadTranscript, (state) => {
         const storedDisplayText = getItem(LS_TRANSCRIPT_DISPLAY_KEY);
@@ -4768,7 +4959,8 @@ export const {
   setError: setTranscriptError,
   setCleanedText: setTranscriptCleanedText, // Renamed for clarity
   revertToOriginal: revertTranscriptToOriginal,
-  insertText: insertTranscriptText,
+    insertText: insertTranscriptText,
+  setLastKnownCursorPosition: setTranscriptLastKnownCursorPosition, // Export new action
 } = transcriptSlice.actions;
 
 // Export the reducer
@@ -5026,6 +5218,12 @@ export interface TranscriptState {
    * Null if there is no error.
    */
   error: string | null;
+  /**
+   * @description Stores the cursor position from the TranscriptPanel textarea
+   * right before the AddContextLineModal is opened. Used to insert the
+   * context line at the correct position. Null if not set.
+   */
+  lastKnownCursorPosition: number | null;
 }
 
 /**

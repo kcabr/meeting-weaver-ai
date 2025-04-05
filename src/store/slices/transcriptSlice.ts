@@ -53,6 +53,7 @@ const initialState: TranscriptState = {
   originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) || null, // Use || null to handle empty string correctly
   isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it 'cleaned' if original exists on load
   isLoading: false,
+    lastKnownCursorPosition: null, // Add cursor position state
   error: null,
 };
 
@@ -167,8 +168,16 @@ export const transcriptSlice = createSlice({
       }
        setItem(LS_TRANSCRIPT_DISPLAY_KEY, newText); // Persist after insertion
     },
-  },
-   extraReducers: (builder) => {
+      /**
+     * @description Sets the last known cursor position in the transcript textarea.
+     * @param state - The current transcript state.
+     * @param action - Payload contains the cursor position number or null.
+     */
+    setLastKnownCursorPosition: (state, action: PayloadAction<number | null>) => {
+      state.lastKnownCursorPosition = action.payload;
+    },
+},
+  extraReducers: (builder) => {
     builder
       .addCase(loadTranscript, (state) => {
         const storedDisplayText = getItem(LS_TRANSCRIPT_DISPLAY_KEY);
@@ -202,8 +211,10 @@ export const {
   setError: setTranscriptError,
   setCleanedText: setTranscriptCleanedText, // Renamed for clarity
   revertToOriginal: revertTranscriptToOriginal,
-  insertText: insertTranscriptText,
+    insertText: insertTranscriptText,
+  setLastKnownCursorPosition: setTranscriptLastKnownCursorPosition, // Export new action
 } = transcriptSlice.actions;
 
 // Export the reducer
 export default transcriptSlice.reducer;
+

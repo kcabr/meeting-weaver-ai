@@ -33,6 +33,7 @@ import { Header } from "./Header";
 import { MainContentLayout } from "./MainContentLayout";
 import { ContextModal } from "./ContextModal";
 import { ImageExtractModal } from "./ImageExtractModal"; // Import the new modal
+import { AddContextLineModal } from "./AddContextLineModal"; // Import the new modal
 import { useAppDispatch } from "~/store/hooks";
 import { loadContext } from "~/store/slices/contextSlice";
 import { loadSlideNotes } from "~/store/slices/slideNotesSlice";
@@ -59,8 +60,10 @@ export function AppLayout() {
 
       {/* Global Modals */}
       <ContextModal />
-      <ImageExtractModal /> {/* Add the ImageExtractModal here */}
+      <ImageExtractModal /> {/* Add the AddContextLineModal here */}
+      <AddContextLineModal /> {/* Add the ImageExtractModal here */}
       {/* Add other global modals here as needed */}
     </div>
   );
 }
+
