@@ -8,7 +8,7 @@
  *
  * Key features:
  * - Displays a labeled multi-line text area for notes input.
- * - Shows action buttons with icons.
+ * - Shows action buttons with icons and tooltips.
  * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage text area content and cursor position state.
  * - Updates Redux state on text area change ('onChange').
  * - Persists text area content to localStorage on blur ('onBlur').
@@ -36,6 +36,7 @@
  * - Cursor position setting after 'Add Line' uses a state variable and useEffect for better reliability.
  * - Navigation uses the findNearestSeparatorLine utility to move the cursor.
  * - Image Extract button now dispatches Redux actions to open the modal and save cursor position.
+ * - Textarea now uses flex-grow within its container to fill available vertical space.
  */
 
 import React, { useRef, useEffect, useState } from "react";
@@ -59,7 +60,6 @@ import {
   ArrowUp,
   Plus,
   ArrowDown,
-  Loader2, // Keep Loader2 for potential future use
 } from "lucide-react";
 
 // BEGIN WRITING FILE CODE
@@ -73,8 +73,6 @@ export function SlideNotesPanel() {
 
   /**
    * @description Handles changes in the textarea input.
-   * Dispatches the 'setSlideNotesText' action to update the Redux store immediately.
-   * @param e - The textarea change event.
    */
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch(setSlideNotesText(e.target.value));
@@ -82,7 +80,6 @@ export function SlideNotesPanel() {
 
   /**
    * @description Handles the blur event on the textarea.
-   * Dispatches the 'persistSlideNotes' action to save the current text to localStorage.
    */
   const handleBlur = () => {
     const currentText = textareaRef.current?.value ?? slideNotesText;
@@ -91,7 +88,6 @@ export function SlideNotesPanel() {
 
   /**
    * @description Handles the click event for the "Copy Text" button.
-   * Calls the copyToClipboard utility with the current notes text.
    */
   const handleCopyText = () => {
     copyToClipboard(slideNotesText);
@@ -99,27 +95,22 @@ export function SlideNotesPanel() {
 
   /**
    * @description Handles the click event for the "Add Line" button.
-   * Gets the current cursor position, constructs the separator string,
-   * and dispatches the 'insertSlideNotesText' action.
-   * Stores the intended cursor position for the useEffect hook.
    */
   const handleAddLine = () => {
     if (textareaRef.current) {
       const cursorPosition = textareaRef.current.selectionStart;
-      const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
-      // Calculate based on insertion point
+      // Insert with surrounding newlines for proper line separation
+      const textToInsert = `\n${SLIDE_NOTES_SEPARATOR}\n`;
       const calculatedNextPosition = cursorPosition + textToInsert.length;
 
       dispatch(
         insertSlideNotesText({ textToInsert, position: cursorPosition })
       );
-      // Schedule cursor update after state changes
       setNextCursorPosition(calculatedNextPosition);
     } else {
       console.warn("Textarea ref not available for Add Line action.");
-      // Fallback if ref is not available (less likely but safe)
-      const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
-      const cursorPosition = slideNotesText.length; // Append at the end
+      const textToInsert = `\n${SLIDE_NOTES_SEPARATOR}\n`;
+      const cursorPosition = slideNotesText.length;
       const calculatedNextPosition = cursorPosition + textToInsert.length;
       dispatch(
         insertSlideNotesText({ textToInsert, position: cursorPosition })
@@ -129,25 +120,22 @@ export function SlideNotesPanel() {
   };
 
   /**
-   * @description Effect to set the cursor position after the text state has updated
-   * from an insertion action. Checks if the requested position is valid.
+   * @description Effect to set the cursor position after the text state has updated.
    */
   useEffect(() => {
     if (nextCursorPosition !== null && textareaRef.current) {
-      // Ensure the position is valid before setting
       const currentLength = textareaRef.current.value.length;
       const targetPosition = Math.min(nextCursorPosition, currentLength);
 
       textareaRef.current.focus();
       textareaRef.current.setSelectionRange(targetPosition, targetPosition);
 
-      setNextCursorPosition(null); // Reset after attempting to set
+      setNextCursorPosition(null);
     }
-  }, [slideNotesText, nextCursorPosition]); // Depend on text change and the trigger
+  }, [slideNotesText, nextCursorPosition]);
 
   /**
    * @description Handles the click event for the "Navigate Up" button.
-   * Finds the nearest separator line above the cursor and moves the cursor there.
    */
   const handleNavigateUp = () => {
     if (textareaRef.current) {
@@ -171,7 +159,6 @@ export function SlideNotesPanel() {
 
   /**
    * @description Handles the click event for the "Navigate Down" button.
-   * Finds the nearest separator line below the cursor and moves the cursor there.
    */
   const handleNavigateDown = () => {
     if (textareaRef.current) {
@@ -195,10 +182,8 @@ export function SlideNotesPanel() {
 
   /**
    * @description Handles the click event for the "Img-Txt Extract (Modal)" button.
-   * Saves the current cursor position to Redux state and then opens the modal.
    */
   const handleImageExtract = () => {
-    // Save cursor position before opening modal
     const currentPosition =
       textareaRef.current?.selectionStart ?? slideNotesText.length;
     dispatch(setLastKnownCursorPosition(currentPosition));
@@ -206,12 +191,13 @@ export function SlideNotesPanel() {
   };
 
   return (
-    <div className="flex gap-2 h-full">
-      {/* Text Area Section */}
+    // Use flex layout, ensure parent container allows growth (h-full)
+    <div className="flex gap-4 h-full">
+      {/* Text Area Section - Allow this part to grow */}
       <div className="flex flex-col flex-grow h-full">
         <Label
           htmlFor="slide-notes-textarea"
-          className="mb-2 text-sm font-medium"
+          className="mb-2 text-sm font-medium shrink-0" // Prevent label from shrinking
         >
           Slide / Meeting Notes Text Area
         </Label>
@@ -222,13 +208,14 @@ export function SlideNotesPanel() {
           onChange={handleTextChange}
           onBlur={handleBlur}
           placeholder="Paste slide content or enter meeting notes here..."
-          className="flex-grow resize-none text-sm"
+          // Use flex-grow to fill vertical space, ensure min-height if needed
+          className="flex-grow resize-none text-sm w-full min-h-[200px] lg:min-h-0"
           spellCheck={false}
         />
       </div>
 
-      {/* Action Buttons Section */}
-      <div className="flex flex-col gap-2">
+      {/* Action Buttons Section - Fixed width */}
+      <div className="flex flex-col gap-2 shrink-0">
         <Button
           variant="outline"
           size="icon"

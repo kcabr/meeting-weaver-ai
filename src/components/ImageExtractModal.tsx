@@ -14,6 +14,7 @@
  * - Uses 'react-hot-toast' for error and success notifications.
  * - "Add" button inserts extracted text + separator into slide notes at the stored cursor position.
  * - Resets local state on close.
+ * - Adjusted modal width and textarea height.
  *
  * @dependencies
  * - react: For component creation and hooks (useState, useCallback).
@@ -30,7 +31,6 @@
  * @notes
  * - The actual image extraction logic resides in 'utils/imageExtractor.ts'.
  * - Cursor position for insertion is retrieved from Redux state ('slideNotes.lastKnownCursorPosition').
- * - Added success toasts for extraction and adding text.
  */
 import React, { useState, useCallback } from "react";
 import {
@@ -47,10 +47,10 @@ import { Button } from "~/components/ui/button";
 import { useAppSelector, useAppDispatch } from "~/store/hooks";
 import { closeImageExtractModal } from "~/store/slices/modalSlice";
 import { insertSlideNotesText } from "~/store/slices/slideNotesSlice";
-import { extractTextFromImage } from "~/utils/imageExtractor"; // Import the extractor function
-import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants"; // Import separator constant
-import { Loader2 } from "lucide-react"; // Import Loader icon
-import toast from "react-hot-toast"; // Import toast
+import { extractTextFromImage } from "~/utils/imageExtractor";
+import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants";
+import { Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 // BEGIN WRITING FILE CODE
 export function ImageExtractModal() {
@@ -58,16 +58,13 @@ export function ImageExtractModal() {
   const isOpen = useAppSelector(
     (state) => state.modals.isImageExtractModalOpen
   );
-  // Get the cursor position stored in Redux state
   const lastKnownCursorPosition = useAppSelector(
     (state) => state.slideNotes.lastKnownCursorPosition
   );
-  // Fallback position if Redux state is null (e.g., append to end)
   const slideNotesLength = useAppSelector(
     (state) => state.slideNotes.text.length
   );
 
-  // Local state for managing extracted text, loading, and errors
   const [extractedText, setExtractedText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,8 +79,7 @@ export function ImageExtractModal() {
   }, []);
 
   /**
-   * @description Handles the closing of the dialog, dispatched via onOpenChange or Cancel button.
-   * Also resets the local component state.
+   * @description Handles the closing of the dialog.
    */
   const handleClose = useCallback(() => {
     dispatch(closeImageExtractModal());
@@ -91,17 +87,16 @@ export function ImageExtractModal() {
   }, [dispatch, resetLocalState]);
 
   /**
-   * @description Processes an image file: calls extraction and updates state.
-   * @param imageFile - The image file blob to process.
+   * @description Processes an image file.
    */
   const processImage = useCallback(async (imageFile: Blob) => {
     setIsLoading(true);
     setError(null);
-    setExtractedText(""); // Clear previous text
+    setExtractedText("");
     try {
       const text = await extractTextFromImage(imageFile);
       setExtractedText(text);
-      toast.success("Image text extracted successfully!"); // Success toast for extraction
+      toast.success("Image text extracted successfully!");
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error extracting text.";
@@ -114,12 +109,10 @@ export function ImageExtractModal() {
 
   /**
    * @description Handles the paste event on the designated paste area.
-   * Checks for image data in the clipboard and initiates processing.
-   * @param e - The React ClipboardEvent.
    */
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLDivElement>) => {
-      setError(null); // Clear previous errors on new paste
+      setError(null);
       const items = e.clipboardData.items;
       let imageFound = false;
       for (let i = 0; i < items.length; i++) {
@@ -128,7 +121,7 @@ export function ImageExtractModal() {
           if (file) {
             imageFound = true;
             processImage(file);
-            break; // Process only the first image found
+            break;
           }
         }
       }
@@ -142,32 +135,25 @@ export function ImageExtractModal() {
 
   /**
    * @description Handles the "Add" button click.
-   * Constructs the text to insert (extracted text + separator) and dispatches
-   * the 'insertSlideNotesText' action with the correct position from Redux state.
    */
   const handleAddText = () => {
     if (!extractedText.trim()) {
       toast.error("No extracted text to add.");
       return;
     }
-
-    // Use the stored cursor position, fallback to end of text if null
     const position = lastKnownCursorPosition ?? slideNotesLength;
+    // Ensure separator is added with correct newlines
+    const textToInsert = `${extractedText.trim()}\n${SLIDE_NOTES_SEPARATOR}\n`;
 
-    // Construct the text to insert, ensuring separators are added correctly
-    const textToInsert = `${extractedText.trim()}\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
-
-    // Dispatch action to insert text into the slide notes
     dispatch(insertSlideNotesText({ textToInsert, position }));
-
-    toast.success("Extracted text added to notes."); // Success toast for adding
-
-    handleClose(); // Close modal after adding
+    toast.success("Extracted text added to notes.");
+    handleClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      {/* Adjusted width */}
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Image-to-Text Extraction</DialogTitle>
           <DialogDescription>
@@ -176,15 +162,16 @@ export function ImageExtractModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
+        {/* Added flex-grow */}
+        <div className="grid gap-4 py-4 flex-grow">
           {/* Paste Area */}
           <div className="grid gap-2">
             <Label htmlFor="paste-area">Paste Image Here</Label>
             <div
               id="paste-area"
               className="border-2 border-dashed rounded-md p-4 text-center min-h-[100px] flex items-center justify-center text-muted-foreground bg-secondary/30 cursor-copy focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              onPaste={handlePaste} // Attach paste handler
-              tabIndex={0} // Make it focusable for paste
+              onPaste={handlePaste}
+              tabIndex={0}
               role="button"
               aria-label="Paste image area"
             >
@@ -196,23 +183,24 @@ export function ImageExtractModal() {
               ) : error ? (
                 <span className="text-destructive">{error}</span>
               ) : (
-                "Paste Image Here" // Keep simple instructions
+                "Paste Image Here"
               )}
             </div>
           </div>
 
           {/* Review Area */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 flex-grow"> {/* Added flex-grow */}
             <Label htmlFor="extracted-text-review">
               Extracted Text (Review)
             </Label>
             <Textarea
               id="extracted-text-review"
               value={extractedText}
-              onChange={(e) => setExtractedText(e.target.value)} // Allow editing of extracted text
+              onChange={(e) => setExtractedText(e.target.value)}
               placeholder="Extracted text will appear here..."
-              className="min-h-[200px] resize-y bg-background" // Use standard background
-              aria-live="polite" // Announce changes for screen readers
+              // Adjusted height
+              className="min-h-[200px] h-full resize-y bg-background"
+              aria-live="polite"
             />
           </div>
         </div>
@@ -223,7 +211,7 @@ export function ImageExtractModal() {
           </Button>
           <Button
             onClick={handleAddText}
-            disabled={isLoading || !extractedText.trim()} // Disable if loading or no text
+            disabled={isLoading || !extractedText.trim()}
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Add to Notes

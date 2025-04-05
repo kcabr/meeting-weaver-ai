@@ -23,6 +23,7 @@
  * - Implements "Undo" button by dispatching 'revertTranscriptToOriginal'. Includes success toast.
  * - Implements enablement logic for the "Generate Note Builder Prompt..." button.
  * - Uses 'useRef' for the textarea element.
+ * - Textarea now uses flex-grow within its container to fill available vertical space.
  *
  * @dependencies
  * - react: For component creation and 'useRef'.
@@ -48,11 +49,11 @@ import {
   setTranscriptDisplayText,
   persistTranscript,
   setTranscriptLastKnownCursorPosition,
-  revertTranscriptToOriginal, // Import Undo action
+  revertTranscriptToOriginal,
 } from "~/store/slices/transcriptSlice";
 import {
   openAddContextLineModal,
-  openGeneratePromptModal, // Import action to open Generate Prompt modal
+  openGeneratePromptModal,
 } from "~/store/slices/modalSlice";
 import {
   copyToClipboard,
@@ -69,7 +70,7 @@ import {
   MessageSquarePlus,
   ArrowDown,
   Send,
-  Loader2, // Import Loader2 for Clean button
+  Loader2,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "~/store/hooks";
 import { useRef } from "react";
@@ -77,27 +78,22 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import toast from "react-hot-toast";
-import { useTranscriptCleaner } from "~/hooks/useTranscriptCleaner"; // Import the hook
+import { useTranscriptCleaner } from "~/hooks/useTranscriptCleaner";
 
 // BEGIN WRITING FILE CODE
 export function TranscriptPanel() {
   const dispatch = useAppDispatch();
-  const {
-    displayText,
-    originalText,
-    isLoading,
-    isCleaned,
-  } = useAppSelector((state) => state.transcript);
-  // Selectors for enablement logic
+  const { displayText, originalText, isLoading, isCleaned } = useAppSelector(
+    (state) => state.transcript
+  );
   const contextText = useAppSelector((state) => state.context.text);
   const slideNotesText = useAppSelector((state) => state.slideNotes.text);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { cleanTranscriptHandler } = useTranscriptCleaner(); // Use the hook
+  const { cleanTranscriptHandler } = useTranscriptCleaner();
 
   /**
    * @description Determines if the Generate Prompt button should be enabled.
-   * Checks if all three input areas (context, slide notes, transcript) contain non-whitespace text.
    */
   const isGenerateButtonEnabled =
     contextText.trim().length > 0 &&
@@ -133,7 +129,7 @@ export function TranscriptPanel() {
   };
 
   /**
-   * @description Handles the click event for the "Navigate Up" (Context Line) button.
+   * @description Handles the click event for the "Navigate Up" button.
    */
   const handleNavigateUp = () => {
     if (textareaRef.current) {
@@ -159,7 +155,7 @@ export function TranscriptPanel() {
   };
 
   /**
-   * @description Handles the click event for the "Navigate Down" (Context Line) button.
+   * @description Handles the click event for the "Navigate Down" button.
    */
   const handleNavigateDown = () => {
     if (textareaRef.current) {
@@ -196,7 +192,6 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Clean ✨" button.
-   * Uses the handler from the useTranscriptCleaner hook.
    */
   const handleClean = () => {
     cleanTranscriptHandler();
@@ -204,28 +199,27 @@ export function TranscriptPanel() {
 
   /**
    * @description Handles the click event for the "Undo" button.
-   * Dispatches the action to revert to the original text and shows a success toast.
    */
   const handleUndo = () => {
     dispatch(revertTranscriptToOriginal());
-    toast.success("Reverted to original transcript."); // Added success toast
+    toast.success("Reverted to original transcript.");
   };
 
   /**
    * @description Handles the click event for the "Generate Note Builder Prompt..." button.
-   * Dispatches the action to open the modal.
    */
   const handleGeneratePrompt = () => {
     dispatch(openGeneratePromptModal());
   };
 
   return (
-    <div className="flex gap-2 h-full">
-      {/* Text Area Section */}
+    // Use flex layout, ensure parent container allows growth (h-full)
+    <div className="flex gap-4 h-full">
+      {/* Text Area Section - Allow this part to grow */}
       <div className="flex flex-col flex-grow h-full">
         <Label
           htmlFor="transcript-textarea"
-          className="mb-2 text-sm font-medium"
+          className="mb-2 text-sm font-medium shrink-0" // Prevent label from shrinking
         >
           Meeting Transcript Text Area
         </Label>
@@ -236,19 +230,20 @@ export function TranscriptPanel() {
           onChange={handleTextChange}
           onBlur={handleBlur}
           placeholder="Paste or type the meeting transcript here..."
-          className="flex-grow resize-none text-sm"
+          // Use flex-grow to fill vertical space, ensure min-height if needed
+          className="flex-grow resize-none text-sm w-full min-h-[200px] lg:min-h-0"
           spellCheck={false}
         />
       </div>
 
-      {/* Action Buttons Section */}
-      <div className="flex flex-col gap-2">
+      {/* Action Buttons Section - Fixed width */}
+      <div className="flex flex-col gap-2 shrink-0">
         <Button
           variant="outline"
           size="icon"
-          onClick={handleClean} // Connect to handler
+          onClick={handleClean}
           title="Clean ✨ Transcript (AI)"
-          disabled={isLoading} // Disable while loading
+          disabled={isLoading || !displayText.trim()} // Disable if loading or no text
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -260,7 +255,7 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleUndo} // Connect to handler
+          onClick={handleUndo}
           title="Undo Clean"
           disabled={!isCleaned || isLoading} // Disable if not cleaned or if loading
         >
@@ -289,7 +284,7 @@ export function TranscriptPanel() {
           variant="outline"
           size="icon"
           onClick={handleNavigateUp}
-          title="Navigate Up (Context Line)"
+          title="Navigate Up (Context Line ##)"
         >
           <ArrowUp className="h-4 w-4" />
           <span className="sr-only">Up Arrow (↑)</span>
@@ -307,17 +302,18 @@ export function TranscriptPanel() {
           variant="outline"
           size="icon"
           onClick={handleNavigateDown}
-          title="Navigate Down (Context Line)"
+          title="Navigate Down (Context Line ##)"
         >
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
         </Button>
         <Button
-          variant="outline"
+          variant="default" // Make Generate button more prominent
           size="icon"
           onClick={handleGeneratePrompt}
           title="Generate Note Builder Prompt..."
           disabled={!isGenerateButtonEnabled} // Enable/disable based on content
+          className="mt-auto" // Push to bottom if space allows
         >
           <Send className="h-4 w-4" />
           <span className="sr-only">Generate Note Builder Prompt...</span>

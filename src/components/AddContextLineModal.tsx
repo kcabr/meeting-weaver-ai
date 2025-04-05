@@ -11,9 +11,10 @@
  *   into the transcript using the 'insertTranscriptText' action.
  * - Uses the 'lastKnownCursorPosition' from transcriptSlice to determine insertion point.
  * - Resets local input state when the modal closes.
+ * - Adjusted modal width.
  *
  * @dependencies
- * - react: For component creation and hooks (useState, useCallback).
+ * - react: For component creation and hooks (useState, useCallback, useEffect).
  * - react-redux: For accessing Redux state and dispatching actions (useAppSelector, useAppDispatch).
  * - ~/components/ui/*: Shadcn UI components (Dialog, Label, Input, Button).
  * - ~/store/hooks: Typed Redux hooks.
@@ -43,7 +44,6 @@ import { useAppSelector, useAppDispatch } from "~/store/hooks";
 import { closeAddContextLineModal } from "~/store/slices/modalSlice";
 import { insertTranscriptText } from "~/store/slices/transcriptSlice";
 import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants";
-// import { Loader2 } from 'lucide-react'; // Keep for potential future use
 
 // BEGIN WRITING FILE CODE
 export function AddContextLineModal() {
@@ -51,7 +51,6 @@ export function AddContextLineModal() {
   const isOpen = useAppSelector(
     (state) => state.modals.isAddContextLineModalOpen
   );
-  // Retrieve last known cursor position from transcript state
   const lastKnownCursorPosition = useAppSelector(
     (state) => state.transcript.lastKnownCursorPosition
   );
@@ -59,7 +58,6 @@ export function AddContextLineModal() {
     (state) => state.transcript.displayText.length
   );
 
-  // Local state for the input field
   const [contextText, setContextText] = useState("");
 
   /**
@@ -79,7 +77,6 @@ export function AddContextLineModal() {
 
   /**
    * @description Handles the change event for the input field.
-   * @param e - The React ChangeEvent for the input element.
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContextText(e.target.value);
@@ -87,24 +84,17 @@ export function AddContextLineModal() {
 
   /**
    * @description Handles the "Add" button click.
-   * Constructs the formatted context string and dispatches the insertion action.
    */
   const handleAddContext = () => {
     if (!contextText.trim()) {
-      // Optionally add validation/toast message here
       return;
     }
-
-    // Determine insertion position, default to end if null
     const position = lastKnownCursorPosition ?? transcriptLength;
+    // Ensure separator is added with correct newlines
+    const textToInsert = `\n## [${contextText.trim()}] ${SLIDE_NOTES_SEPARATOR}\n`;
 
-    // Construct the string to insert
-    const textToInsert = `\n\n## [${contextText.trim()}] ${SLIDE_NOTES_SEPARATOR}\n\n`;
-
-    // Dispatch the action to insert text into the transcript
     dispatch(insertTranscriptText({ textToInsert, position }));
-
-    handleClose(); // Close the modal after adding
+    handleClose();
   };
 
   // Reset local state if the modal is closed externally
@@ -116,7 +106,8 @@ export function AddContextLineModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[425px]">
+      {/* Adjusted width */}
+      <DialogContent className="sm:max-w-md md:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add Transcript Context Line</DialogTitle>
           <DialogDescription>
@@ -145,7 +136,7 @@ export function AddContextLineModal() {
           </Button>
           <Button
             onClick={handleAddContext}
-            disabled={!contextText.trim()} // Disable if input is empty
+            disabled={!contextText.trim()}
           >
             Add Context Line
           </Button>
@@ -154,4 +145,3 @@ export function AddContextLineModal() {
     </Dialog>
   );
 }
-

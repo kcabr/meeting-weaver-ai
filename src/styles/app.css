@@ -4,64 +4,104 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
+    /* Light Theme Colors */
+    --background: 0 0% 100%; /* White */
+    --foreground: 224 71.4% 4.1%; /* Dark Blue/Black */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 224 71.4% 4.1%; /* Dark Blue/Black */
+
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 224 71.4% 4.1%; /* Dark Blue/Black */
+
+    --primary: 220.9 39.3% 11%; /* Dark Blue */
+    --primary-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --secondary: 220 14.3% 95.9%; /* Light Gray */
+    --secondary-foreground: 220.9 39.3% 11%; /* Dark Blue */
+
+    --muted: 220 14.3% 95.9%; /* Light Gray */
+    --muted-foreground: 220 8.9% 46.1%; /* Mid Gray */
+
+    --accent: 220 14.3% 95.9%; /* Light Gray */
+    --accent-foreground: 220.9 39.3% 11%; /* Dark Blue */
+
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --border: 220 13% 91%; /* Light Gray Border */
+    --input: 220 13% 91%; /* Light Gray Input Border */
+    --ring: 224 71.4% 4.1%; /* Dark Blue Ring */
+
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 224 71.4% 10%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 10%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 10%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 20%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 20%;
-    --muted-foreground: 217.9 10.6% 70%;
-    --accent: 215 27.9% 20%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 20%;
-    --input: 215 27.9% 20%;
-    --ring: 216 12.2% 83.9%;
+    /* Dark Theme Colors */
+    --background: 224 71.4% 10%; /* Very Dark Blue */
+    --foreground: 210 20% 98%; /* Very Light Gray */
+
+    --card: 224 71.4% 11%; /* Slightly Lighter Dark Blue */
+    --card-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --popover: 224 71.4% 10%; /* Very Dark Blue */
+    --popover-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --primary: 210 20% 98%; /* Very Light Gray */
+    --primary-foreground: 220.9 39.3% 11%; /* Dark Blue */
+
+    --secondary: 215 27.9% 16.9%; /* Dark Grayish Blue */
+    --secondary-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --muted: 215 27.9% 16.9%; /* Dark Grayish Blue */
+    --muted-foreground: 217.9 10.6% 60.6%; /* Lighter Gray */
+
+    --accent: 215 27.9% 16.9%; /* Dark Grayish Blue */
+    --accent-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --destructive: 0 62.8% 30.6%; /* Darker Red */
+    --destructive-foreground: 210 20% 98%; /* Very Light Gray */
+
+    --border: 215 27.9% 16.9%; /* Dark Grayish Blue Border */
+    --input: 215 27.9% 16.9%; /* Dark Grayish Blue Input Border */
+    --ring: 216 12.2% 83.9%; /* Lighter Gray Ring */
   }
 
-  html {
-    color-scheme: light dark;
+  /* Base body styles */
+  body {
+    @apply bg-background text-foreground;
+    /* Apply a subtle background pattern */
+    /* background-image: linear-gradient(rgba(var(--foreground), 0.02) 1px, transparent 1px), linear-gradient(to right, rgba(var(--foreground), 0.02) 1px, transparent 1px); */
+    /* background-size: 20px 20px; */
+    min-height: 100vh;
+    font-feature-settings: "rlig" 1, "calt" 1; /* Enable common ligatures */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Apply border color to all elements by default */
   * {
     @apply border-border;
   }
 
-  html,
-  body {
-    @apply bg-background text-foreground;
+  /* Improve focus visibility for accessibility */
+  *:focus-visible {
+      @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
-  .using-mouse * {
-    outline: none !important;
+  /* Remove default outline for mouse users */
+  .using-mouse *:focus {
+      outline: none !important;
   }
+
+  /* Add smooth scrolling */
+  html {
+      scroll-behavior: smooth;
+  }
+
+  /* Specific styles for textarea to ensure consistent font */
+  textarea {
+    @apply font-sans;
+  }
+
 }

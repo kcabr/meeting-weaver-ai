@@ -11,6 +11,7 @@
  * - Uses 'useMemo' to efficiently compute the prompt string.
  * - Displays the generated prompt in a read-only Textarea.
  * - Provides a "Copy to Clipboard" button using the 'copyToClipboard' utility.
+ * - Adjusted modal width and textarea height.
  *
  * @dependencies
  * - react: For component creation and hooks (useRef, useMemo).
@@ -27,11 +28,11 @@
  * - lucide-react: For 'Copy' icon.
  *
  * @notes
- * - The prompt generation logic is now implemented using 'useMemo' and Redux selectors.
+ * - The prompt generation logic uses 'useMemo' and Redux selectors.
  * - Copy functionality calls the 'copyToClipboard' utility.
  */
 
-import React, { useRef, useMemo } from "react"; // Added useMemo
+import React, { useMemo } from "react"; // Removed useRef as it's not strictly needed for copy
 import {
   Dialog,
   DialogContent,
@@ -45,10 +46,9 @@ import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { useAppSelector, useAppDispatch } from "~/store/hooks";
 import { closeGeneratePromptModal } from "~/store/slices/modalSlice";
-import { copyToClipboard } from "~/utils/textUtils"; // Import copy utility
-import { PROMPT_TEMPLATE } from "~/utils/constants"; // Import the template
+import { copyToClipboard } from "~/utils/textUtils";
+import { PROMPT_TEMPLATE } from "~/utils/constants";
 import { Copy as CopyIcon } from "lucide-react";
-// import toast from 'react-hot-toast'; // Not directly used here, handled in copyToClipboard
 
 // BEGIN WRITING FILE CODE
 export function GeneratePromptModal() {
@@ -57,18 +57,14 @@ export function GeneratePromptModal() {
     (state) => state.modals.isGeneratePromptModalOpen
   );
 
-  // Fetch required text content from Redux store
   const contextText = useAppSelector((state) => state.context.text);
   const slideNotesText = useAppSelector((state) => state.slideNotes.text);
   const transcriptDisplayText = useAppSelector(
     (state) => state.transcript.displayText
   );
 
-  const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
-
   /**
-   * @description Computes the final prompt string by replacing placeholders in the template.
-   * Uses useMemo for efficiency.
+   * @description Computes the final prompt string.
    */
   const finalPrompt = useMemo(() => {
     let prompt = PROMPT_TEMPLATE;
@@ -87,15 +83,15 @@ export function GeneratePromptModal() {
 
   /**
    * @description Handles the "Copy to Clipboard" button click.
-   * Calls the utility function to copy the generated prompt.
    */
   const handleCopyPrompt = () => {
-    copyToClipboard(finalPrompt); // Use the utility function
+    copyToClipboard(finalPrompt);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[70vw] md:max-w-[60vw] lg:max-w-[50vw] xl:max-w-[45vw]">
+      {/* Adjusted width for better prompt visibility */}
+      <DialogContent className="sm:max-w-lg md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Generated Note Builder Prompt</DialogTitle>
           <DialogDescription>
@@ -103,20 +99,21 @@ export function GeneratePromptModal() {
             Large Language Model (LLM).
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        {/* Use flex-grow on the container to push footer down */}
+        <div className="grid gap-4 py-4 flex-grow">
           <Textarea
-            ref={promptTextareaRef}
             id="generated-prompt-textarea"
-            value={finalPrompt} // Display the generated prompt
-            readOnly // Make it read-only
-            className="min-h-[50vh] resize-y font-mono text-xs bg-muted/50" // Slightly different bg for readonly
+            value={finalPrompt}
+            readOnly
+            // Adjusted min-height and added h-full
+            className="min-h-[400px] h-full resize-y font-mono text-xs bg-muted/50"
             aria-label="Generated Prompt"
           />
         </div>
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="sm:justify-between mt-auto"> {/* Pushed footer */}
           <Button
             variant="outline"
-            onClick={handleCopyPrompt} // Call the copy handler
+            onClick={handleCopyPrompt}
             className="flex items-center gap-2"
           >
             <CopyIcon className="h-4 w-4" />

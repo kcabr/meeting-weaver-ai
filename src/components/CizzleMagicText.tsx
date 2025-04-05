@@ -1,7 +1,7 @@
 import { postAiGetCizzleMagicText } from "~/services/ai";
 import { Lightbulb } from "lucide-react";
 import React, { ChangeEvent, ReactElement, useState } from "react";
-import { AccentButton } from "./AccentButton";
+import { Button } from "~/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface InputElementProps {
@@ -75,7 +75,7 @@ const CizzleMagicText: React.FC<CizzleMagicTextProps> = ({
   return (
     <div className="flex items-center">
       {clonedInput}
-      <AccentButton
+      <Button
         onClick={executePrompt}
         disabled={loading || !isModified}
         size="icon"
@@ -86,7 +86,7 @@ const CizzleMagicText: React.FC<CizzleMagicTextProps> = ({
         ) : (
           <Lightbulb className="h-4 w-4" />
         )}
-      </AccentButton>
+      </Button>
     </div>
   );
 };

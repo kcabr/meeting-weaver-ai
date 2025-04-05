@@ -10,6 +10,8 @@
  * - Loads context from Redux state, which is initialized from localStorage.
  * - Populates with template when empty.
  * - Persists updates to localStorage via Redux actions.
+ * - Adjusted modal width using className on DialogContent.
+ * - Adjusted textarea height.
  *
  * @dependencies
  * - react: For component creation and hooks.
@@ -62,7 +64,6 @@ export function ContextModal() {
 
   /**
    * @description Handles the change in the textarea value.
-   * @param e - The change event.
    */
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
@@ -70,11 +71,9 @@ export function ContextModal() {
 
   /**
    * @description Handles saving the context text when closing the modal.
-   * @param open - The new open state of the dialog.
    */
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // Save the text to Redux (and localStorage) when closing
       dispatch(setContextText(text));
       dispatch(closeContextModal());
     }
@@ -90,7 +89,8 @@ export function ContextModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[60vw] md:max-w-[50vw] lg:max-w-[40vw]">
+      {/* Increased max-width for wider screens */}
+      <DialogContent className="sm:max-w-xl md:max-w-2xl lg:max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Project & Company Context</DialogTitle>
           <DialogDescription>
@@ -99,7 +99,8 @@ export function ContextModal() {
             relevant notes later.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        {/* Added flex-grow to allow textarea to fill space */}
+        <div className="grid gap-4 py-4 flex-grow">
           <Label htmlFor="context-textarea" className="sr-only">
             Context Input Area
           </Label>
@@ -108,7 +109,8 @@ export function ContextModal() {
             value={text}
             onChange={handleTextChange}
             placeholder="Start typing your project context here... (Use the template)"
-            className="min-h-[40vh] resize-y"
+            // Increased min-height and added h-full for better vertical sizing
+            className="min-h-[300px] h-full resize-y"
           />
         </div>
         <DialogFooter>
