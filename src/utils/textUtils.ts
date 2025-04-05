@@ -17,6 +17,7 @@
  * @notes
  * - Error handling for clipboard and save operations is included.
  * - saveTextToFile uses Blob and Object URL for client-side file generation.
+ * - Navigation functions now handle both exact separator matches and prefix matches.
  */
 
 // BEGIN WRITING FILE CODE
@@ -79,6 +80,33 @@ export function insertTextAtCursor(
 }
 
 /**
+ * @description Calculates the line index corresponding to a given character position.
+ * @param text - The text content.
+ * @param position - The character position (index).
+ * @returns The 0-based line index.
+ */
+function getLineIndexFromPosition(text: string, position: number): number {
+    // Ensure position is within bounds
+    const validPosition = Math.max(0, Math.min(position, text.length));
+    // Count newline characters before the position
+    return text.substring(0, validPosition).split('\n').length - 1;
+}
+
+/**
+ * @description Calculates the starting character index of a given line index.
+ * @param lines - An array of strings representing the lines of text.
+ * @param lineIndex - The 0-based index of the target line.
+ * @returns The character index where the target line begins.
+ */
+function getStartPositionOfLine(lines: string[], lineIndex: number): number {
+    let index = 0;
+    for (let j = 0; j < lineIndex; j++) {
+        index += lines[j].length + 1; // Add line length + 1 for newline character
+    }
+    return index;
+}
+
+/**
  * @description Finds the starting index of the nearest line that exactly matches the separator,
  * searching upwards or downwards from the current cursor position.
  * @param text - The text content to search within.
@@ -93,22 +121,15 @@ export function findNearestSeparatorLine(
   separator: string,
   direction: "up" | "down"
 ): number | null {
+  if (!text) return null;
   const lines = text.split("\n");
-  // Determine the line index the cursor is currently on or before
-  let currentLineIndex =
-    text.substring(0, currentPosition).split("\n").length - 1;
+  const currentLineIndex = getLineIndexFromPosition(text, currentPosition);
 
   if (direction === "up") {
     // Search backwards from the line *before* the current one
     for (let i = currentLineIndex - 1; i >= 0; i--) {
-      if (lines[i].trim() === separator) {
-        // Check if the line *exactly* matches the separator (ignoring potential whitespace)
-        // Calculate the starting index of this line
-        let index = 0;
-        for (let j = 0; j < i; j++) {
-          index += lines[j].length + 1; // Add line length + 1 for newline character
-        }
-        return index;
+      if (lines[i].trim() === separator) { // Trim to handle potential surrounding whitespace
+        return getStartPositionOfLine(lines, i);
       }
     }
     return null; // No separator found above
@@ -116,34 +137,52 @@ export function findNearestSeparatorLine(
     // direction === 'down'
     // Search forwards from the line *after* the current one
     for (let i = currentLineIndex + 1; i < lines.length; i++) {
-      if (lines[i].trim() === separator) {
-        // Check if the line *exactly* matches the separator
-        // Calculate the starting index of this line
-        let index = 0;
-        for (let j = 0; j < i; j++) {
-          index += lines[j].length + 1; // Add line length + 1 for newline character
-        }
-        return index;
+      if (lines[i].trim() === separator) { // Trim to handle potential surrounding whitespace
+        return getStartPositionOfLine(lines, i);
       }
     }
     return null; // No separator found below
   }
 }
 
+
 /**
- * @description Finds the index of the nearest line starting with a specific prefix,
+ * @description Finds the starting index of the nearest line starting with a specific prefix,
  * searching upwards or downwards from the current cursor position.
- * (To be implemented in Step 21)
  * @param text - The text content to search within.
  * @param currentPosition - The starting cursor position index.
  * @param prefix - The prefix string the line must start with.
  * @param direction - The direction to search ('up' or 'down').
  * @returns The starting index of the found line, or null if no such line is found.
  */
-// export function findNearestPrefixedLine(text: string, currentPosition: number, prefix: string, direction: 'up' | 'down'): number | null {
-//   // Implementation in Step 21
-//   return null;
-// }
+export function findNearestPrefixedLine(
+    text: string,
+    currentPosition: number,
+    prefix: string,
+    direction: 'up' | 'down'
+): number | null {
+    if (!text) return null;
+    const lines = text.split('\n');
+    const currentLineIndex = getLineIndexFromPosition(text, currentPosition);
+
+    if (direction === 'up') {
+        // Search backwards from the line *before* the current one
+        for (let i = currentLineIndex - 1; i >= 0; i--) {
+            if (lines[i].startsWith(prefix)) {
+                return getStartPositionOfLine(lines, i);
+            }
+        }
+        return null; // No matching prefix found above
+    } else { // direction === 'down'
+        // Search forwards from the line *after* the current one
+        for (let i = currentLineIndex + 1; i < lines.length; i++) {
+            if (lines[i].startsWith(prefix)) {
+                return getStartPositionOfLine(lines, i);
+            }
+        }
+        return null; // No matching prefix found below
+    }
+}
 
 /**
  * @description Triggers a browser download for the given text content.
@@ -179,3 +218,4 @@ export function saveTextToFile(text: string, filename: string): void {
     toast.error("Failed to save file. See console for details.");
   }
 }
+// END WRITING FILE CODE

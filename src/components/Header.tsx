@@ -21,11 +21,11 @@
  * - Clicking the button dispatches the 'openContextModal' action.
  */
 
-import React from 'react';
-import { Button } from '~/components/ui/button';
-import { useAppDispatch } from '~/store/hooks';
-import { openContextModal } from '~/store/slices/modalSlice'; // Import the action
-import { cn } from '~/utils/cn'; // Ensure cn utility is correctly imported
+import React from "react";
+import { Button } from "~/components/ui/button";
+import { useAppDispatch } from "~/store/hooks";
+import { openContextModal } from "~/store/slices/modalSlice"; // Import the action
+import { cn } from "~/utils/cn"; // Ensure cn utility is correctly imported
 
 export function Header() {
   const dispatch = useAppDispatch();
@@ -40,16 +40,20 @@ export function Header() {
 
   return (
     <header className="flex justify-between items-center p-4 border-b shrink-0">
-      {/* Left Side: Application Title */}
-      <h1 className="text-xl font-semibold">MeetingWeaver AI</h1>
+      {/* Left Side: Banner Image */}
+      <img
+        src="/img/meeting-weaver-header.png"
+        alt="MeetingWeaver AI"
+        className="h-16"
+      />
 
       {/* Right Side: Context Modal Button */}
       <Button
         variant="outline" // Using outline variant for distinction
         size="sm" // Using small size
         className={cn(
-          'rounded-full', // Make it circular
-          'h-10 w-auto px-4' // Specific height, auto width, horizontal padding
+          "rounded-full", // Make it circular
+          "h-10 w-auto px-4" // Specific height, auto width, horizontal padding
           // Consider 'size-10 p-0 flex items-center justify-center' for a fixed size circle if text is short or icon is used
         )}
         onClick={handleOpenContextModal} // Attach the click handler

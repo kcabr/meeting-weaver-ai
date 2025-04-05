@@ -92,6 +92,7 @@ src/components/ui/input.tsx
 src/components/ui/label.tsx
 src/components/ui/switch.tsx
 src/components/ui/textarea.tsx
+src/hooks/useTranscriptCleaner.ts
 src/lib/utils.ts
 src/router.tsx
 src/routes/__root.tsx
@@ -118,6 +119,7 @@ src/templates/context-template.md
 src/templates/prompt-template.md
 src/types/app-types.ts
 src/types/index.ts
+src/utils/apiClient.ts
 src/utils/cn.ts
 src/utils/constants.ts
 src/utils/feedback.ts
@@ -1717,11 +1719,11 @@ File: src/components/Header.tsx
  * - Clicking the button dispatches the 'openContextModal' action.
  */
 
-import React from 'react';
-import { Button } from '~/components/ui/button';
-import { useAppDispatch } from '~/store/hooks';
-import { openContextModal } from '~/store/slices/modalSlice'; // Import the action
-import { cn } from '~/utils/cn'; // Ensure cn utility is correctly imported
+import React from "react";
+import { Button } from "~/components/ui/button";
+import { useAppDispatch } from "~/store/hooks";
+import { openContextModal } from "~/store/slices/modalSlice"; // Import the action
+import { cn } from "~/utils/cn"; // Ensure cn utility is correctly imported
 
 export function Header() {
   const dispatch = useAppDispatch();
@@ -1736,16 +1738,20 @@ export function Header() {
 
   return (
     <header className="flex justify-between items-center p-4 border-b shrink-0">
-      {/* Left Side: Application Title */}
-      <h1 className="text-xl font-semibold">MeetingWeaver AI</h1>
+      {/* Left Side: Banner Image */}
+      <img
+        src="/img/meeting-weaver-header.png"
+        alt="MeetingWeaver AI"
+        className="h-16"
+      />
 
       {/* Right Side: Context Modal Button */}
       <Button
         variant="outline" // Using outline variant for distinction
         size="sm" // Using small size
         className={cn(
-          'rounded-full', // Make it circular
-          'h-10 w-auto px-4' // Specific height, auto width, horizontal padding
+          "rounded-full", // Make it circular
+          "h-10 w-auto px-4" // Specific height, auto width, horizontal padding
           // Consider 'size-10 p-0 flex items-center justify-center' for a fixed size circle if text is short or icon is used
         )}
         onClick={handleOpenContextModal} // Attach the click handler
@@ -2362,32 +2368,37 @@ File: src/components/TranscriptPanel.tsx
  * Connects the text area to the Redux store ('transcriptSlice') for state management.
  * Handles 'onChange' to update the displayed text and reset cleaning status.
  * Persists both display and original text to localStorage on blur.
- * Implements "Copy Text" and "Save" button functionalities.
+ * Implements "Copy Text", "Save", "Add Context Line", and context line navigation functionalities.
  *
  * Key features:
  * - Displays a labeled multi-line text area for transcript input.
- * - Shows action buttons (Copy and Save are now functional).
+ * - Shows action buttons (Copy, Save, Add Context Line, Navigate Up/Down now functional).
  * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage transcript state.
  * - Updates Redux state on text area change ('onChange').
  * - Persists state to localStorage on blur ('onBlur').
  * - Implements "Copy Text" button using 'copyToClipboard' utility.
  * - Implements "Save" button using 'saveTextToFile' utility.
- * - Uses 'useRef' to hold a reference to the textarea element.
+ * - Implements "Add Context Line" button to save cursor position and open modal.
+ * - Implements Up/Down arrow buttons for navigating between lines starting with "## ".
+ * - Uses 'useRef' to hold a reference to the textarea element for cursor manipulation.
  *
  * @dependencies
  * - react: For component creation and 'useRef'.
  * - react-redux: For hooks 'useAppSelector', 'useAppDispatch'.
+ * - react-hot-toast: For user feedback on navigation.
  * - ~/components/ui/label: Shadcn Label component.
  * - ~/components/ui/textarea: Shadcn Textarea component.
  * - ~/components/ui/button: Shadcn Button component.
  * - ~/store/hooks: Typed Redux hooks.
- * - ~/store/slices/transcriptSlice: Action creators 'setTranscriptDisplayText', 'persistTranscript'.
- * - ~/utils/textUtils: Utilities 'copyToClipboard', 'saveTextToFile'.
+ * - ~/store/slices/transcriptSlice: Action creators 'setTranscriptDisplayText', 'persistTranscript', 'setTranscriptLastKnownCursorPosition'.
+ * - ~/store/slices/modalSlice: Action creator 'openAddContextLineModal'.
+ * - ~/utils/textUtils: Utilities 'copyToClipboard', 'saveTextToFile', 'findNearestPrefixedLine'.
+ * - ~/utils/constants: Constants like 'TRANSCRIPT_CONTEXT_PREFIX'.
  * - lucide-react: For icons.
  *
  * @notes
- * - Other button functionalities (Clean, Undo, Navigate, Add Context, Generate) will be implemented in subsequent steps.
- * - Copy and Save buttons are now enabled.
+ * - Clean, Undo, and Generate Prompt buttons are still placeholders.
+ * - Navigation uses the findNearestPrefixedLine utility.
  */
 import {
   setTranscriptDisplayText,
@@ -2395,7 +2406,12 @@ import {
   setTranscriptLastKnownCursorPosition, // Import action for cursor position
 } from "~/store/slices/transcriptSlice";
 import { openAddContextLineModal } from "~/store/slices/modalSlice"; // Import action to open modal
-import { copyToClipboard, saveTextToFile } from "~/utils/textUtils"; // Import utilities // Import utilities
+import {
+  copyToClipboard,
+  saveTextToFile,
+  findNearestPrefixedLine,
+} from "~/utils/textUtils"; // Import utilities
+import { TRANSCRIPT_CONTEXT_PREFIX } from "~/utils/constants"; // Import prefix constant
 import {
   Sparkles, // Clean ✨
   Undo2, // Undo
@@ -2411,6 +2427,7 @@ import { useRef } from "react";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import toast from "react-hot-toast"; // Import toast for navigation feedback
 
 // BEGIN WRITING FILE CODE
 export function TranscriptPanel() {
@@ -2447,12 +2464,60 @@ export function TranscriptPanel() {
     saveTextToFile(displayText, "meeting_transcript.txt");
   };
 
-  // Placeholder handlers for other buttons
-  const handleClean = () =>
-    console.log("Clean button clicked (not implemented)");
-  const handleUndo = () => console.log("Undo button clicked (not implemented)");
-  const handleNavigateUp = () =>
-    console.log("Navigate Up button clicked (not implemented)");
+  /**
+   * @description Handles the click event for the "Navigate Up" (Context Line) button.
+   * Finds the nearest line above starting with "## " and moves the cursor there.
+   */
+  const handleNavigateUp = () => {
+    if (textareaRef.current) {
+      const currentPosition = textareaRef.current.selectionStart;
+      const text = textareaRef.current.value;
+      const newPosition = findNearestPrefixedLine(
+        text,
+        currentPosition,
+        TRANSCRIPT_CONTEXT_PREFIX,
+        "up"
+      );
+
+      if (newPosition !== null) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      } else {
+        toast("No context line (##) found above.", {
+          icon: "🤷",
+          duration: 1500,
+        });
+      }
+    }
+  };
+
+  /**
+   * @description Handles the click event for the "Navigate Down" (Context Line) button.
+   * Finds the nearest line below starting with "## " and moves the cursor there.
+   */
+  const handleNavigateDown = () => {
+    if (textareaRef.current) {
+      const currentPosition = textareaRef.current.selectionStart;
+      const text = textareaRef.current.value;
+      const newPosition = findNearestPrefixedLine(
+        text,
+        currentPosition,
+        TRANSCRIPT_CONTEXT_PREFIX,
+        "down"
+      );
+
+      if (newPosition !== null) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      } else {
+        toast("No context line (##) found below.", {
+          icon: "🤷",
+          duration: 1500,
+        });
+      }
+    }
+  };
+
   /**
    * @description Handles the click event for the "Add Context Line (Modal)" button.
    * Saves the current cursor position and opens the modal.
@@ -2464,8 +2529,11 @@ export function TranscriptPanel() {
     dispatch(setTranscriptLastKnownCursorPosition(currentPosition));
     dispatch(openAddContextLineModal()); // Dispatch action to open modal
   };
-  const handleNavigateDown = () =>
-    console.log("Navigate Down button clicked (not implemented)");
+
+  // Placeholder handlers for other buttons
+  const handleClean = () =>
+    console.log("Clean button clicked (not implemented)");
+  const handleUndo = () => console.log("Undo button clicked (not implemented)");
   const handleGeneratePrompt = () =>
     console.log("Generate Prompt button clicked (not implemented)");
 
@@ -2498,7 +2566,7 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleClean}
           title="Clean ✨ Transcript"
-          disabled // Disabled until implemented
+          //disabled // Disabled until implemented
         >
           <Sparkles className="h-4 w-4" />
           <span className="sr-only">Clean ✨</span>
@@ -2516,9 +2584,8 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleSave} // Attach handler
+          onClick={handleSave}
           title="Save Transcript"
-          // No longer disabled
         >
           <Save className="h-4 w-4" />
           <span className="sr-only">Save</span>
@@ -2526,9 +2593,8 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleCopyText} // Attach handler
+          onClick={handleCopyText}
           title="Copy Transcript"
-          // No longer disabled
         >
           <Copy className="h-4 w-4" />
           <span className="sr-only">Copy Text</span>
@@ -2536,9 +2602,9 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateUp}
+          onClick={handleNavigateUp} // Attach handler
           title="Navigate Up (Context Line)"
-          disabled // Disabled until implemented
+          // No longer disabled
         >
           <ArrowUp className="h-4 w-4" />
           <span className="sr-only">Up Arrow (↑)</span>
@@ -2548,7 +2614,6 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleAddContextLine}
           title="Add Context Line (Modal)"
-          // Disabled until implemented
         >
           <MessageSquarePlus className="h-4 w-4" />
           <span className="sr-only">Add Context Line (Modal)</span>
@@ -2556,9 +2621,9 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateDown}
+          onClick={handleNavigateDown} // Attach handler
           title="Navigate Down (Context Line)"
-          disabled // Disabled until implemented
+          // No longer disabled
         >
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
@@ -2577,6 +2642,7 @@ export function TranscriptPanel() {
     </div>
   );
 }
+// END WRITING FILE CODE
 
 ================
 File: src/components/ui/alert.tsx
@@ -3359,6 +3425,89 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 Textarea.displayName = "Textarea";
 
 export { Textarea };
+
+================
+File: src/hooks/useTranscriptCleaner.ts
+================
+/**
+ * @description
+ * Custom hook to manage the state and logic for the transcript cleaning feature.
+ * Encapsulates the API call to 'cleanTranscript', updates Redux state for loading,
+ * error handling, and setting the original/cleaned text.
+ *
+ * Key features:
+ * - Provides a 'cleanTranscriptHandler' function to trigger the cleaning process.
+ * - Uses 'useAppDispatch' and 'useAppSelector' to interact with the Redux store.
+ * - Dispatches actions to manage loading, error, original text, and cleaned text states.
+ * - Shows toast notifications for API errors.
+ *
+ * @dependencies
+ * - react: For hook creation (useCallback).
+ * - react-redux: For hooks 'useAppDispatch', 'useAppSelector'.
+ * - react-hot-toast: For error notifications.
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/transcriptSlice: Action creators for setting loading, error, original text, and cleaned text.
+ * - ~/utils/apiClient: The 'cleanTranscript' API function.
+ *
+ * @returns An object containing the 'cleanTranscriptHandler' function.
+ */
+
+// BEGIN WRITING FILE CODE
+import { useCallback } from "react";
+import toast from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "~/store/hooks";
+import {
+  setTranscriptLoading,
+  setTranscriptError,
+  setTranscriptOriginalText,
+  setTranscriptCleanedText,
+} from "~/store/slices/transcriptSlice";
+import { cleanTranscript as callCleanTranscriptApi } from "~/utils/apiClient";
+
+/**
+ * @description Custom hook providing logic for the transcript cleaning feature.
+ * @returns An object with a 'cleanTranscriptHandler' function.
+ */
+export function useTranscriptCleaner() {
+  const dispatch = useAppDispatch();
+  // Get the current display text from the store to send to the API
+  const currentDisplayText = useAppSelector(
+    (state) => state.transcript.displayText
+  );
+
+  /**
+   * @description Asynchronous function to handle the transcript cleaning process.
+   * It dispatches state updates for loading, sets the original text backup,
+   * calls the API, and updates the state with the result or error.
+   */
+  const cleanTranscriptHandler = useCallback(async () => {
+    // Prevent cleaning if text is empty
+    if (!currentDisplayText.trim()) {
+      toast.error("Transcript is empty, nothing to clean.");
+      return;
+    }
+
+    dispatch(setTranscriptLoading(true)); // Start loading state
+    dispatch(setTranscriptOriginalText(currentDisplayText)); // Backup current text
+
+    try {
+      const cleanedText = await callCleanTranscriptApi(currentDisplayText);
+      // Dispatch action to update state with cleaned text and set flags
+      dispatch(setTranscriptCleanedText(cleanedText));
+      toast.success("Transcript cleaned successfully!");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Transcript cleaning failed.";
+      dispatch(setTranscriptError(errorMessage)); // Set error state
+      toast.error(Error: );
+      // No need to explicitly set loading false here, setError reducer handles it
+    }
+    // setLoading(false) is handled implicitly by setTranscriptCleanedText and setTranscriptError reducers
+  }, [currentDisplayText, dispatch]);
+
+  return { cleanTranscriptHandler };
+}
+// END WRITING FILE CODE
 
 ================
 File: src/lib/utils.ts
@@ -5266,6 +5415,93 @@ File: src/types/index.ts
 export * from './app-types';
 
 ================
+File: src/utils/apiClient.ts
+================
+/**
+ * @description
+ * This module provides functions for interacting with external APIs,
+ * specifically the Langdock API for cleaning transcripts.
+ *
+ * Key features:
+ * - cleanTranscript: Sends transcript text to the Langdock API for cleaning.
+ *
+ * @dependencies
+ * - None directly, but uses browser 'fetch' API and environment variables.
+ *
+ * @notes
+ * - Requires VITE_LANGDOCK_CLEAN_ENDPOINT and VITE_LANGDOCK_API_KEY environment variables to be set.
+ * - Assumes the Langdock API expects a JSON body with 'text' and 'prompt' fields
+ *   and returns a JSON body with a 'cleaned_text' field on success.
+ * - Handles potential API errors and network issues.
+ */
+
+// BEGIN WRITING FILE CODE
+
+/**
+ * @description Sends the provided transcript text to the configured Langdock API endpoint for cleaning.
+ * @param text - The raw transcript text to be cleaned.
+ * @returns A Promise resolving with the cleaned text string.
+ * @throws An error if the API call fails or returns an error status.
+ */
+export async function cleanTranscript(text: string): Promise<string> {
+  const endpoint = import.meta.env.VITE_LANGDOCK_CLEAN_ENDPOINT;
+  const apiKey = import.meta.env.VITE_LANGDOCK_API_KEY;
+
+  if (!endpoint || !apiKey) {
+    const errorMessage =
+      "Langdock API endpoint or API key is not configured in environment variables.";
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  const prompt =
+    "Remove filler words, correct grammar, format turns, maintain speaker identity if present.";
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: Bearer ,
+      },
+      body: JSON.stringify({
+        text,
+        prompt,
+      }),
+    });
+
+    if (!response.ok) {
+      let errorBody;
+      try {
+        errorBody = await response.json();
+      } catch (e) {
+        // Ignore if response body is not JSON
+        errorBody = await response.text();
+      }
+      const errorMessage = Langdock API error:  . ;
+      console.error("API Error Details:", errorBody);
+      throw new Error(errorMessage.trim());
+    }
+
+    const data = await response.json();
+
+    // Assuming the API returns the cleaned text in a 'cleaned_text' field
+    // Adjust this field name if the actual API response is different
+    if (typeof data.cleaned_text !== "string") {
+      console.error("Unexpected API response format:", data);
+      throw new Error("Received unexpected format from Langdock API.");
+    }
+
+    return data.cleaned_text;
+  } catch (error) {
+    console.error("Error during cleanTranscript API call:", error);
+    // Rethrow the error to be caught by the calling hook/component
+    throw error instanceof Error ? error : new Error("An unknown network error occurred.");
+  }
+}
+// END WRITING FILE CODE
+
+================
 File: src/utils/cn.ts
 ================
 import { type ClassValue, clsx } from "clsx";
@@ -5649,6 +5885,7 @@ File: src/utils/textUtils.ts
  * @notes
  * - Error handling for clipboard and save operations is included.
  * - saveTextToFile uses Blob and Object URL for client-side file generation.
+ * - Navigation functions now handle both exact separator matches and prefix matches.
  */
 
 // BEGIN WRITING FILE CODE
@@ -5711,6 +5948,33 @@ export function insertTextAtCursor(
 }
 
 /**
+ * @description Calculates the line index corresponding to a given character position.
+ * @param text - The text content.
+ * @param position - The character position (index).
+ * @returns The 0-based line index.
+ */
+function getLineIndexFromPosition(text: string, position: number): number {
+    // Ensure position is within bounds
+    const validPosition = Math.max(0, Math.min(position, text.length));
+    // Count newline characters before the position
+    return text.substring(0, validPosition).split('\n').length - 1;
+}
+
+/**
+ * @description Calculates the starting character index of a given line index.
+ * @param lines - An array of strings representing the lines of text.
+ * @param lineIndex - The 0-based index of the target line.
+ * @returns The character index where the target line begins.
+ */
+function getStartPositionOfLine(lines: string[], lineIndex: number): number {
+    let index = 0;
+    for (let j = 0; j < lineIndex; j++) {
+        index += lines[j].length + 1; // Add line length + 1 for newline character
+    }
+    return index;
+}
+
+/**
  * @description Finds the starting index of the nearest line that exactly matches the separator,
  * searching upwards or downwards from the current cursor position.
  * @param text - The text content to search within.
@@ -5725,22 +5989,15 @@ export function findNearestSeparatorLine(
   separator: string,
   direction: "up" | "down"
 ): number | null {
+  if (!text) return null;
   const lines = text.split("\n");
-  // Determine the line index the cursor is currently on or before
-  let currentLineIndex =
-    text.substring(0, currentPosition).split("\n").length - 1;
+  const currentLineIndex = getLineIndexFromPosition(text, currentPosition);
 
   if (direction === "up") {
     // Search backwards from the line *before* the current one
     for (let i = currentLineIndex - 1; i >= 0; i--) {
-      if (lines[i].trim() === separator) {
-        // Check if the line *exactly* matches the separator (ignoring potential whitespace)
-        // Calculate the starting index of this line
-        let index = 0;
-        for (let j = 0; j < i; j++) {
-          index += lines[j].length + 1; // Add line length + 1 for newline character
-        }
-        return index;
+      if (lines[i].trim() === separator) { // Trim to handle potential surrounding whitespace
+        return getStartPositionOfLine(lines, i);
       }
     }
     return null; // No separator found above
@@ -5748,34 +6005,52 @@ export function findNearestSeparatorLine(
     // direction === 'down'
     // Search forwards from the line *after* the current one
     for (let i = currentLineIndex + 1; i < lines.length; i++) {
-      if (lines[i].trim() === separator) {
-        // Check if the line *exactly* matches the separator
-        // Calculate the starting index of this line
-        let index = 0;
-        for (let j = 0; j < i; j++) {
-          index += lines[j].length + 1; // Add line length + 1 for newline character
-        }
-        return index;
+      if (lines[i].trim() === separator) { // Trim to handle potential surrounding whitespace
+        return getStartPositionOfLine(lines, i);
       }
     }
     return null; // No separator found below
   }
 }
 
+
 /**
- * @description Finds the index of the nearest line starting with a specific prefix,
+ * @description Finds the starting index of the nearest line starting with a specific prefix,
  * searching upwards or downwards from the current cursor position.
- * (To be implemented in Step 21)
  * @param text - The text content to search within.
  * @param currentPosition - The starting cursor position index.
  * @param prefix - The prefix string the line must start with.
  * @param direction - The direction to search ('up' or 'down').
  * @returns The starting index of the found line, or null if no such line is found.
  */
-// export function findNearestPrefixedLine(text: string, currentPosition: number, prefix: string, direction: 'up' | 'down'): number | null {
-//   // Implementation in Step 21
-//   return null;
-// }
+export function findNearestPrefixedLine(
+    text: string,
+    currentPosition: number,
+    prefix: string,
+    direction: 'up' | 'down'
+): number | null {
+    if (!text) return null;
+    const lines = text.split('\n');
+    const currentLineIndex = getLineIndexFromPosition(text, currentPosition);
+
+    if (direction === 'up') {
+        // Search backwards from the line *before* the current one
+        for (let i = currentLineIndex - 1; i >= 0; i--) {
+            if (lines[i].startsWith(prefix)) {
+                return getStartPositionOfLine(lines, i);
+            }
+        }
+        return null; // No matching prefix found above
+    } else { // direction === 'down'
+        // Search forwards from the line *after* the current one
+        for (let i = currentLineIndex + 1; i < lines.length; i++) {
+            if (lines[i].startsWith(prefix)) {
+                return getStartPositionOfLine(lines, i);
+            }
+        }
+        return null; // No matching prefix found below
+    }
+}
 
 /**
  * @description Triggers a browser download for the given text content.
@@ -5811,6 +6086,7 @@ export function saveTextToFile(text: string, filename: string): void {
     toast.error("Failed to save file. See console for details.");
   }
 }
+// END WRITING FILE CODE
 
 ================
 File: tailwind.config.mjs

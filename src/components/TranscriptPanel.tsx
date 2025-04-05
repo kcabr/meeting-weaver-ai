@@ -5,32 +5,37 @@
  * Connects the text area to the Redux store ('transcriptSlice') for state management.
  * Handles 'onChange' to update the displayed text and reset cleaning status.
  * Persists both display and original text to localStorage on blur.
- * Implements "Copy Text" and "Save" button functionalities.
+ * Implements "Copy Text", "Save", "Add Context Line", and context line navigation functionalities.
  *
  * Key features:
  * - Displays a labeled multi-line text area for transcript input.
- * - Shows action buttons (Copy and Save are now functional).
+ * - Shows action buttons (Copy, Save, Add Context Line, Navigate Up/Down now functional).
  * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage transcript state.
  * - Updates Redux state on text area change ('onChange').
  * - Persists state to localStorage on blur ('onBlur').
  * - Implements "Copy Text" button using 'copyToClipboard' utility.
  * - Implements "Save" button using 'saveTextToFile' utility.
- * - Uses 'useRef' to hold a reference to the textarea element.
+ * - Implements "Add Context Line" button to save cursor position and open modal.
+ * - Implements Up/Down arrow buttons for navigating between lines starting with "## ".
+ * - Uses 'useRef' to hold a reference to the textarea element for cursor manipulation.
  *
  * @dependencies
  * - react: For component creation and 'useRef'.
  * - react-redux: For hooks 'useAppSelector', 'useAppDispatch'.
+ * - react-hot-toast: For user feedback on navigation.
  * - ~/components/ui/label: Shadcn Label component.
  * - ~/components/ui/textarea: Shadcn Textarea component.
  * - ~/components/ui/button: Shadcn Button component.
  * - ~/store/hooks: Typed Redux hooks.
- * - ~/store/slices/transcriptSlice: Action creators 'setTranscriptDisplayText', 'persistTranscript'.
- * - ~/utils/textUtils: Utilities 'copyToClipboard', 'saveTextToFile'.
+ * - ~/store/slices/transcriptSlice: Action creators 'setTranscriptDisplayText', 'persistTranscript', 'setTranscriptLastKnownCursorPosition'.
+ * - ~/store/slices/modalSlice: Action creator 'openAddContextLineModal'.
+ * - ~/utils/textUtils: Utilities 'copyToClipboard', 'saveTextToFile', 'findNearestPrefixedLine'.
+ * - ~/utils/constants: Constants like 'TRANSCRIPT_CONTEXT_PREFIX'.
  * - lucide-react: For icons.
  *
  * @notes
- * - Other button functionalities (Clean, Undo, Navigate, Add Context, Generate) will be implemented in subsequent steps.
- * - Copy and Save buttons are now enabled.
+ * - Clean, Undo, and Generate Prompt buttons are still placeholders.
+ * - Navigation uses the findNearestPrefixedLine utility.
  */
 import {
   setTranscriptDisplayText,
@@ -38,7 +43,12 @@ import {
   setTranscriptLastKnownCursorPosition, // Import action for cursor position
 } from "~/store/slices/transcriptSlice";
 import { openAddContextLineModal } from "~/store/slices/modalSlice"; // Import action to open modal
-import { copyToClipboard, saveTextToFile } from "~/utils/textUtils"; // Import utilities // Import utilities
+import {
+  copyToClipboard,
+  saveTextToFile,
+  findNearestPrefixedLine,
+} from "~/utils/textUtils"; // Import utilities
+import { TRANSCRIPT_CONTEXT_PREFIX } from "~/utils/constants"; // Import prefix constant
 import {
   Sparkles, // Clean ✨
   Undo2, // Undo
@@ -54,6 +64,7 @@ import { useRef } from "react";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import toast from "react-hot-toast"; // Import toast for navigation feedback
 
 // BEGIN WRITING FILE CODE
 export function TranscriptPanel() {
@@ -90,12 +101,60 @@ export function TranscriptPanel() {
     saveTextToFile(displayText, "meeting_transcript.txt");
   };
 
-  // Placeholder handlers for other buttons
-  const handleClean = () =>
-    console.log("Clean button clicked (not implemented)");
-  const handleUndo = () => console.log("Undo button clicked (not implemented)");
-  const handleNavigateUp = () =>
-    console.log("Navigate Up button clicked (not implemented)");
+  /**
+   * @description Handles the click event for the "Navigate Up" (Context Line) button.
+   * Finds the nearest line above starting with "## " and moves the cursor there.
+   */
+  const handleNavigateUp = () => {
+    if (textareaRef.current) {
+      const currentPosition = textareaRef.current.selectionStart;
+      const text = textareaRef.current.value;
+      const newPosition = findNearestPrefixedLine(
+        text,
+        currentPosition,
+        TRANSCRIPT_CONTEXT_PREFIX,
+        "up"
+      );
+
+      if (newPosition !== null) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      } else {
+        toast("No context line (##) found above.", {
+          icon: "🤷",
+          duration: 1500,
+        });
+      }
+    }
+  };
+
+  /**
+   * @description Handles the click event for the "Navigate Down" (Context Line) button.
+   * Finds the nearest line below starting with "## " and moves the cursor there.
+   */
+  const handleNavigateDown = () => {
+    if (textareaRef.current) {
+      const currentPosition = textareaRef.current.selectionStart;
+      const text = textareaRef.current.value;
+      const newPosition = findNearestPrefixedLine(
+        text,
+        currentPosition,
+        TRANSCRIPT_CONTEXT_PREFIX,
+        "down"
+      );
+
+      if (newPosition !== null) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      } else {
+        toast("No context line (##) found below.", {
+          icon: "🤷",
+          duration: 1500,
+        });
+      }
+    }
+  };
+
   /**
    * @description Handles the click event for the "Add Context Line (Modal)" button.
    * Saves the current cursor position and opens the modal.
@@ -107,8 +166,11 @@ export function TranscriptPanel() {
     dispatch(setTranscriptLastKnownCursorPosition(currentPosition));
     dispatch(openAddContextLineModal()); // Dispatch action to open modal
   };
-  const handleNavigateDown = () =>
-    console.log("Navigate Down button clicked (not implemented)");
+
+  // Placeholder handlers for other buttons
+  const handleClean = () =>
+    console.log("Clean button clicked (not implemented)");
+  const handleUndo = () => console.log("Undo button clicked (not implemented)");
   const handleGeneratePrompt = () =>
     console.log("Generate Prompt button clicked (not implemented)");
 
@@ -141,7 +203,7 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleClean}
           title="Clean ✨ Transcript"
-          disabled // Disabled until implemented
+          //disabled // Disabled until implemented
         >
           <Sparkles className="h-4 w-4" />
           <span className="sr-only">Clean ✨</span>
@@ -159,9 +221,8 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleSave} // Attach handler
+          onClick={handleSave}
           title="Save Transcript"
-          // No longer disabled
         >
           <Save className="h-4 w-4" />
           <span className="sr-only">Save</span>
@@ -169,9 +230,8 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleCopyText} // Attach handler
+          onClick={handleCopyText}
           title="Copy Transcript"
-          // No longer disabled
         >
           <Copy className="h-4 w-4" />
           <span className="sr-only">Copy Text</span>
@@ -179,9 +239,9 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateUp}
+          onClick={handleNavigateUp} // Attach handler
           title="Navigate Up (Context Line)"
-          disabled // Disabled until implemented
+          // No longer disabled
         >
           <ArrowUp className="h-4 w-4" />
           <span className="sr-only">Up Arrow (↑)</span>
@@ -191,7 +251,6 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleAddContextLine}
           title="Add Context Line (Modal)"
-          // Disabled until implemented
         >
           <MessageSquarePlus className="h-4 w-4" />
           <span className="sr-only">Add Context Line (Modal)</span>
@@ -199,9 +258,9 @@ export function TranscriptPanel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={handleNavigateDown}
+          onClick={handleNavigateDown} // Attach handler
           title="Navigate Down (Context Line)"
-          disabled // Disabled until implemented
+          // No longer disabled
         >
           <ArrowDown className="h-4 w-4" />
           <span className="sr-only">Down Arrow (↓)</span>
@@ -220,3 +279,4 @@ export function TranscriptPanel() {
     </div>
   );
 }
+// END WRITING FILE CODE
