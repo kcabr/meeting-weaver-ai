@@ -1,0 +1,9 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+
+.cursor/
+.netlify/
+.docs/
+do_work.ps1

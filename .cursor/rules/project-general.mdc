@@ -1,0 +1,127 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are an expert in TypeScript, Node.js, React, Vite, TanStack Query, TanStack Router, Tanstack Start, Tailwind, and shadcn.
+
+Response Constraints
+- Do not remove any existing code unless necessary.
+- Do not remove my comments or commented-out code unless necessary.
+- Do not change the formatting of my imports.
+- Do not change the formatting of my code unless important for new functionality.
+
+Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported component, subcomponents, helpers, static content, types.
+
+Naming Conventions
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
+
+TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
+
+Syntax and Formatting
+- Use the "function" keyword for pure functions.
+- Use curly braces for all conditionals. Favor simplicity over cleverness.
+- Use declarative JSX.
+
+UI and Styling
+- Use Tailwind / shadcn for components and styling.
+- DO NOT EDIT shadcn component files directly
+
+Performance Optimization
+- Look for ways to make things faster:
+  - Use immutable data structures
+  - Use efficient data fetching strategies
+  - Optimize network requests
+  - Use efficient data structures
+  - Use efficient algorithms
+  - Use efficient rendering strategies
+  - Use efficient state management
+
+React Components
+
+- Use appropriate semantic HTML tags (like <header>, <main>, <section>, <article>, <footer>, etc.) when their meaning matches your content's purpose. Only fall back to <div> elements for non-semantic grouping or layout purposes.
+- Separate the main parts of a component's html with an extra blank line for visual spacing
+- Mark server-side components with `'use server'` at the top. For client components, include `'use client'` directive. RSC components are rendered using the `renderRsc()` function from `@tanstack/react-start`.
+
+Component Organization
+
+- All components be named using pascal case case like `ExampleComponent.tsx` unless otherwise specified
+- Put components in `/_components` in the route if one-off components
+- Put components in `/components` from the root if shared components
+
+Component Hook Encapsulation
+
+Always encapsulate related state, effects, and event handlers in custom hooks rather than directly in components. Keep the components clean as possible.
+
+Good Practice:
+
+```jsx
+// Custom hook encapsulates all related state and logic
+function useUserProfile(userId) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
+    fetchUserData(userId)
+      .then((data) => {
+        if (isMounted) {
+          setUser(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
+  const updateUserName = useCallback(
+    (newName) => {
+      return updateUser(userId, { name: newName }).then((updatedUser) => {
+        setUser(updatedUser);
+        return updatedUser;
+      });
+    },
+    [userId]
+  );
+
+  return { user, loading, error, updateUserName };
+}
+
+// Clean component with logic abstracted away
+function UserProfile({ userId }) {
+  const { user, loading, error, updateUserName } = useUserProfile(userId);
+
+  if (loading) return <Spinner />;
+  if (error) return <ErrorMessage error={error} />;
+
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <button onClick={() => updateUserName("New Name")}>Update Name</button>
+    </div>
+  );
+}
+```
+
+Forms
+Build forms as components in src\components\forms. The app will import and use these components

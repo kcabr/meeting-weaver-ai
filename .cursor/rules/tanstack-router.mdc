@@ -1,0 +1,47 @@
+---
+description: 
+globs: src/routes/**
+alwaysApply: false
+---
+# TanStack Start Routing Rules
+
+## File Structure & Organization
+
+### Route Files
+
+- Place all routes in the `./app/routes` directory
+- Use file-based routing conventions:
+  - `index.tsx` → `/`
+  - `about.tsx` → `/about`
+  - `posts/$postId.tsx` → `/posts/:postId`
+  - `posts/$postId/edit.tsx` → `/posts/:postId/edit`
+- Use layout routes (prefixed with `__`) for shared UI elements:
+  - `__root.tsx` wraps all routes
+  - `posts/__layout.tsx` wraps all posts routes
+
+### API Routes
+
+- Place all API routes in `./app/routes/api` directory
+- Naming conventions:
+  - `api.users.ts` → `/api/users`
+  - `api/users.ts` → `/api/users`
+  - `api/users/$id.ts` → `/api/users/:id`
+- One API route per path - don't create duplicate routes like both `api.users.ts` and `api/users.ts`
+- Create `app/api.ts` handler file for API routes entry point
+
+## Route Implementation
+
+### Page Routes
+
+- Export a `Route` constant from each route file
+- Create routes using `createFileRoute` function
+- Each route should include a well-defined `component`
+- Use route loaders for data fetching:
+
+```tsx
+export const Route = createFileRoute('/posts/$postId')({
+  component: PostDetails,
+  loader: async ({ params }) => {
+    return await fetchPost(params.postId)
+  },
+})

@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Troubleshooting
+
+-If system wide 503 app then check the src/routes folder to make sure they are are exporting the file routes properly. 
+
+Example (this should be at the top of every file):
+
+```js
+export const Route = createFileRoute("/news")({
+  component: NewsLayout,
+  head: () => ({
+    title: "News Explorer",
+    meta: [
+      ...seo({
+        title: "News Explorer | TanStack Start Demo",
+        description: "Search and explore news articles from around the world",
+      }),
+    ],
+  }),
+});
+```
+

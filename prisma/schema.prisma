@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String    @id
+  email               String    @unique
+  stripeCustomerId    String?
+  firstName    String?
+  lastName    String?
+  stripeSubscriptionId String?
+  stripePriceId       String?
+  subscriptionStatus  String?
+  subscriptionPeriodEnd DateTime?
+  lastLoginAt         DateTime?
+  lastLoginIP         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  todos               Todo[]
+  notes               Note[]
+  subscriptions       Subscription[]
+  feedback            Feedback[]
+}
+
+model Todo {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Counter {
+  id    String @id @default(uuid())
+  name  String @unique
+  count Int    @default(0)
+}
+
+model Subscription {
+  id                 String    @id @default(uuid())
+  stripeCustomerId   String
+  stripeSubscriptionId String  @unique
+  stripePriceId      String
+  productId          String?
+  productName        String?
+  status             String    // active, canceled, past_due, etc.
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+  userId             String?   // Nullable to allow connecting to Clerk user later
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Feedback {
+  id                String   @id @default(cuid())
+  title             String
+  feedback          String   @db.Text
+  image_data        String?  @db.Text
+  azdo_work_item_id String?
+  userId            String
+  createdAt         DateTime @default(now())
+  
+  // Define relation to User model
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Add index for querying by user
+  @@index([userId])
+}

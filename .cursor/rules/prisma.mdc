@@ -1,0 +1,355 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Prisma Best Practices
+
+This guide outlines best practices for working with Prisma in our TanStack Start + Clerk + Supabase + Shadcn project.
+
+## Project Setup
+
+Our Prisma configuration resides in the `prisma/` directory with:
+- `schema.prisma`: Main schema file defining our data models
+- `migrations/`: Directory containing all database migrations
+
+## Schema Design Best Practices
+
+### 1. Use Clear and Consistent Naming
+
+```prisma
+// Good
+model User {
+  id String @id
+  email String @unique
+  posts Post[]
+}
+
+// Avoid
+model usr {
+  uid String @id
+  email_addr String @unique
+  p Post[]
+}
+```
+
+### 2. Design Relationships Properly
+
+```prisma
+// One-to-many relationship example
+model User {
+  id String @id
+  notes Note[]
+}
+
+model Note {
+  id String @id @default(uuid())
+  title String
+  content String
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+```
+
+### 3. Use Appropriate Data Types
+
+```prisma
+model Subscription {
+  id String @id @default(uuid())
+  status String // Use enum instead (see below)
+  currentPeriodStart DateTime
+  currentPeriodEnd DateTime
+  cancelAtPeriodEnd Boolean @default(false)
+  canceledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Better with enum
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  INCOMPLETE
+}
+
+model ImprovedSubscription {
+  id String @id @default(uuid())
+  status SubscriptionStatus
+  // other fields...
+}
+```
+
+### 4. Use Meaningful Default Values
+
+```prisma
+model Todo {
+  id String @id @default(uuid())
+  title String
+  completed Boolean @default(false) // Meaningful default
+  createdAt DateTime @default(now()) // Automatically set creation time
+  updatedAt DateTime @updatedAt // Automatically updated
+}
+```
+
+## Prisma Client Usage
+
+### 1. Use the Singleton Pattern
+
+```typescript
+// src/utils/prisma.ts
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+export default prisma
+```
+
+### 2. Structure Queries for Readability
+
+```typescript
+// Good: Structured for readability
+const getUserWithNotes = async (userId: string) => {
+  return await prisma.user.findUnique({
+    where: { 
+      id: userId 
+    },
+    include: { 
+      notes: {
+        orderBy: { 
+          createdAt: 'desc' 
+        }
+      } 
+    }
+  });
+};
+
+// Avoid: Hard to read
+const badGetUserWithNotes = async (userId: string) => {
+  return await prisma.user.findUnique({where:{id:userId},include:{notes:{orderBy:{createdAt:'desc'}}}});
+};
+```
+
+### 3. Use Transactions for Related Operations
+
+```typescript
+// Example: Creating a user and their first note in a transaction
+const createUserWithFirstNote = async (userData: UserData, noteData: NoteData) => {
+  return await prisma.$transaction(async (tx) => {
+    // Create the user
+    const user = await tx.user.create({
+      data: userData
+    });
+    
+    // Create their first note
+    const note = await tx.note.create({
+      data: {
+        ...noteData,
+        userId: user.id
+      }
+    });
+    
+    return { user, note };
+  });
+};
+```
+
+### 4. Proper Error Handling
+
+```typescript
+// Example: Robust error handling
+export async function createNote({ title, content }: { title: string; content: string }) {
+  try {
+    const { userId } = await getAuth(getWebRequest()!);
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    return await prisma.note.create({
+      data: {
+        title,
+        content,
+        userId,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to create note:", error);
+    
+    // Proper error classification
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        throw new Error("A note with this title already exists");
+      }
+    }
+    
+    throw new Error("Failed to create note");
+  }
+}
+```
+
+### 5. Use Select for Performance
+
+```typescript
+// Good: Only select what you need
+const getUserBasicInfo = async (userId: string) => {
+  return await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      createdAt: true
+    }
+  });
+};
+
+// Avoid: Fetching everything when only a few fields are needed
+const badGetUserBasicInfo = async (userId: string) => {
+  return await prisma.user.findUnique({
+    where: { id: userId }
+  });
+};
+```
+
+## Migrations Best Practices
+
+### 1. Generate Migrations for All Schema Changes
+
+Always create migrations for schema changes:
+
+```bash
+# Generate migration without applying it
+npx prisma migrate dev --name descriptive_name --create-only
+
+# Review the generated migration files
+
+# Apply the migration
+npx prisma migrate dev
+```
+
+### 2. Use Descriptive Migration Names
+
+Good migration names:
+- `add_subscription_model`
+- `make_email_unique`
+- `add_user_profile_relation`
+
+Avoid vague names like:
+- `update`
+- `fix`
+- `changes`
+
+### 3. Test Migrations Before Production
+
+```bash
+# Test migrations in development
+npx prisma migrate reset --force
+npx prisma migrate dev
+```
+
+## Integration with TanStack Start
+
+### 1. Use Server Functions for Database Operations
+
+```typescript
+// Example of a good server function for Prisma operations
+import { createServerFn } from "@tanstack/react-start";
+import { prisma } from "~/utils/prisma";
+import { getAuth } from "@clerk/tanstack-start/server";
+import { getWebRequest } from "@tanstack/react-start/server";
+import { z } from "zod";
+
+// Schema validation
+const NoteSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(1),
+});
+
+export const createNote = createServerFn({ method: "POST" })
+  .validator((data) => NoteSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { userId } = await getAuth(getWebRequest()!);
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    return await prisma.note.create({
+      data: {
+        ...data,
+        userId,
+      },
+    });
+  });
+```
+
+### 2. Combine with React Query for Client Caching
+
+```typescript
+// Client component
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { createNote } from "~/utils/notes";
+import toast from "react-hot-toast";
+
+function NoteForm() {
+  const queryClient = useQueryClient();
+  const createNoteMutation = useMutation({
+    mutationFn: useServerFn(createNote),
+    onSuccess: () => {
+      // Invalidate and refetch notes after mutation
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("Note created successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to create note: ${error.message}`);
+    },
+  });
+  
+  // Form submission code...
+}
+```
+
+## Schema Validation
+
+Always validate data before sending it to Prisma:
+
+```typescript
+import { z } from "zod";
+import { Prisma } from "@prisma/client";
+
+// Define schema that matches Prisma model
+const TodoSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().optional(),
+  completed: z.boolean().default(false),
+});
+
+// Type-safe function that accepts validated data
+export async function createTodo(data: z.infer<typeof TodoSchema>, userId: string) {
+  // Input is already validated and matches the Prisma model
+  return await prisma.todo.create({
+    data: {
+      ...data,
+      userId,
+    },
+  });
+}
+```
+
+## Final Tips
+
+1. **Keep Prisma Client and CLI in sync**: Always use the same version for both packages.
+2. **Document complex queries**: Add comments to explain the purpose of complex queries.
+3. **Use Prisma Studio for data exploration**: Run `npx prisma studio` during development.
+4. **Learn to use raw queries when needed**: For complex operations that Prisma can't handle elegantly.
+5. **Consider using middleware** for cross-cutting concerns like automatic timestamps or soft deletes.
+
+By following these practices, you'll maintain a clean, efficient, and maintainable database layer in your TanStack Start application.

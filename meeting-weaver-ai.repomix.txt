@@ -1,0 +1,4808 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+.env.example
+.gitignore
+.prettierignore
+.repomix/bundles.json
+.repomixignore
+app.config.ts
+components.json
+package.json
+postcss.config.mjs
+prisma/migrations/20250321181016_init/migration.sql
+prisma/migrations/20250325032143_user/migration.sql
+prisma/migrations/20250325060849_add_subscription_model/migration.sql
+prisma/migrations/20250325205132_add_last_login_fields/migration.sql
+prisma/migrations/20250327030352_user_firstname_lastname/migration.sql
+prisma/migrations/20250327173917_add_feedback_model/migration.sql
+prisma/migrations/migration_lock.toml
+prisma/schema.prisma
+public/site.webmanifest
+README.md
+repomix.config.json
+src/api.ts
+src/client.tsx
+src/components/AppLayout.tsx
+src/components/CizzleMagicText.tsx
+src/components/ContextModal.tsx
+src/components/DefaultCatchBoundary.tsx
+src/components/FeedbackModal.tsx
+src/components/Header.tsx
+src/components/MainContentLayout.tsx
+src/components/NotFound.tsx
+src/components/SlideNotesPanel.tsx
+src/components/ui/alert.tsx
+src/components/ui/avatar.tsx
+src/components/ui/badge.tsx
+src/components/ui/button.tsx
+src/components/ui/card.tsx
+src/components/ui/checkbox.tsx
+src/components/ui/dialog.tsx
+src/components/ui/dropdown-menu.tsx
+src/components/ui/input.tsx
+src/components/ui/label.tsx
+src/components/ui/switch.tsx
+src/components/ui/textarea.tsx
+src/lib/utils.ts
+src/router.tsx
+src/routes/__root.tsx
+src/routes/api/ai/magic-text.ts
+src/routes/api/stripe/webhooks.ts
+src/routes/form.tsx
+src/routes/grid.tsx
+src/routes/index.tsx
+src/routes/test.tsx
+src/routeTree.gen.ts
+src/services/ai.ts
+src/ssr.tsx
+src/store/hooks.ts
+src/store/index.ts
+src/store/slices/contextSlice.ts
+src/store/slices/modalSlice.ts
+src/store/slices/slideNotesSlice.ts
+src/store/slices/transcriptSlice.ts
+src/store/slices/userSlice.ts
+src/styles/app.css
+src/templates/context-template.md
+src/templates/prompt-template.md
+src/types/app-types.ts
+src/types/index.ts
+src/utils/cn.ts
+src/utils/constants.ts
+src/utils/feedback.ts
+src/utils/localStorage.ts
+src/utils/seo.ts
+src/utils/textUtils.ts
+tailwind.config.mjs
+tsconfig.json
+vite.config.ts
+
+================================================================
+Files
+================================================================
+
+================
+File: .env.example
+================
+VITE_ENABLE_FEEDBACK=true
+VITE_LANGDOCK_API_KEY=
+VITE_LANGDOCK_CLEAN_ENDPOINT=
+
+================
+File: .gitignore
+================
+node_modules
+package-lock.json
+yarn.lock
+
+.DS_Store
+.cache
+.vercel
+.output
+.vinxi
+
+/build/
+/dist/
+/api/
+/server/build
+/public/build
+.vinxi
+# Sentry Config File
+.env.sentry-build-plugin
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+.env
+.env.local
+
+================
+File: .prettierignore
+================
+**/build
+**/public
+pnpm-lock.yaml
+routeTree.gen.ts
+
+================
+File: .repomix/bundles.json
+================
+{
+  "bundles": {}
+}
+
+================
+File: .repomixignore
+================
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+
+.cursor/
+.netlify/
+.docs/
+do_work.ps1
+
+================
+File: app.config.ts
+================
+import { defineConfig } from "@tanstack/react-start/config";
+import tsConfigPaths from "vite-tsconfig-paths";
+
+export default defineConfig({
+  server: {
+    preset: "vercel",
+  },
+  tsr: {
+    appDirectory: "src",
+  },
+  vite: {
+    plugins: [
+      tsConfigPaths({
+        projects: ["./tsconfig.json"],
+      }),
+    ],
+  },
+});
+
+================
+File: components.json
+================
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/app.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "~/components",
+    "utils": "~/lib/utils",
+    "ui": "~/components/ui",
+    "lib": "~/lib",
+    "hooks": "~/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+
+================
+File: package.json
+================
+{
+  "name": "tanstack-start-example-clerk-supabase",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start"
+  },
+  "dependencies": {
+    "@radix-ui/react-avatar": "^1.1.3",
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@reduxjs/toolkit": "^2.6.1",
+    "@tanstack/react-form": "^1.1.2",
+    "@tanstack/react-query": "^5.69.0",
+    "@tanstack/react-query-devtools": "^5.69.0",
+    "@tanstack/react-router": "^1.114.23",
+    "@tanstack/react-router-devtools": "^1.114.23",
+    "@tanstack/react-start": "^1.114.23",
+    "@tanstack/zod-form-adapter": "^0.42.1",
+    "ag-grid-react": "^33.2.1",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.483.0",
+    "openai": "^4.89.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "react-redux": "^9.2.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vinxi": "0.5.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
+
+================
+File: postcss.config.mjs
+================
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+================
+File: prisma/migrations/20250321181016_init/migration.sql
+================
+-- CreateTable
+CREATE TABLE "Todo" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "completed" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Todo_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Note" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Note_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Counter" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "count" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "Counter_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Counter_name_key" ON "Counter"("name");
+
+================
+File: prisma/migrations/20250325032143_user/migration.sql
+================
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "stripeCustomerId" TEXT,
+    "stripeSubscriptionId" TEXT,
+    "stripePriceId" TEXT,
+    "subscriptionStatus" TEXT,
+    "subscriptionPeriodEnd" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- AddForeignKey
+ALTER TABLE "Todo" ADD CONSTRAINT "Todo_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Note" ADD CONSTRAINT "Note_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+================
+File: prisma/migrations/20250325060849_add_subscription_model/migration.sql
+================
+-- CreateTable
+CREATE TABLE "Subscription" (
+    "id" TEXT NOT NULL,
+    "stripeCustomerId" TEXT NOT NULL,
+    "stripeSubscriptionId" TEXT NOT NULL,
+    "stripePriceId" TEXT NOT NULL,
+    "productId" TEXT,
+    "productName" TEXT,
+    "status" TEXT NOT NULL,
+    "currentPeriodStart" TIMESTAMP(3) NOT NULL,
+    "currentPeriodEnd" TIMESTAMP(3) NOT NULL,
+    "cancelAtPeriodEnd" BOOLEAN NOT NULL DEFAULT false,
+    "canceledAt" TIMESTAMP(3),
+    "userId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Subscription_stripeSubscriptionId_key" ON "Subscription"("stripeSubscriptionId");
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+================
+File: prisma/migrations/20250325205132_add_last_login_fields/migration.sql
+================
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "lastLoginAt" TIMESTAMP(3),
+ADD COLUMN     "lastLoginIP" TEXT;
+
+================
+File: prisma/migrations/20250327030352_user_firstname_lastname/migration.sql
+================
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "firstName" TEXT,
+ADD COLUMN     "lastName" TEXT;
+
+================
+File: prisma/migrations/20250327173917_add_feedback_model/migration.sql
+================
+-- CreateTable
+CREATE TABLE "Feedback" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "feedback" TEXT NOT NULL,
+    "image_data" TEXT,
+    "azdo_work_item_id" TEXT,
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Feedback_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "Feedback_userId_idx" ON "Feedback"("userId");
+
+-- AddForeignKey
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+================
+File: prisma/migrations/migration_lock.toml
+================
+# Please do not edit this file manually
+# It should be added in your version-control system (e.g., Git)
+provider = "postgresql"
+
+================
+File: prisma/schema.prisma
+================
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String    @id
+  email               String    @unique
+  stripeCustomerId    String?
+  firstName    String?
+  lastName    String?
+  stripeSubscriptionId String?
+  stripePriceId       String?
+  subscriptionStatus  String?
+  subscriptionPeriodEnd DateTime?
+  lastLoginAt         DateTime?
+  lastLoginIP         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  todos               Todo[]
+  notes               Note[]
+  subscriptions       Subscription[]
+  feedback            Feedback[]
+}
+
+model Todo {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Counter {
+  id    String @id @default(uuid())
+  name  String @unique
+  count Int    @default(0)
+}
+
+model Subscription {
+  id                 String    @id @default(uuid())
+  stripeCustomerId   String
+  stripeSubscriptionId String  @unique
+  stripePriceId      String
+  productId          String?
+  productName        String?
+  status             String    // active, canceled, past_due, etc.
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+  userId             String?   // Nullable to allow connecting to Clerk user later
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Feedback {
+  id                String   @id @default(cuid())
+  title             String
+  feedback          String   @db.Text
+  image_data        String?  @db.Text
+  azdo_work_item_id String?
+  userId            String
+  createdAt         DateTime @default(now())
+  
+  // Define relation to User model
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Add index for querying by user
+  @@index([userId])
+}
+
+================
+File: public/site.webmanifest
+================
+{
+  "name": "",
+  "short_name": "",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
+
+================
+File: README.md
+================
+# TanStack Start + Clerk + Supabase Starter
+
+A modern full-stack web application template built with TanStack Start, featuring Clerk authentication, Supabase database, Prisma ORM, Redux Toolkit, React Query, and React Server Components.
+
+## Features
+
+- **Authentication**: Integrated Clerk authentication with user management
+- **Database**: Supabase PostgreSQL database with Prisma ORM
+- **State Management**: 
+  - Redux Toolkit for global state
+  - React Query for server state
+- **UI and Styling**: 
+  - Tailwind CSS for responsive design
+  - React Hot Toast for notifications
+- **Modern React Practices**:
+  - React Server Components (RSC) for optimized rendering
+  - Type-safe APIs with TanStack Server Functions
+- **Demonstration Pages**:
+  - Todo List (CRUD operations with Prisma & Supabase)
+  - Notes (React Server Components example)
+  - Counter (Redux state management example)
+  - Posts (React Query data fetching)
+  - User Profile (Clerk integration)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or newer)
+- npm, yarn, or pnpm
+
+### Environment Setup
+
+1. Create a `.env` file with your Clerk and Supabase credentials:
+
+```
+# Clerk
+CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# Supabase
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Database for Prisma
+DATABASE_URL=your_postgres_connection_string
+```
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npm run prisma:generate
+
+# Run database migrations
+npm run prisma:migrate
+
+# Start the development server
+npm run dev
+```
+
+The app will be available at http://localhost:3000.
+
+## Project Structure
+
+```
+/
+├── prisma/               # Prisma schema and migrations
+├── public/               # Static assets
+└── src/
+    ├── components/       # Reusable UI components
+    ├── routes/           # File-based routing
+    │   ├── __root.tsx    # Root layout
+    │   ├── _authed/      # Protected routes
+    │   └── index.tsx     # Home page
+    ├── store/            # Redux store configuration
+    │   └── slices/       # Redux slices
+    ├── styles/           # Global styles
+    └── utils/            # Utility functions and API calls
+```
+
+## Development Tools
+
+- **Prisma Studio**: Run `npm run prisma:studio` to open a browser interface for your database
+- **TanStack Router Dev Tools**: Accessible in the app for debugging routes
+- **React Query Dev Tools**: Integrated for monitoring data fetching
+
+## License
+
+MIT
+
+================
+File: repomix.config.json
+================
+{
+  "output": {
+    "filePath": "meeting-weaver-ai.repomix.txt",
+    "style": "plain",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": false
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
+
+================
+File: src/api.ts
+================
+import {
+  createStartAPIHandler,
+  defaultAPIFileRouteHandler,
+} from '@tanstack/react-start/api'
+
+export default createStartAPIHandler(defaultAPIFileRouteHandler)
+
+================
+File: src/client.tsx
+================
+/// <reference types="vinxi/types/client" />
+import { hydrateRoot } from 'react-dom/client'
+import { StartClient } from '@tanstack/react-start'
+import { createRouter } from './router'
+
+const router = createRouter()
+
+hydrateRoot(document, <StartClient router={router} />)
+
+================
+File: src/components/AppLayout.tsx
+================
+/**
+ * @description
+ * Defines the overall layout structure of the MeetingWeaver AI application.
+ * It combines the Header and the MainContentLayout into a single cohesive view.
+ * Includes logic to dispatch actions for loading persisted state from localStorage on mount.
+ *
+ * Key features:
+ * - Uses flexbox to arrange Header and MainContentLayout vertically.
+ * - Ensures the layout occupies the full screen height.
+ * - Dispatches actions to load persisted context, slide notes, and transcript data on initial render.
+ * - Includes modal components that can be shown throughout the application.
+ *
+ * @dependencies
+ * - react: For component creation and useEffect hook.
+ * - react-redux: For dispatching actions (useAppDispatch).
+ * - ./Header: The application header component.
+ * - ./MainContentLayout: The main two-column content area component.
+ * - ./ContextModal: The context modal component.
+ * - ~/store/hooks: Typed Redux dispatch hook.
+ * - ~/store/slices/contextSlice: Action creator for loading context.
+ * - ~/store/slices/slideNotesSlice: Action creator for loading slide notes.
+ * - ~/store/slices/transcriptSlice: Action creator for loading transcript.
+ *
+ * @notes
+ * - This component acts as the primary container rendered by the main route.
+ * - The useEffect hook runs only once when the component mounts.
+ * - Modals are placed here so they're available throughout the application.
+ */
+import React, { useEffect } from "react";
+import { Header } from "./Header";
+import { MainContentLayout } from "./MainContentLayout";
+import { ContextModal } from "./ContextModal";
+import { useAppDispatch } from "~/store/hooks";
+import { loadContext } from "~/store/slices/contextSlice";
+import { loadSlideNotes } from "~/store/slices/slideNotesSlice";
+import { loadTranscript } from "~/store/slices/transcriptSlice";
+
+export function AppLayout() {
+  const dispatch = useAppDispatch();
+
+  /**
+   * @description Effect hook to dispatch loading actions when the component mounts.
+   * This triggers the initial population of Redux state from localStorage.
+   */
+  useEffect(() => {
+    dispatch(loadContext());
+    dispatch(loadSlideNotes());
+    dispatch(loadTranscript());
+  }, [dispatch]); // Dependency array ensures this runs only once on mount
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <MainContentLayout />
+
+      {/* Modals */}
+      <ContextModal />
+    </div>
+  );
+}
+
+================
+File: src/components/CizzleMagicText.tsx
+================
+import { postAiGetCizzleMagicText } from "~/services/ai";
+import { Lightbulb } from "lucide-react";
+import React, { ChangeEvent, ReactElement, useState } from "react";
+import { AccentButton } from "./AccentButton";
+import { Loader2 } from "lucide-react";
+
+interface InputElementProps {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  disabled?: boolean;
+}
+
+interface CizzleMagicTextProps {
+  prompt: string;
+  children: ReactElement<InputElementProps>;
+  value: string;
+  setValue: (value: string) => void;
+}
+
+const CizzleMagicText: React.FC<CizzleMagicTextProps> = ({
+  prompt,
+  value,
+  setValue,
+  children,
+}) => {
+  //const [text, setText] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [lastSubmittedText, setLastSubmittedText] = useState<string>("");
+
+  // Determine whether the text has been modified since the last successful cleaning.
+  const isModified = value !== lastSubmittedText;
+
+  // Handle input changes from either an Input or a TextArea.
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setValue(e.target.value);
+  };
+
+  // Execute the prompt by calling the backend API.
+  const executePrompt = async () => {
+    if (!isModified) return;
+
+    if (!value) return;
+
+    setLoading(true);
+    try {
+      const response = await postAiGetCizzleMagicText({
+        prompt: prompt,
+        inputText: value,
+      });
+
+      //   if (!response.ok) {
+      //     throw new Error('API call failed');
+      //   }
+
+      // Assume the API returns the cleaned text in a property called "cleanedText".
+      setValue(response);
+      setLastSubmittedText(response);
+    } catch (error) {
+      console.error("Error cleaning text:", error);
+      // Optionally, implement user-facing error handling.
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Clone the passed child and inject controlled props.
+  const clonedInput = React.cloneElement(children, {
+    value: value,
+    onChange: handleChange,
+    disabled: loading || (children.props as InputElementProps).disabled,
+  });
+
+  return (
+    <div className="flex items-center">
+      {clonedInput}
+      <AccentButton
+        onClick={executePrompt}
+        disabled={loading || !isModified}
+        size="icon"
+        className="ml-2"
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Lightbulb className="h-4 w-4" />
+        )}
+      </AccentButton>
+    </div>
+  );
+};
+
+export default CizzleMagicText;
+
+================
+File: src/components/ContextModal.tsx
+================
+/**
+ * @description
+ * This component renders the modal dialog for inputting Project & Company Context.
+ * It uses shadcn/ui Dialog components and is controlled by Redux state for visibility.
+ *
+ * Key features:
+ * - Renders a Dialog from shadcn/ui.
+ * - Visibility controlled by `isContextModalOpen` state from `modalSlice`.
+ * - Includes a Label and Textarea for user input.
+ * - Loads context from Redux state, which is initialized from localStorage.
+ * - Populates with template when empty.
+ * - Persists updates to localStorage via Redux actions.
+ *
+ * @dependencies
+ * - react: For component creation and hooks.
+ * - react-redux: For accessing Redux state and dispatching actions.
+ * - ~/components/ui/dialog: Shadcn Dialog components.
+ * - ~/components/ui/label: Shadcn Label component.
+ * - ~/components/ui/textarea: Shadcn Textarea component.
+ * - ~/components/ui/button: Shadcn Button component.
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/modalSlice: Actions and selectors for modal state.
+ * - ~/store/slices/contextSlice: Actions and selectors for context state.
+ * - ~/utils/constants: Template constants.
+ */
+import React, { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import { Button } from "~/components/ui/button";
+import { useAppSelector, useAppDispatch } from "~/store/hooks";
+import { closeContextModal } from "~/store/slices/modalSlice";
+import { setContextText } from "~/store/slices/contextSlice";
+import { CONTEXT_TEMPLATE } from "~/utils/constants";
+
+export function ContextModal() {
+  const dispatch = useAppDispatch();
+  const isOpen = useAppSelector((state) => state.modals.isContextModalOpen);
+  const contextText = useAppSelector((state) => state.context.text);
+
+  // Local state to track text changes within the modal
+  const [text, setText] = useState(contextText);
+
+  // Update local state when the modal opens or contextText changes
+  useEffect(() => {
+    if (isOpen) {
+      // If opening the modal and there's no text, use the template
+      if (!contextText.trim()) {
+        setText(CONTEXT_TEMPLATE);
+      } else {
+        setText(contextText);
+      }
+    }
+  }, [isOpen, contextText]);
+
+  /**
+   * @description Handles the change in the textarea value.
+   * @param e - The change event.
+   */
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+  };
+
+  /**
+   * @description Handles saving the context text when closing the modal.
+   * @param open - The new open state of the dialog.
+   */
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // Save the text to Redux (and localStorage) when closing
+      dispatch(setContextText(text));
+      dispatch(closeContextModal());
+    }
+  };
+
+  /**
+   * @description Handles the save and close button click.
+   */
+  const handleSaveAndClose = () => {
+    dispatch(setContextText(text));
+    dispatch(closeContextModal());
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[60vw] md:max-w-[50vw] lg:max-w-[40vw]">
+        <DialogHeader>
+          <DialogTitle>Project & Company Context</DialogTitle>
+          <DialogDescription>
+            Provide background information about the project, company,
+            attendees, and meeting goals. This context helps in generating more
+            relevant notes later.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <Label htmlFor="context-textarea" className="sr-only">
+            Context Input Area
+          </Label>
+          <Textarea
+            id="context-textarea"
+            value={text}
+            onChange={handleTextChange}
+            placeholder="Start typing your project context here... (Use the template)"
+            className="min-h-[40vh] resize-y"
+          />
+        </div>
+        <DialogFooter>
+          <Button type="button" onClick={handleSaveAndClose}>
+            Save & Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+================
+File: src/components/DefaultCatchBoundary.tsx
+================
+import {
+  ErrorComponent,
+  Link,
+  rootRouteId,
+  useMatch,
+  useRouter,
+} from '@tanstack/react-router'
+import type { ErrorComponentProps } from '@tanstack/react-router'
+
+export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
+  const router = useRouter()
+  const isRoot = useMatch({
+    strict: false,
+    select: (state) => state.id === rootRouteId,
+  })
+
+  console.error(error)
+
+  return (
+    <div className="min-w-0 flex-1 p-4 flex flex-col items-center justify-center gap-6">
+      <ErrorComponent error={error} />
+      <div className="flex gap-2 items-center flex-wrap">
+        <button
+          onClick={() => {
+            router.invalidate()
+          }}
+          className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
+        >
+          Try Again
+        </button>
+        {isRoot ? (
+          <Link
+            to="/"
+            className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
+          >
+            Home
+          </Link>
+        ) : (
+          <Link
+            to="/"
+            className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
+            onClick={(e) => {
+              e.preventDefault()
+              window.history.back()
+            }}
+          >
+            Go Back
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
+
+================
+File: src/components/FeedbackModal.tsx
+================
+import React, { useState, useRef, useCallback } from "react";
+import { toast } from "react-hot-toast";
+import { Loader2, Sparkles } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { Textarea } from "~/components/ui/textarea";
+import { Label } from "~/components/ui/label";
+import { submitFeedback } from "~/utils/feedback";
+import { postAiGetCizzleMagicText } from "~/services/ai";
+import { useMutation } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+
+interface FeedbackModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const SUPPORTED_FORMATS = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+
+export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
+  const [title, setTitle] = useState("");
+  const [feedbackText, setFeedbackText] = useState("");
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const imageAreaRef = useRef<HTMLDivElement>(null);
+
+  // For drag-and-drop image handling
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Handle image file processing
+  const processImageFile = (file: File) => {
+    // Check file size
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error("Image file is too large. Maximum size is 5MB.");
+      return;
+    }
+
+    // Check file type
+    if (!SUPPORTED_FORMATS.includes(file.type)) {
+      toast.error(
+        "Unsupported file format. Please use JPG, PNG, GIF, or WEBP."
+      );
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setImageData(e.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handle paste event for images
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          processImageFile(file);
+          break;
+        }
+      }
+    }
+  }, []);
+
+  // Handle drag events
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      processImageFile(file);
+    }
+  }, []);
+
+  // Generate AI title based on feedback text
+  const generateTitle = async () => {
+    if (!feedbackText.trim()) {
+      toast.error("Please enter feedback text before generating a title");
+      return;
+    }
+
+    setIsGeneratingTitle(true);
+    try {
+      const generatedTitle = await postAiGetCizzleMagicText({
+        prompt:
+          "Please generate a concise title based on the following end user software platform feedback: ",
+        inputText: feedbackText,
+      });
+
+      setTitle(generatedTitle);
+    } catch (error) {
+      console.error("Error generating title:", error);
+      toast.error(
+        "Failed to generate title. Please try again or enter one manually."
+      );
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  };
+
+  // Setup the mutation for feedback submission
+  const feedbackMutation = useMutation({
+    mutationFn: useServerFn(submitFeedback),
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success("Feedback submitted successfully!");
+        // Reset form and close modal
+        setTitle("");
+        setFeedbackText("");
+        setImageData(null);
+        onOpenChange(false);
+      } else {
+        toast.error(data.error || "Failed to submit feedback");
+      }
+      setIsSubmitting(false);
+    },
+    onError: (error) => {
+      console.error("Error submitting feedback:", error);
+      toast.error("An error occurred. Please try again.");
+      setIsSubmitting(false);
+    },
+  });
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
+    if (!feedbackText.trim()) {
+      toast.error("Please enter your feedback");
+      return;
+    }
+
+    setIsSubmitting(true);
+    feedbackMutation.mutate({
+      data: {
+        title,
+        feedback: feedbackText,
+        image_data: imageData,
+      },
+    });
+  };
+
+  // Reset form when modal closes
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Only reset if we're closing and not in the middle of submitting
+      if (!isSubmitting) {
+        setTitle("");
+        setFeedbackText("");
+        setImageData(null);
+      }
+    }
+    onOpenChange(newOpen);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Submit Feedback</DialogTitle>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="title">Title*</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="title"
+                placeholder="Enter a title for your feedback"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="flex-1"
+                disabled={isGeneratingTitle}
+              />
+              <Button
+                onClick={generateTitle}
+                size="sm"
+                variant="outline"
+                className="whitespace-nowrap"
+                disabled={isGeneratingTitle || !feedbackText.trim()}
+              >
+                {isGeneratingTitle ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-2" />
+                )}
+                Generate
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="feedback">Feedback*</Label>
+            <Textarea
+              id="feedback"
+              placeholder="Please provide your feedback or bug report..."
+              className="min-h-[200px] resize-y"
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              onPaste={handlePaste}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Attach Screenshot (Optional)</Label>
+            <div
+              ref={imageAreaRef}
+              className={`border-2 border-dashed rounded-md p-4 text-center h-32 flex items-center justify-center cursor-pointer ${
+                isDragging ? "border-primary bg-primary/10" : "border-gray-300"
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onPaste={handlePaste}
+              tabIndex={0}
+            >
+              {imageData ? (
+                <div className="relative w-full h-full">
+                  <img
+                    src={imageData}
+                    alt="Preview"
+                    className="max-h-full max-w-full mx-auto object-contain"
+                  />
+                  <button
+                    onClick={() => setImageData(null)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                    aria-label="Remove image"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="text-gray-500">
+                  <p>Paste or drag & drop an image here</p>
+                  <p className="text-xs mt-1">
+                    (PNG, JPG, GIF, WEBP - max 5MB)
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" disabled={isSubmitting}>
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !title.trim() || !feedbackText.trim()}
+          >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Submit Feedback
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+================
+File: src/components/Header.tsx
+================
+/**
+ * @description
+ * Renders the header section of the MeetingWeaver AI application.
+ * Displays the application title and a button to open the Project Context modal.
+ *
+ * Key features:
+ * - Displays static application title "MeetingWeaver AI".
+ * - Contains a circular button to trigger the Project Context modal.
+ * - Uses TailwindCSS for layout and shadcn/ui Button component.
+ *
+ * @dependencies
+ * - react: For component creation.
+ * - react-redux: For dispatching actions (useAppDispatch).
+ * - ~/components/ui/button: Shadcn Button component.
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/modalSlice: Action creator for opening the context modal.
+ * - ~/utils/cn: Utility for combining class names.
+ *
+ * @notes
+ * - The button is styled to be circular using Tailwind utilities.
+ * - Clicking the button dispatches the 'openContextModal' action.
+ */
+
+import React from 'react';
+import { Button } from '~/components/ui/button';
+import { useAppDispatch } from '~/store/hooks';
+import { openContextModal } from '~/store/slices/modalSlice'; // Import the action
+import { cn } from '~/utils/cn'; // Ensure cn utility is correctly imported
+
+export function Header() {
+  const dispatch = useAppDispatch();
+
+  /**
+   * @description Handles the click event for the Project Context button.
+   * Dispatches an action to open the context modal.
+   */
+  const handleOpenContextModal = () => {
+    dispatch(openContextModal()); // Dispatch the action to open the modal
+  };
+
+  return (
+    <header className="flex justify-between items-center p-4 border-b shrink-0">
+      {/* Left Side: Application Title */}
+      <h1 className="text-xl font-semibold">MeetingWeaver AI</h1>
+
+      {/* Right Side: Context Modal Button */}
+      <Button
+        variant="outline" // Using outline variant for distinction
+        size="sm" // Using small size
+        className={cn(
+          'rounded-full', // Make it circular
+          'h-10 w-auto px-4' // Specific height, auto width, horizontal padding
+          // Consider 'size-10 p-0 flex items-center justify-center' for a fixed size circle if text is short or icon is used
+        )}
+        onClick={handleOpenContextModal} // Attach the click handler
+      >
+        Project & Company Context (Modal)
+      </Button>
+    </header>
+  );
+}
+
+================
+File: src/components/MainContentLayout.tsx
+================
+/**
+ * @description
+ * Renders the main two-column content area of the application.
+ * This component establishes the side-by-side layout for the Slide/Notes panel
+ * and the Transcript panel.
+ *
+ * Key features:
+ * - Uses CSS Grid for a two-column layout with a gap.
+ * - Designed to fill the remaining vertical space below the header.
+ * - Renders the SlideNotesPanel and a placeholder for the TranscriptPanel.
+ *
+ * @dependencies
+ * - react: For component creation.
+ * - ./SlideNotesPanel: The component for the left panel.
+ *
+ * @notes
+ * - The 'flex-grow' class ensures this component expands vertically.
+ * - TranscriptPanel placeholder will be replaced later.
+ */
+import React from "react";
+import { SlideNotesPanel } from "./SlideNotesPanel"; // Import the SlideNotesPanel
+
+export function MainContentLayout() {
+  return (
+    // Use flex-grow to take available vertical space, grid for columns
+    // Set an explicit height or min-height on the parent container if needed
+    // Adding h-0 to flex-grow allows it to shrink correctly if content overflows
+    <main className="grid grid-cols-2 gap-4 p-4 flex-grow h-0">
+      {/* Left Panel: Slide / Meeting Notes */}
+      {/* Wrap panel in a div that allows internal flex-grow */}
+      <div className="flex flex-col h-full border rounded p-4 bg-card text-card-foreground shadow-sm">
+        <SlideNotesPanel />
+      </div>
+
+      {/* Right Panel Placeholder */}
+      <div className="border rounded p-4 bg-card text-card-foreground shadow-sm">
+        {/* Placeholder for TranscriptPanel */}
+        Right Panel: Meeting Transcript (Placeholder)
+      </div>
+    </main>
+  );
+}
+
+================
+File: src/components/NotFound.tsx
+================
+import { Link } from '@tanstack/react-router'
+
+export function NotFound({ children }: { children?: any }) {
+  return (
+    <div className="space-y-2 p-2">
+      <div className="text-gray-600 dark:text-gray-400">
+        {children || <p>The page you are looking for does not exist.</p>}
+      </div>
+      <p className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => window.history.back()}
+          className="bg-emerald-500 text-white px-2 py-1 rounded uppercase font-black text-sm"
+        >
+          Go back
+        </button>
+        <Link
+          to="/"
+          className="bg-cyan-600 text-white px-2 py-1 rounded uppercase font-black text-sm"
+        >
+          Start Over
+        </Link>
+      </p>
+    </div>
+  )
+}
+
+================
+File: src/components/SlideNotesPanel.tsx
+================
+/**
+ * @description
+ * Renders the left panel dedicated to Slide/Meeting Notes input.
+ * Includes a labeled text area and a vertical stack of action buttons.
+ * Connects the text area to the Redux store for state management and persists on blur.
+ * Implements the "Copy Text", "Add Line", and separator navigation functionalities.
+ *
+ * Key features:
+ * - Displays a labeled multi-line text area for notes input.
+ * - Shows action buttons with icons.
+ * - Uses Redux ('useAppSelector', 'useAppDispatch') to manage text area content.
+ * - Updates Redux state on text area change ('onChange').
+ * - Persists text area content to localStorage on blur ('onBlur').
+ * - Implements "Copy Text" button functionality using utility function and toast feedback.
+ * - Implements "Add Line" button to insert a separator using a Redux action.
+ * - Implements Up/Down arrow buttons to navigate between separator lines.
+ * - Uses 'useRef' to hold a reference to the textarea element for cursor manipulation.
+ *
+ * @dependencies
+ * - react: For component creation, 'useRef', 'useEffect', 'useState'.
+ * - react-redux: For hooks 'useAppSelector', 'useAppDispatch'.
+ * - react-hot-toast: For displaying notifications (used via textUtils).
+ * - ~/components/ui/label: Shadcn Label component.
+ * - ~/components/ui/textarea: Shadcn Textarea component.
+ * - ~/components/ui/button: Shadcn Button component.
+ * - ~/store/hooks: Typed Redux hooks.
+ * - ~/store/slices/slideNotesSlice: Action creators 'setSlideNotesText', 'persistSlideNotes', 'insertSlideNotesText'.
+ * - ~/utils/textUtils: Utility functions 'copyToClipboard', 'findNearestSeparatorLine'.
+ * - ~/utils/constants: Constants like 'SLIDE_NOTES_SEPARATOR'.
+ * - lucide-react: For icons (Image, Copy, ArrowUp, Plus, ArrowDown).
+ *
+ * @notes
+ * - Cursor position setting after 'Add Line' uses a state variable and useEffect for better reliability.
+ * - Navigation uses the findNearestSeparatorLine utility to move the cursor.
+ */
+
+import React, { useRef, useEffect, useState } from "react";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import { Button } from "~/components/ui/button";
+import { useAppSelector, useAppDispatch } from "~/store/hooks";
+import {
+  setSlideNotesText,
+  persistSlideNotes,
+  insertSlideNotesText,
+} from "~/store/slices/slideNotesSlice";
+import { copyToClipboard, findNearestSeparatorLine } from "~/utils/textUtils"; // Import navigation util
+import { SLIDE_NOTES_SEPARATOR } from "~/utils/constants";
+import toast from "react-hot-toast";
+import {
+  Image as ImageIcon,
+  Copy as CopyIcon,
+  ArrowUp,
+  Plus,
+  ArrowDown,
+} from "lucide-react";
+
+// BEGIN WRITING FILE CODE
+
+export function SlideNotesPanel() {
+  const dispatch = useAppDispatch();
+  const slideNotesText = useAppSelector((state) => state.slideNotes.text);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [nextCursorPosition, setNextCursorPosition] = useState<number | null>(
+    null
+  );
+
+  /**
+   * @description Handles changes in the textarea input.
+   * Dispatches the 'setSlideNotesText' action to update the Redux store immediately.
+   * @param e - The textarea change event.
+   */
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    dispatch(setSlideNotesText(e.target.value));
+  };
+
+  /**
+   * @description Handles the blur event on the textarea.
+   * Dispatches the 'persistSlideNotes' action to save the current text to localStorage.
+   */
+  const handleBlur = () => {
+    const currentText = textareaRef.current?.value ?? slideNotesText;
+    dispatch(persistSlideNotes(currentText));
+  };
+
+  /**
+   * @description Handles the click event for the "Copy Text" button.
+   * Calls the copyToClipboard utility with the current notes text.
+   */
+  const handleCopyText = () => {
+    copyToClipboard(slideNotesText);
+  };
+
+  /**
+   * @description Handles the click event for the "Add Line" button.
+   * Gets the current cursor position, constructs the separator string,
+   * and dispatches the 'insertSlideNotesText' action.
+   * Stores the intended cursor position for the useEffect hook.
+   */
+  const handleAddLine = () => {
+    if (textareaRef.current) {
+      const cursorPosition = textareaRef.current.selectionStart;
+      const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
+      const calculatedNextPosition = cursorPosition + textToInsert.length;
+
+      dispatch(
+        insertSlideNotesText({ textToInsert, position: cursorPosition })
+      );
+      setNextCursorPosition(calculatedNextPosition);
+    } else {
+      console.warn("Textarea ref not available for Add Line action.");
+      const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
+      const calculatedNextPosition =
+        slideNotesText.length + textToInsert.length;
+      dispatch(
+        insertSlideNotesText({ textToInsert, position: slideNotesText.length })
+      );
+      setNextCursorPosition(calculatedNextPosition);
+    }
+  };
+
+  /**
+   * @description Effect to set the cursor position after the text state has updated
+   * from an insertion action.
+   */
+  useEffect(() => {
+    if (nextCursorPosition !== null && textareaRef.current) {
+      if (textareaRef.current.value.length >= nextCursorPosition) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(
+          nextCursorPosition,
+          nextCursorPosition
+        );
+      } else {
+        console.warn("Could not set cursor position, text length mismatch.");
+      }
+      setNextCursorPosition(null);
+    }
+  }, [slideNotesText, nextCursorPosition]);
+
+  /**
+   * @description Handles the click event for the "Navigate Up" button.
+   * Finds the nearest separator line above the cursor and moves the cursor there.
+   */
+  const handleNavigateUp = () => {
+    if (textareaRef.current) {
+      const currentPosition = textareaRef.current.selectionStart;
+      const text = textareaRef.current.value;
+      const newPosition = findNearestSeparatorLine(
+        text,
+        currentPosition,
+        SLIDE_NOTES_SEPARATOR,
+        'up'
+      );
+
+      if (newPosition !== null) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      } else {
+        // Optional: Add feedback if no separator is found above
+         toast('No separator found above.', { icon: '🤷', duration: 1500 });
+      }
+    }
+  };
+
+  /**
+   * @description Handles the click event for the "Navigate Down" button.
+   * Finds the nearest separator line below the cursor and moves the cursor there.
+   */
+  const handleNavigateDown = () => {
+      if (textareaRef.current) {
+        const currentPosition = textareaRef.current.selectionStart;
+        const text = textareaRef.current.value;
+        const newPosition = findNearestSeparatorLine(
+          text,
+          currentPosition,
+          SLIDE_NOTES_SEPARATOR,
+          'down'
+        );
+
+        if (newPosition !== null) {
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(newPosition, newPosition);
+        } else {
+          // Optional: Add feedback if no separator is found below
+           toast('No separator found below.', { icon: '🤷', duration: 1500 });
+        }
+      }
+  };
+
+  // Placeholder handler for Image Extract button
+  const handleImageExtract = () =>
+    console.log("Image Extract clicked (Placeholder)");
+
+
+  return (
+    <div className="flex gap-2 h-full">
+      {/* Text Area Section */}
+      <div className="flex flex-col flex-grow h-full">
+        <Label
+          htmlFor="slide-notes-textarea"
+          className="mb-2 text-sm font-medium"
+        >
+          Slide / Meeting Notes Text Area
+        </Label>
+        <Textarea
+          id="slide-notes-textarea"
+          ref={textareaRef}
+          value={slideNotesText}
+          onChange={handleTextChange}
+          onBlur={handleBlur}
+          placeholder="Paste slide content or enter meeting notes here..."
+          className="flex-grow resize-none text-sm"
+          // Add spellCheck false if desired
+          spellCheck={false}
+        />
+      </div>
+
+      {/* Action Buttons Section */}
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleImageExtract}
+          title="Img-Txt Extract (Modal)"
+        >
+          <ImageIcon className="h-4 w-4" />
+          <span className="sr-only">Img-Txt Extract (Modal)</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleCopyText}
+          title="Copy Text"
+        >
+          <CopyIcon className="h-4 w-4" />
+          <span className="sr-only">Copy Text</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNavigateUp} // Connect handler
+          title="Navigate Up (Separator)"
+        >
+          <ArrowUp className="h-4 w-4" />
+          <span className="sr-only">Up Arrow (↑)</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleAddLine}
+          title="Add Separator Line"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="sr-only">Add Line</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNavigateDown} // Connect handler
+          title="Navigate Down (Separator)"
+        >
+          <ArrowDown className="h-4 w-4" />
+          <span className="sr-only">Down Arrow (↓)</span>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+================
+File: src/components/ui/alert.tsx
+================
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "~/utils/cn"
+
+const alertVariants = cva(
+  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  {
+    variants: {
+      variant: {
+        default: "bg-background text-foreground",
+        destructive:
+          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+const Alert = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+>(({ className, variant, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="alert"
+    className={cn(alertVariants({ variant }), className)}
+    {...props}
+  />
+))
+Alert.displayName = "Alert"
+
+const AlertTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h5
+    ref={ref}
+    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    {...props}
+  />
+))
+AlertTitle.displayName = "AlertTitle"
+
+const AlertDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm [&_p]:leading-relaxed", className)}
+    {...props}
+  />
+))
+AlertDescription.displayName = "AlertDescription"
+
+export { Alert, AlertTitle, AlertDescription }
+
+================
+File: src/components/ui/avatar.tsx
+================
+import * as React from "react"
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
+
+import { cn } from "~/lib/utils"
+
+function Avatar({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
+  return (
+    <AvatarPrimitive.Root
+      data-slot="avatar"
+      className={cn(
+        "relative flex size-8 shrink-0 overflow-hidden rounded-full",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function AvatarImage({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+  return (
+    <AvatarPrimitive.Image
+      data-slot="avatar-image"
+      className={cn("aspect-square size-full", className)}
+      {...props}
+    />
+  )
+}
+
+function AvatarFallback({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+  return (
+    <AvatarPrimitive.Fallback
+      data-slot="avatar-fallback"
+      className={cn(
+        "bg-muted flex size-full items-center justify-center rounded-full",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Avatar, AvatarImage, AvatarFallback }
+
+================
+File: src/components/ui/badge.tsx
+================
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "~/utils/cn";
+
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
+}
+
+export { Badge, badgeVariants };
+
+================
+File: src/components/ui/button.tsx
+================
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "../../utils/cn";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+export { Button, buttonVariants };
+
+================
+File: src/components/ui/card.tsx
+================
+import * as React from "react";
+
+import { cn } from "../../utils/cn";
+
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      className
+    )}
+    {...props}
+  />
+));
+Card.displayName = "Card";
+
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+));
+CardHeader.displayName = "CardHeader";
+
+const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn(
+      "text-2xl font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+));
+CardTitle.displayName = "CardTitle";
+
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+));
+CardDescription.displayName = "CardDescription";
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+));
+CardContent.displayName = "CardContent";
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+));
+CardFooter.displayName = "CardFooter";
+
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+};
+
+================
+File: src/components/ui/checkbox.tsx
+================
+import * as React from "react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { Check } from "lucide-react";
+
+import { cn } from "../../utils/cn";
+
+const Checkbox = React.forwardRef<
+  React.ElementRef<typeof CheckboxPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <CheckboxPrimitive.Root
+    ref={ref}
+    className={cn(
+      "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      className
+    )}
+    {...props}
+  >
+    <CheckboxPrimitive.Indicator
+      className={cn("flex items-center justify-center text-current")}
+    >
+      <Check className="h-4 w-4" />
+    </CheckboxPrimitive.Indicator>
+  </CheckboxPrimitive.Root>
+));
+Checkbox.displayName = CheckboxPrimitive.Root.displayName;
+
+export { Checkbox };
+
+================
+File: src/components/ui/dialog.tsx
+================
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+
+import { cn } from "../../utils/cn";
+
+const Dialog = DialogPrimitive.Root;
+
+const DialogTrigger = DialogPrimitive.Trigger;
+
+const DialogPortal = DialogPrimitive.Portal;
+
+const DialogClose = DialogPrimitive.Close;
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+  />
+));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+));
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+);
+DialogHeader.displayName = "DialogHeader";
+
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+);
+DialogFooter.displayName = "DialogFooter";
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+));
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+));
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
+
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+};
+
+================
+File: src/components/ui/dropdown-menu.tsx
+================
+import * as React from "react";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { Check, ChevronRight, Circle } from "lucide-react";
+
+import { cn } from "../../utils/cn";
+
+const DropdownMenu = DropdownMenuPrimitive.Root;
+
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+
+const DropdownMenuGroup = DropdownMenuPrimitive.Group;
+
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+
+const DropdownMenuSub = DropdownMenuPrimitive.Sub;
+
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+
+const DropdownMenuSubTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
+    inset?: boolean;
+  }
+>(({ className, inset, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronRight className="ml-auto h-4 w-4" />
+  </DropdownMenuPrimitive.SubTrigger>
+));
+DropdownMenuSubTrigger.displayName =
+  DropdownMenuPrimitive.SubTrigger.displayName;
+
+const DropdownMenuSubContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubContent
+    ref={ref}
+    className={cn(
+      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  />
+));
+DropdownMenuSubContent.displayName =
+  DropdownMenuPrimitive.SubContent.displayName;
+
+const DropdownMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        className
+      )}
+      {...props}
+    />
+  </DropdownMenuPrimitive.Portal>
+));
+DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
+
+const DropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+    inset?: boolean;
+  }
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+));
+DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
+
+const DropdownMenuCheckboxItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
+>(({ className, children, checked, ...props }, ref) => (
+  <DropdownMenuPrimitive.CheckboxItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    checked={checked}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </DropdownMenuPrimitive.CheckboxItem>
+));
+DropdownMenuCheckboxItem.displayName =
+  DropdownMenuPrimitive.CheckboxItem.displayName;
+
+const DropdownMenuRadioItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.RadioItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Circle className="h-2 w-2 fill-current" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </DropdownMenuPrimitive.RadioItem>
+));
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
+
+const DropdownMenuLabel = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
+    inset?: boolean;
+  }
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Label
+    ref={ref}
+    className={cn(
+      "px-2 py-1.5 text-sm font-semibold",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+));
+DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
+
+const DropdownMenuSeparator = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    {...props}
+  />
+));
+DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
+
+const DropdownMenuShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
+  return (
+    <span
+      className={cn("ml-auto text-xs tracking-widest opacity-60", className)}
+      {...props}
+    />
+  );
+};
+DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
+
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+};
+
+================
+File: src/components/ui/input.tsx
+================
+import * as React from "react";
+
+import { cn } from "../../utils/cn";
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Input.displayName = "Input";
+
+export { Input };
+
+================
+File: src/components/ui/label.tsx
+================
+import * as React from "react";
+import * as LabelPrimitive from "@radix-ui/react-label";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "../../utils/cn";
+
+const labelVariants = cva(
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+);
+
+const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
+    VariantProps<typeof labelVariants>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn(labelVariants(), className)}
+    {...props}
+  />
+));
+Label.displayName = LabelPrimitive.Root.displayName;
+
+export { Label };
+
+================
+File: src/components/ui/switch.tsx
+================
+import * as React from "react";
+import * as SwitchPrimitives from "@radix-ui/react-switch";
+
+import { cn } from "../../utils/cn";
+
+const Switch = React.forwardRef<
+  React.ElementRef<typeof SwitchPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+>(({ className, ...props }, ref) => (
+  <SwitchPrimitives.Root
+    className={cn(
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      className
+    )}
+    {...props}
+    ref={ref}
+  >
+    <SwitchPrimitives.Thumb
+      className={cn(
+        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+      )}
+    />
+  </SwitchPrimitives.Root>
+));
+Switch.displayName = SwitchPrimitives.Root.displayName;
+
+export { Switch };
+
+================
+File: src/components/ui/textarea.tsx
+================
+import * as React from "react";
+
+import { cn } from "../../utils/cn";
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        className={cn(
+          "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Textarea.displayName = "Textarea";
+
+export { Textarea };
+
+================
+File: src/lib/utils.ts
+================
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+================
+File: src/router.tsx
+================
+import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { routeTree } from "./routeTree.gen";
+import { DefaultCatchBoundary } from "./components/DefaultCatchBoundary";
+import { NotFound } from "./components/NotFound";
+
+export function createRouter() {
+  const router = createTanStackRouter({
+    routeTree,
+    defaultErrorComponent: DefaultCatchBoundary,
+    defaultNotFoundComponent: () => <NotFound />,
+    scrollRestoration: true,
+  });
+
+  return router;
+}
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: ReturnType<typeof createRouter>;
+  }
+}
+
+================
+File: src/routes/__root.tsx
+================
+/**
+ * @description
+ * This is the root component for the entire application's routing structure.
+ * It sets up the basic HTML document structure (html, head, body) and includes
+ * global providers like Redux Provider and React Query Provider.
+ * It also renders the main content area ('<Outlet />') where nested routes will be displayed.
+ *
+ * Key features:
+ * - Defines the root HTML structure.
+ * - Includes global meta tags, links (favicon, CSS).
+ * - Wraps the application in the Redux Provider ('<Provider>').
+ * - Wraps the application in the React Query Provider ('<QueryClientProvider>').
+ * - Renders the TanStack Router Devtools for debugging.
+ * - Renders the Toaster component for notifications.
+ * - Defines default error and not found components.
+ *
+ * @dependencies
+ * - @tanstack/react-router: For routing components ('Outlet', 'createRootRoute', etc.).
+ * - @tanstack/react-query: For server state management ('QueryClientProvider').
+ * - react-redux: For Redux state management ('Provider').
+ * - react-hot-toast: For displaying notifications ('Toaster').
+ * - ~/components/DefaultCatchBoundary: Custom component for displaying route errors.
+ * - ~/components/NotFound: Custom component for 404 pages.
+ * - ~/store: Imports the configured Redux store.
+ * - ~/styles/app.css: Imports global application styles.
+ *
+ * @notes
+ * - The 'RootDocument' component provides the basic HTML shell.
+ * - The Redux Provider makes the store accessible to all child components.
+ * - ClerkProvider and related auth logic were removed during cleanup (Step 3).
+ */
+/// <reference types="vite/client" />
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRoute,
+} from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "react-hot-toast";
+import { Provider } from "react-redux"; // Import Redux Provider
+import * as React from "react";
+import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary.js";
+import { NotFound } from "~/components/NotFound.js";
+import { store } from "~/store"; // Import the configured Redux store
+import appCss from "~/styles/app.css?url";
+
+// Create a client for React Query
+const queryClient = new QueryClient();
+
+/**
+ * @description Configuration for the root route of the application.
+ */
+export const Route = createRootRoute({
+  /**
+   * @description Configures the content of the <head> tag for the application.
+   */
+  head: () => ({
+    meta: [
+      {
+        charSet: "utf-8",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
+      },
+      // Note: Title might be better managed per-route
+      {
+        title: "MeetingWeaver AI", // Set a default title
+      },
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/favicon-32x32.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        href: "/favicon-16x16.png",
+      },
+      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
+      { rel: "icon", href: "/favicon.ico" },
+    ],
+  }),
+  /**
+   * @description Component to render when an error occurs in this route or its children.
+   */
+  errorComponent: (props) => {
+    return (
+      <RootDocument>
+        <DefaultCatchBoundary {...props} />
+      </RootDocument>
+    );
+  },
+  /**
+   * @description Component to render when no matching route is found.
+   */
+  notFoundComponent: () => <NotFound />,
+  /**
+   * @description The main component rendered for the root route.
+   */
+  component: RootComponent,
+});
+
+/**
+ * @description The core component that sets up global providers.
+ */
+function RootComponent() {
+  return (
+    // Wrap the entire application with the Redux Provider
+    <Provider store={store}>
+      {/* React Query Provider is kept from template */}
+      <QueryClientProvider client={queryClient}>
+        <RootDocument>
+          {/* Outlet renders the matched child route component */}
+          <Outlet />
+        </RootDocument>
+      </QueryClientProvider>
+    </Provider>
+  );
+}
+
+/**
+ * @description Renders the basic HTML document structure (<html>, <head>, <body>).
+ * @param children - The content to be rendered within the <body> tag.
+ */
+function RootDocument({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <head>
+        {/* Renders meta tags, links defined in Route.head */}
+        <HeadContent />
+        {/* Optional: Include inline styles or additional head elements */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          .bg-pattern {
+            /* background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='currentColor' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E"); */
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
+          }
+
+          /* Optional: Dark mode pattern styling */
+          /* .dark .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='currentColor' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+          } */
+          `,
+          }}
+        />
+      </head>
+      <body className="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100 min-h-screen">
+        {/* bg-pattern class can be removed if not desired */}
+        <div className="bg-pattern">
+          {/* Removed max-width for full-width layout based on spec */}
+          <main className="min-h-screen flex flex-col">{children}</main>
+          {/* Toaster for notifications */}
+          <Toaster position="top-right" />
+          {/* Router Devtools */}
+          <TanStackRouterDevtools position="bottom-right" />
+        </div>
+        {/* Renders script tags for the client bundle */}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+================
+File: src/routes/api/ai/magic-text.ts
+================
+import { z } from "zod";
+import OpenAI from "openai";
+import { createAPIFileRoute } from "@tanstack/react-start/api";
+
+const magicTextInputSchema = z.object({
+  prompt: z.string(),
+  inputText: z.string(),
+});
+
+// Create OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export const APIRoute = createAPIFileRoute("/api/ai/magic-text")({
+  POST: async ({ request }) => {
+    try {
+      const body = await request.json();
+      const { prompt, inputText } = magicTextInputSchema.parse(body);
+
+      // Call OpenAI API
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: prompt,
+              },
+              {
+                type: "text",
+                text: inputText,
+              },
+            ],
+          },
+        ],
+      });
+
+      // Return the response content
+      return Response.json(response.choices[0].message.content);
+    } catch (error) {
+      console.error("Error processing magic text request:", error);
+      return Response.json(
+        { error: "Failed to process request" },
+        { status: 500 }
+      );
+    }
+  },
+});
+
+================
+File: src/routes/api/stripe/webhooks.ts
+================
+/*
+<ai_context>
+This webhook handler processes Stripe payment gateway events. It verifies 
+incoming webhook signatures and handles subscription-related events including:
+
+- checkout.session.completed: When a customer completes payment
+- customer.subscription.updated: When subscription details change
+- customer.subscription.deleted: When a subscription is canceled
+
+The handler updates the application database with subscription status changes
+and customer information to keep payment records in sync with Stripe.
+</ai_context>
+*/
+
+import { createAPIFileRoute } from "@tanstack/react-start/api";
+import Stripe from "stripe";
+import { stripe } from "~/utils/stripe";
+import {
+  manageSubscriptionStatusChange,
+  updateStripeCustomer,
+  verifyStripeWebhook,
+} from "~/utils/stripe-webhooks";
+
+// These are the Stripe webhook events we want to handle
+const relevantEvents = new Set([
+  "checkout.session.completed",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "payment_link.created",
+  "customer.subscription.created",
+]);
+
+export const APIRoute = createAPIFileRoute("/api/stripe/webhooks")({
+  POST: async ({ request }) => {
+    const body = await request.text();
+    const signature = request.headers.get("Stripe-Signature");
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    // TESTING
+    //console.error(`Webhook TEST: ${webhookSecret}`);
+    //return;
+
+    let event: Stripe.Event;
+
+    try {
+      if (!signature || !webhookSecret) {
+        throw new Error("Webhook secret or signature missing");
+      }
+
+      // Verify the webhook signature
+      event = verifyStripeWebhook(body, signature, webhookSecret);
+    } catch (err: any) {
+      console.error(`Webhook Error: ${err.message}`);
+      return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+    }
+
+    // Handle the event if it's one we care about
+    if (relevantEvents.has(event.type)) {
+      try {
+        switch (event.type) {
+          case "customer.subscription.created":
+          case "customer.subscription.updated":
+          case "customer.subscription.deleted":
+            await handleSubscriptionChange(event);
+            break;
+
+          case "checkout.session.completed":
+            await handleCheckoutSession(event);
+            break;
+
+          case "payment_link.created":
+            // DONOTHING: Handle payment link created event
+            break;
+
+          default:
+            throw new Error("Unhandled relevant event!");
+        }
+      } catch (error) {
+        console.error("Webhook handler failed:", error);
+        return new Response(
+          "Webhook handler failed. View server logs for details.",
+          {
+            status: 400,
+          }
+        );
+      }
+    }
+
+    // Return a success response
+    return new Response(JSON.stringify({ received: true }), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  },
+});
+
+async function handleSubscriptionChange(event: Stripe.Event) {
+  const subscription = event.data.object as Stripe.Subscription;
+  const productId = subscription.items.data[0].price.product as string;
+
+  // Update database with subscription status
+  await manageSubscriptionStatusChange(
+    subscription.id,
+    subscription.customer as string,
+    productId
+  );
+}
+
+async function handleCheckoutSession(event: Stripe.Event) {
+  const checkoutSession = event.data.object as Stripe.Checkout.Session;
+
+  //console.error(`TEST-handleCheckoutSession: ${checkoutSession}`);
+
+  if (checkoutSession.mode === "subscription") {
+    const subscriptionId = checkoutSession.subscription as string;
+
+    // Update customer with subscription info
+    await updateStripeCustomer(
+      checkoutSession.client_reference_id as string,
+      subscriptionId,
+      checkoutSession.customer as string
+    );
+
+    // Get subscription details
+    const subscription =
+      (await stripe?.subscriptions.retrieve(subscriptionId, {
+        expand: ["default_payment_method"],
+      })) ?? null;
+
+    // Update subscription status
+    const productId = subscription?.items.data[0].price.product as string;
+    await manageSubscriptionStatusChange(
+      subscription?.id ?? "",
+      (subscription?.customer as string) ?? "",
+      productId
+    );
+  }
+}
+
+================
+File: src/routes/form.tsx
+================
+import { createFileRoute } from "@tanstack/react-router";
+import { TestForm } from "~/components/forms/TestForm";
+
+export const Route = createFileRoute("/form")({
+  component: FormPage,
+  head: () => ({
+    title: "Form Showcase | TanStack Form Demo",
+    meta: [
+      {
+        name: "description",
+        content: "A comprehensive showcase of TanStack Form's features",
+      },
+    ],
+  }),
+});
+
+function FormPage() {
+  return (
+    <div className="container py-8">
+      <TestForm />
+    </div>
+  );
+}
+
+================
+File: src/routes/grid.tsx
+================
+"use client";
+
+import { useState, useMemo } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { AgGridReact } from "ag-grid-react";
+import { ColDef, themeMaterial } from "ag-grid-community";
+import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import { useAppSelector } from "~/store/hooks";
+
+// Register all Community features
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+export const Route = createFileRoute("/grid")({
+  component: ShowGrid,
+  head: () => ({
+    title: "ag-grid Demo",
+    meta: [
+      {
+        name: "description",
+        content: "Test the ag-grid functionality",
+      },
+    ],
+  }),
+});
+
+function ShowGrid() {
+  // Get theme mode from Redux store
+  const { mode } = useAppSelector((state) => state.theme);
+
+  // Create light and dark themes
+  const lightTheme = useMemo(() => {
+    return themeMaterial.withParams({
+      backgroundColor: "rgb(255, 255, 255)",
+      foregroundColor: "rgb(33, 43, 54)",
+      headerTextColor: "rgb(33, 43, 54)",
+      headerBackgroundColor: "rgb(244, 246, 248)",
+      oddRowBackgroundColor: "rgb(0, 0, 0, 0.02)",
+      headerColumnResizeHandleColor: "rgb(180, 180, 180)",
+    });
+  }, []);
+
+  const darkTheme = useMemo(() => {
+    return themeMaterial.withParams({
+      backgroundColor: "rgb(22, 28, 36)",
+      foregroundColor: "rgb(255, 255, 255)",
+      headerTextColor: "rgb(255, 255, 255)",
+      headerBackgroundColor: "rgb(33, 43, 54)",
+      oddRowBackgroundColor: "rgb(255, 255, 255, 0.05)",
+      headerColumnResizeHandleColor: "rgb(100, 100, 100)",
+    });
+  }, []);
+
+  // Row Data: The data to be displayed.
+  const [rowData, setRowData] = useState([
+    { make: "Tesla", model: "Model Y", price: 64950, electric: true },
+    { make: "Ford", model: "F-Series", price: 33850, electric: false },
+    { make: "Toyota", model: "Corolla", price: 29600, electric: false },
+  ]);
+
+  // Column Definitions: Defines the columns to be displayed.
+  const [colDefs, setColDefs] = useState<ColDef[]>([
+    { field: "make" },
+    { field: "model" },
+    { field: "price" },
+    { field: "electric" },
+  ]);
+
+  // Choose the appropriate theme based on the Redux theme state
+  const currentTheme = mode === "dark" ? darkTheme : lightTheme;
+
+  return (
+    <div className="container py-8">
+      <h1 className="text-3xl font-bold mb-8">ag-grid Demo</h1>
+      <div className="ag-theme-alpine h-[500px]">
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={colDefs}
+          theme={currentTheme}
+        />
+      </div>
+    </div>
+  );
+}
+
+================
+File: src/routes/index.tsx
+================
+/**
+ * @description
+ * Defines the component for the root route ("/") of the application.
+ * This component now renders the main application layout (AppLayout).
+ *
+ * Key features:
+ * - Serves as the entry point component for the application UI.
+ * - Renders the AppLayout which includes the Header and main content area.
+ *
+ * @dependencies
+ * - @tanstack/react-router: For creating the file route.
+ * - ~/components/AppLayout: The main layout component.
+ *
+ * @notes
+ * - Previous landing page content has been removed.
+ * - The 'seo' utility import and usage were removed as the landing page content is gone.
+ *   SEO handling might be added back globally or per-route later if needed.
+ */
+import { createFileRoute } from "@tanstack/react-router";
+import { AppLayout } from "~/components/AppLayout"; // Import the main layout
+
+export const Route = createFileRoute("/")({
+  component: Index,
+  // Removed head function from previous example as it was specific to the landing page.
+  // Global head settings are in __root.tsx. Route-specific head can be added if needed.
+});
+
+/**
+ * @description The component rendered for the index route ("/").
+ * It simply renders the main application layout.
+ */
+function Index() {
+  return <AppLayout />;
+}
+
+================
+File: src/routes/test.tsx
+================
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import CizzleMagicText from "~/components/CizzleMagicText";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Textarea } from "~/components/ui/textarea";
+import { Input } from "~/components/ui/input";
+
+export const Route = createFileRoute("/test")({
+  component: AiTest,
+  head: () => ({
+    title: "AI Magic Text Demo",
+    meta: [
+      {
+        name: "description",
+        content: "Test the AI magic text functionality",
+      },
+    ],
+  }),
+});
+
+function AiTest() {
+  const [text, setText] = useState<string>("");
+  const [prompt, setPrompt] = useState<string>(
+    "Rewrite this text to make it more professional and concise"
+  );
+
+  return (
+    <div className="container py-8">
+      <h1 className="text-3xl font-bold mb-8">AI Magic Text Demo</h1>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Customize Prompt</CardTitle>
+          <CardDescription>
+            Edit the prompt that will be sent to the AI
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter an instruction for the AI"
+            className="w-full"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Magic Text Input</CardTitle>
+          <CardDescription>
+            Enter text below, then click the lightbulb icon to apply AI magic
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CizzleMagicText prompt={prompt} value={text} setValue={setText}>
+            <Textarea
+              placeholder="Enter your text here..."
+              className="min-h-[200px]"
+            />
+          </CizzleMagicText>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+================
+File: src/routeTree.gen.ts
+================
+/* eslint-disable */
+
+// @ts-nocheck
+
+// noinspection JSUnusedGlobalSymbols
+
+// This file was automatically generated by TanStack Router.
+// You should NOT make any changes in this file as it will be overwritten.
+// Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
+
+// Import Routes
+
+import { Route as rootRoute } from './routes/__root'
+import { Route as TestImport } from './routes/test'
+import { Route as GridImport } from './routes/grid'
+import { Route as FormImport } from './routes/form'
+import { Route as IndexImport } from './routes/index'
+
+// Create/Update Routes
+
+const TestRoute = TestImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const GridRoute = GridImport.update({
+  id: '/grid',
+  path: '/grid',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FormRoute = FormImport.update({
+  id: '/form',
+  path: '/form',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+// Populate the FileRoutesByPath interface
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/form': {
+      id: '/form'
+      path: '/form'
+      fullPath: '/form'
+      preLoaderRoute: typeof FormImport
+      parentRoute: typeof rootRoute
+    }
+    '/grid': {
+      id: '/grid'
+      path: '/grid'
+      fullPath: '/grid'
+      preLoaderRoute: typeof GridImport
+      parentRoute: typeof rootRoute
+    }
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestImport
+      parentRoute: typeof rootRoute
+    }
+  }
+}
+
+// Create and export the route tree
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/form': typeof FormRoute
+  '/grid': typeof GridRoute
+  '/test': typeof TestRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/form': typeof FormRoute
+  '/grid': typeof GridRoute
+  '/test': typeof TestRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/form': typeof FormRoute
+  '/grid': typeof GridRoute
+  '/test': typeof TestRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/form' | '/grid' | '/test'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/form' | '/grid' | '/test'
+  id: '__root__' | '/' | '/form' | '/grid' | '/test'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  FormRoute: typeof FormRoute
+  GridRoute: typeof GridRoute
+  TestRoute: typeof TestRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  FormRoute: FormRoute,
+  GridRoute: GridRoute,
+  TestRoute: TestRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/form",
+        "/grid",
+        "/test"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/form": {
+      "filePath": "form.tsx"
+    },
+    "/grid": {
+      "filePath": "grid.tsx"
+    },
+    "/test": {
+      "filePath": "test.tsx"
+    }
+  }
+}
+ROUTE_MANIFEST_END */
+
+================
+File: src/services/ai.ts
+================
+interface MagicTextInput {
+  prompt: string;
+  inputText: string;
+}
+
+/**
+ * Sends text to OpenAI to process according to the given prompt
+ * and returns the enhanced/modified text
+ */
+export async function postAiGetCizzleMagicText({
+  prompt,
+  inputText,
+}: MagicTextInput): Promise<string> {
+  try {
+    const response = await fetch("/api/ai/magic-text", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt,
+        inputText,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API call failed with status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in postAiGetCizzleMagicText:", error);
+    throw error;
+  }
+}
+
+================
+File: src/ssr.tsx
+================
+/// <reference types="vinxi/types/server" />
+import {
+  createStartHandler,
+  defaultStreamHandler,
+} from "@tanstack/react-start/server";
+import { getRouterManifest } from "@tanstack/react-start/router-manifest";
+import { createRouter } from "./router";
+
+const handler = createStartHandler({
+  createRouter,
+  getRouterManifest,
+});
+
+export default handler(defaultStreamHandler);
+
+================
+File: src/store/hooks.ts
+================
+/**
+ * @description
+ * Defines and exports typed hooks for interacting with the Redux store.
+ * Using these hooks ensures type safety when dispatching actions or selecting state.
+ *
+ * Key features:
+ * - Exports 'useAppDispatch': A pre-typed version of 'useDispatch'.
+ * - Exports 'useAppSelector': A pre-typed version of 'useSelector'.
+ *
+ * @dependencies
+ * - react-redux: Provides the base 'useDispatch' and 'useSelector' hooks.
+ * - ./index: Imports the 'RootState' and 'AppDispatch' types from the store configuration.
+ *
+ * @notes
+ * - These hooks should be used throughout the application instead of the plain 'useDispatch' and 'useSelector'
+ *   from 'react-redux' to maintain type safety.
+ * - Example usage:
+ *   '''typescript
+ *   import { useAppSelector, useAppDispatch } from '~/store/hooks';
+ *   import { setContextText } from '~/store/slices/contextSlice';
+ *
+ *   const MyComponent = () => {
+ *     const contextText = useAppSelector((state) => state.context.text);
+ *     const dispatch = useAppDispatch();
+ *
+ *     const handleClick = () => {
+ *       dispatch(setContextText('New text'));
+ *     };
+ *     // ...
+ *   };
+ *   '''
+ */
+
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import type { RootState, AppDispatch } from './index';
+
+/**
+ * @description Typed hook for dispatching Redux actions.
+ * Use throughout your app instead of plain 'useDispatch'.
+ */
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+
+/**
+ * @description Typed hook for selecting data from the Redux store.
+ * Use throughout your app instead of plain 'useSelector'.
+ */
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+================
+File: src/store/index.ts
+================
+/**
+ * @description
+ * Configures the main Redux Toolkit store for the application.
+ * It combines all the different state slices into a single store instance.
+ * Also exports the RootState and AppDispatch types for use with typed hooks.
+ *
+ * Key features:
+ * - Combines reducers from context, slideNotes, transcript, and modal slices.
+ * - Includes the user slice (retained from template cleanup).
+ * - Exports RootState and AppDispatch for type safety.
+ *
+ * @dependencies
+ * - @reduxjs/toolkit: For store configuration.
+ * - ./slices/*: Imports the individual slice reducers.
+ *
+ * @notes
+ * - Middleware (like thunks for async actions or logging) can be added here if needed in the future.
+ */
+
+import { configureStore } from '@reduxjs/toolkit';
+import userReducer from './slices/userSlice';
+import contextReducer from './slices/contextSlice';
+import slideNotesReducer from './slices/slideNotesSlice';
+import transcriptReducer from './slices/transcriptSlice';
+import modalReducer from './slices/modalSlice';
+
+/**
+ * @description The main Redux store configuration.
+ */
+export const store = configureStore({
+  reducer: {
+    user: userReducer, // Kept from template cleanup, may or may not be used directly by MeetingWeaver features
+    context: contextReducer,
+    slideNotes: slideNotesReducer,
+    transcript: transcriptReducer,
+    modals: modalReducer,
+  },
+  // Middleware can be added here if needed, e.g., for async thunks
+  // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(myMiddleware),
+});
+
+/**
+ * @description Type representing the entire Redux state tree.
+ */
+export type RootState = ReturnType<typeof store.getState>;
+/**
+ * @description Type representing the dispatch function, useful for typing async actions (thunks).
+ */
+export type AppDispatch = typeof store.dispatch;
+
+================
+File: src/store/slices/contextSlice.ts
+================
+/**
+ * @description
+ * Redux slice for managing the state of the Project & Company Context.
+ * This slice holds the text content entered by the user in the context modal
+ * and handles loading/saving this content from/to localStorage.
+ *
+ * Key features:
+ * - Manages the 'text' field for the context.
+ * - Provides a 'setText' action to update the context, including persistence.
+ * - Provides a 'loadContext' action to initialize state from localStorage.
+ * - Initializes state by attempting to load from localStorage immediately.
+ *
+ * @dependencies
+ * - @reduxjs/toolkit: For creating the slice and reducers.
+ * - ~/types: Imports the ContextState interface for type safety.
+ * - ~/utils/localStorage: For interacting with localStorage.
+ * - ~/utils/constants: For localStorage key constant.
+ *
+ * @notes
+ * - Persistence is now handled within the 'setText' action.
+ * - Initial state loading is triggered by calling loadContext when the store is configured or app mounts.
+ */
+
+import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
+import type { ContextState } from '~/types';
+import { getItem, setItem } from '~/utils/localStorage';
+import { LS_CONTEXT_KEY } from '~/utils/constants';
+
+/**
+ * @description Action creator for triggering the load from localStorage.
+ * This can be dispatched when the application initializes.
+ */
+export const loadContext = createAction('context/loadContext');
+
+/**
+ * @description Initial state for the context slice. Tries to load from localStorage immediately.
+ */
+const initialState: ContextState = {
+  text: getItem(LS_CONTEXT_KEY) ?? '', // Initialize from localStorage or default to empty
+};
+
+/**
+ * @description Redux slice definition for context state.
+ */
+export const contextSlice = createSlice({
+  name: 'context',
+  initialState,
+  reducers: {
+    /**
+     * @description Action to set the entire context text content and persist it.
+     * This is typically called when the context modal is closed.
+     * @param state - The current context state.
+     * @param action - Payload contains the new string value for the context text.
+     */
+    setText: (state, action: PayloadAction<string>) => {
+      state.text = action.payload;
+      // Persist the text to localStorage whenever it's set via this action.
+      setItem(LS_CONTEXT_KEY, action.payload);
+    },
+  },
+   extraReducers: (builder) => {
+    builder.addCase(loadContext, (state) => {
+      const storedText = getItem(LS_CONTEXT_KEY);
+      if (storedText !== null) {
+        state.text = storedText;
+      }
+      // If null, the initial state already handled it or it remains empty.
+    });
+  },
+});
+
+// Export the action creator
+export const { setText: setContextText } = contextSlice.actions;
+
+// Export the reducer
+export default contextSlice.reducer;
+
+================
+File: src/store/slices/modalSlice.ts
+================
+/**
+ * @description
+ * Redux slice for managing the visibility state of all modals within the application.
+ * Each modal's open/closed status is controlled by a boolean flag in this slice.
+ *
+ * Key features:
+ * - Tracks visibility for Context, ImageExtract, AddContextLine, and GeneratePrompt modals.
+ * - Provides individual actions to open and close each modal.
+ * - Initializes with all modals closed.
+ *
+ * @dependencies
+ * - @reduxjs/toolkit: For creating the slice and reducers.
+ * - ~/types: Imports the ModalState interface for type safety.
+ *
+ * @notes
+ * - This centralizes modal state management, making it easy to control modal visibility from anywhere in the app.
+ */
+
+import { createSlice } from '@reduxjs/toolkit';
+import type { ModalState } from '~/types';
+
+/**
+ * @description Initial state for the modal slice. All modals start closed.
+ */
+const initialState: ModalState = {
+  isContextModalOpen: false,
+  isImageExtractModalOpen: false,
+  isAddContextLineModalOpen: false,
+  isGeneratePromptModalOpen: false,
+};
+
+/**
+ * @description Redux slice definition for modal visibility state.
+ */
+export const modalSlice = createSlice({
+  name: 'modals',
+  initialState,
+  reducers: {
+    // Context Modal Actions
+    openContextModal: (state) => {
+      state.isContextModalOpen = true;
+    },
+    closeContextModal: (state) => {
+      state.isContextModalOpen = false;
+    },
+    // Image Extract Modal Actions
+    openImageExtractModal: (state) => {
+      state.isImageExtractModalOpen = true;
+    },
+    closeImageExtractModal: (state) => {
+      state.isImageExtractModalOpen = false;
+    },
+    // Add Context Line Modal Actions
+    openAddContextLineModal: (state) => {
+      state.isAddContextLineModalOpen = true;
+    },
+    closeAddContextLineModal: (state) => {
+      state.isAddContextLineModalOpen = false;
+    },
+    // Generate Prompt Modal Actions
+    openGeneratePromptModal: (state) => {
+      state.isGeneratePromptModalOpen = true;
+    },
+    closeGeneratePromptModal: (state) => {
+      state.isGeneratePromptModalOpen = false;
+    },
+  },
+});
+
+// Export action creators
+export const {
+  openContextModal,
+  closeContextModal,
+  openImageExtractModal,
+  closeImageExtractModal,
+  openAddContextLineModal,
+  closeAddContextLineModal,
+  openGeneratePromptModal,
+  closeGeneratePromptModal,
+} = modalSlice.actions;
+
+// Export the reducer
+export default modalSlice.reducer;
+
+================
+File: src/store/slices/slideNotesSlice.ts
+================
+/**
+ * @description
+ * Redux slice for managing the state of the Slide/Meeting Notes panel.
+ * This slice holds the text content entered by the user in the notes text area
+ * and handles loading/saving this content from/to localStorage.
+ *
+ * Key features:
+ * - Manages the 'text' field for slide/meeting notes.
+ * - Provides a 'setSlideNotesText' action for immediate UI updates based on user input.
+ * - Provides a 'persistSlideNotes' action, typically triggered on blur, to save state to localStorage.
+ * - Provides an 'insertSlideNotesText' action for programmatically adding text (like separators), which also persists.
+ * - Provides a 'loadSlideNotes' action to initialize state from localStorage on app load.
+ * - Initializes state by attempting to load from localStorage immediately.
+ *
+ * @dependencies
+ * - @reduxjs/toolkit: For creating the slice and reducers.
+ * - ~/types: Imports the SlideNotesState interface for type safety.
+ * - ~/utils/localStorage: For interacting with localStorage.
+ * - ~/utils/constants: For localStorage key constant.
+ * - ~/utils/textUtils: For text manipulation helper 'insertTextAtCursor'.
+ *
+ * @notes
+ * - Persistence logic is primarily handled by the persistSlideNotes action and within the insertSlideNotesText action.
+ * - setSlideNotesText is for responsive UI updates during typing.
+ * - Initial state loading is triggered by calling loadSlideNotes when the app mounts.
+ */
+
+import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
+import type { SlideNotesState } from '~/types';
+import { getItem, setItem } from '~/utils/localStorage';
+import { LS_SLIDE_NOTES_KEY } from '~/utils/constants';
+import { insertTextAtCursor } from '~/utils/textUtils'; // Import the utility
+
+// BEGIN WRITING FILE CODE
+
+/**
+ * @description Action creator for triggering the load from localStorage.
+ */
+export const loadSlideNotes = createAction('slideNotes/loadSlideNotes');
+
+/**
+ * @description Action creator for explicitly triggering persistence, e.g., on blur.
+ * The payload should be the current text content.
+ */
+export const persistSlideNotes = createAction<string>('slideNotes/persistSlideNotes');
+
+/**
+ * @description Initial state for the slide notes slice. Tries to load from localStorage immediately.
+ */
+const initialState: SlideNotesState = {
+  text: getItem(LS_SLIDE_NOTES_KEY) ?? '', // Initialize from localStorage or default to empty
+};
+
+/**
+ * @description Redux slice definition for slide notes state.
+ */
+export const slideNotesSlice = createSlice({
+  name: 'slideNotes',
+  initialState,
+  reducers: {
+    /**
+     * @description Action to set the entire slide notes text content.
+     * This updates the state immediately for UI responsiveness but doesn't persist automatically.
+     * Persistence should be triggered separately, e.g., by 'persistSlideNotes' on blur.
+     * @param state - The current slide notes state.
+     * @param action - Payload contains the new string value for the notes text.
+     */
+    setText: (state, action: PayloadAction<string>) => {
+      state.text = action.payload;
+    },
+    /**
+     * @description Action to insert text at a specific position. Also handles persistence.
+     * It uses the insertTextAtCursor utility to calculate the new text state.
+     * @param state - The current slide notes state.
+     * @param action - Payload contains the text to insert and the position (cursor index).
+     */
+    insertText: (state, action: PayloadAction<{ textToInsert: string; position: number }>) => {
+      const { textToInsert, position } = action.payload;
+      const { newText } = insertTextAtCursor(state.text, textToInsert, position);
+      state.text = newText;
+       // Persist the change immediately after insertion
+       setItem(LS_SLIDE_NOTES_KEY, newText);
+    },
+  },
+   extraReducers: (builder) => {
+    builder
+      .addCase(loadSlideNotes, (state) => {
+        const storedText = getItem(LS_SLIDE_NOTES_KEY);
+        if (storedText !== null) {
+          state.text = storedText;
+        }
+        // If null, the initial state already handled it or it remains empty.
+      })
+      .addCase(persistSlideNotes, (_state, action) => {
+        // Persists the text passed in the action payload (triggered by onBlur).
+        setItem(LS_SLIDE_NOTES_KEY, action.payload);
+      });
+  },
+});
+
+// Export the action creators
+// Renamed 'setText' export to avoid naming collision if imported directly elsewhere
+export const { setText: setSlideNotesText, insertText: insertSlideNotesText } = slideNotesSlice.actions;
+
+// Export the reducer
+export default slideNotesSlice.reducer;
+
+================
+File: src/store/slices/transcriptSlice.ts
+================
+/**
+ * @description
+ * Redux slice for managing the state of the Meeting Transcript panel.
+ * This includes the displayed text, the original text (pre-cleaning),
+ * loading/error states for AI cleaning, and the cleaned status.
+ * It also handles loading/saving relevant state from/to localStorage.
+ *
+ * Key features:
+ * - Manages 'displayText' (current view) and 'originalText' (backup).
+ * - Tracks 'isLoading' state for the AI cleaning operation.
+ * - Stores potential 'error' messages from the API.
+ * - Maintains 'isCleaned' flag to control the 'Undo' button state.
+ * - Provides actions to update these state fields.
+ * - Handles persistence of displayText and originalText.
+ * - Provides loading actions for initialization.
+ *
+ * @dependencies
+ * - @reduxjs/toolkit: For creating the slice and reducers.
+ * - ~/types: Imports the TranscriptState interface for type safety.
+ * - ~/utils/localStorage: For interacting with localStorage.
+ * - ~/utils/constants: For localStorage key constants.
+ *
+ * @notes
+ * - Persistence is handled within specific actions or via a dedicated persist action.
+ * - Initial state loading reads both display and original text from localStorage.
+ */
+
+import { createSlice, PayloadAction, createAction } from '@reduxjs/toolkit';
+import type { TranscriptState } from '~/types';
+import { getItem, setItem } from '~/utils/localStorage';
+import { LS_TRANSCRIPT_DISPLAY_KEY, LS_TRANSCRIPT_ORIGINAL_KEY } from '~/utils/constants';
+
+/**
+ * @description Action creator for triggering the load from localStorage.
+ */
+export const loadTranscript = createAction('transcript/loadTranscript');
+/**
+ * @description Action creator for explicitly triggering persistence, e.g., on blur.
+ * The payload should contain both displayText and originalText.
+ */
+export const persistTranscript = createAction<{ displayText: string; originalText: string | null }>('transcript/persistTranscript');
+
+/**
+ * @description Initial state for the transcript slice. Tries to load from localStorage immediately.
+ */
+const initialState: TranscriptState = {
+  displayText: getItem(LS_TRANSCRIPT_DISPLAY_KEY) ?? '',
+  originalText: getItem(LS_TRANSCRIPT_ORIGINAL_KEY) ?? null, // originalText is nullable
+  isCleaned: !!getItem(LS_TRANSCRIPT_ORIGINAL_KEY), // Consider it potentially 'cleaned' if original exists on load
+  isLoading: false,
+  error: null,
+};
+
+/**
+ * @description Redux slice definition for transcript state.
+ */
+export const transcriptSlice = createSlice({
+  name: 'transcript',
+  initialState,
+  reducers: {
+    /**
+     * @description Sets the displayed text. Should also reset originalText and isCleaned status
+     * when called directly due to user typing. Persistence should be triggered separately (e.g., onBlur).
+     * @param state - The current transcript state.
+     * @param action - Payload contains the new display text string.
+     */
+    setDisplayText: (state, action: PayloadAction<string>) => {
+      state.displayText = action.payload;
+      // Reset cleaning status on manual edit ONLY if it was cleaned
+      if (state.isCleaned) {
+        state.originalText = null; // Clear original only if it was a cleaned state
+        state.isCleaned = false;
+        // Also persist the clearing of originalText
+         setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Use empty string or handle null appropriately in setItem/getItem
+      }
+      state.error = null; // Clear previous errors on new input
+      // Do NOT persist displayText here, wait for blur/persist action
+    },
+    /**
+     * @description Sets the original transcript text, typically before cleaning. Persists originalText.
+     * @param state - The current transcript state.
+     * @param action - Payload contains the original text string or null.
+     */
+    setOriginalText: (state, action: PayloadAction<string | null>) => {
+      state.originalText = action.payload;
+      setItem(LS_TRANSCRIPT_ORIGINAL_KEY, action.payload ?? ''); // Persist original text change
+    },
+    /**
+     * @description Sets the loading state for the AI cleaning operation.
+     * @param state - The current transcript state.
+     * @param action - Payload contains a boolean indicating loading status.
+     */
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+      if (action.payload) {
+        state.error = null; // Clear errors when starting to load
+      }
+    },
+    /**
+     * @description Sets an error message related to the AI cleaning operation.
+     * @param state - The current transcript state.
+     * @param action - Payload contains the error message string or null.
+     */
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+      state.isLoading = false; // Ensure loading is off if an error occurs
+    },
+    /**
+     * @description Sets the cleaned status flag, typically after a successful clean operation.
+     * @param state - The current transcript state.
+     * @param action - Payload contains a boolean indicating cleaned status.
+     */
+    setIsCleaned: (state, action: PayloadAction<boolean>) => {
+      state.isCleaned = action.payload;
+    },
+    /**
+     * @description Reverts the displayText to the originalText and clears the cleaned status. Persists changes.
+     * This is the 'Undo' operation.
+     * @param state - The current transcript state.
+     */
+    revertToOriginal: (state) => {
+      if (state.originalText !== null) {
+        state.displayText = state.originalText;
+        state.originalText = null;
+        state.isCleaned = false;
+        state.error = null;
+        // Persist changes after undo
+        setItem(LS_TRANSCRIPT_DISPLAY_KEY, state.displayText);
+        setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Clear persisted original text
+      }
+    },
+     /**
+     * @description Inserts text at a specific position in the displayText. Persists the change.
+     * Similar to slideNotesSlice action.
+     * @param state - The current transcript state.
+     * @param action - Payload contains text to insert and position.
+     */
+    insertText: (state, action: PayloadAction<{ textToInsert: string; position: number }>) => {
+      const { textToInsert, position } = action.payload;
+      const currentText = state.displayText;
+      const newText =
+        currentText.slice(0, position) +
+        textToInsert +
+        currentText.slice(position);
+      state.displayText = newText;
+      // Reset cleaning status if inserting manually
+      if (state.isCleaned) {
+        state.originalText = null;
+        state.isCleaned = false;
+         setItem(LS_TRANSCRIPT_ORIGINAL_KEY, ''); // Clear persisted original text
+      }
+       setItem(LS_TRANSCRIPT_DISPLAY_KEY, newText); // Persist after insertion
+    },
+  },
+   extraReducers: (builder) => {
+    builder
+      .addCase(loadTranscript, (state) => {
+        const storedDisplayText = getItem(LS_TRANSCRIPT_DISPLAY_KEY);
+        const storedOriginalText = getItem(LS_TRANSCRIPT_ORIGINAL_KEY);
+
+        if (storedDisplayText !== null) {
+          state.displayText = storedDisplayText;
+        }
+        // Ensure originalText is null if the stored value is empty string or null
+        state.originalText = storedOriginalText || null;
+        // Set isCleaned based on whether originalText was successfully loaded
+        state.isCleaned = !!state.originalText;
+      })
+      .addCase(persistTranscript, (_state, action) => {
+        // Persists the text passed in the action payload.
+        setItem(LS_TRANSCRIPT_DISPLAY_KEY, action.payload.displayText);
+        setItem(LS_TRANSCRIPT_ORIGINAL_KEY, action.payload.originalText ?? '');
+      });
+  },
+});
+
+// Export action creators
+export const {
+  setDisplayText: setTranscriptDisplayText,
+  setOriginalText: setTranscriptOriginalText,
+  setLoading: setTranscriptLoading,
+  setError: setTranscriptError,
+  setIsCleaned: setTranscriptIsCleaned,
+  revertToOriginal: revertTranscriptToOriginal,
+  insertText: insertTranscriptText,
+} = transcriptSlice.actions;
+
+// Export the reducer
+export default transcriptSlice.reducer;
+
+================
+File: src/store/slices/userSlice.ts
+================
+/*
+<ai_context>
+This file defines a Redux slice for managing user state in the application.
+It handles user authentication data and subscription information.
+
+The slice provides:
+- A typed interface for user properties (id, name, email, etc.)
+- Default initial state with null values
+- Reducers for setting user data and clearing user state
+- Action creators that can be dispatched throughout the app
+
+This state would typically be updated when users log in/out or when 
+their subscription status changes through payment processing.
+</ai_context>
+*/
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+interface UserState {
+  id: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  profileImageUrl: string | null;
+  isLoaded: boolean;
+  subscriptionPeriodEnd: Date | null;
+}
+
+const initialState: UserState = {
+  id: null,
+  firstName: null,
+  lastName: null,
+  email: null,
+  profileImageUrl: null,
+  isLoaded: false,
+  subscriptionPeriodEnd: null,
+};
+
+export const userSlice = createSlice({
+  name: "user",
+  initialState,
+  reducers: {
+    setUser: (state, action: PayloadAction<Partial<UserState>>) => {
+      return { ...state, ...action.payload };
+    },
+    clearUser: (state) => {
+      return initialState;
+    },
+  },
+});
+
+export const { setUser, clearUser } = userSlice.actions;
+
+export default userSlice.reducer;
+
+================
+File: src/styles/app.css
+================
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 220.9 39.3% 11%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71.4% 4.1%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 224 71.4% 10%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 10%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 10%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 20%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 20%;
+    --muted-foreground: 217.9 10.6% 70%;
+    --accent: 215 27.9% 20%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 20%;
+    --input: 215 27.9% 20%;
+    --ring: 216 12.2% 83.9%;
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .using-mouse * {
+    outline: none !important;
+  }
+}
+
+================
+File: src/templates/context-template.md
+================
+# Meeting Name
+
+# Company Context
+
+# Our Team in the meeting
+
+# Client Team in the meeting
+
+# Meeting Agenda - We don't always get to all the topics
+
+# Nuance & Extra Context
+
+================
+File: src/templates/prompt-template.md
+================
+Assume the role of detailed meeting note taker and trade promotion management software consultant.
+
+I will feed you the following information about my company and today's meeting under the following headers and I want you to ask any clarifying follow up questions to get better context.
+
+Once receiving answers please sift through banter and provide a detailed, comprehensive set of notes on today's meeting in the following output format:
+
+# Action Items (Client)
+
+# Action Items (Our Team)
+
+# Circle Back Items
+
+# Full Detailed Meeting Notes
+
+###########################################################################################################################################################
+
+# Project/Company/Client Context
+
+<PROJECT_COMPANY_CONTEXT>
+
+# Slide Notes
+
+<SLIDE_NOTES>
+
+###########################################################################################################################################################
+
+#Meeting Transcript
+
+<MEETING_TRANSCRIPT>
+
+================
+File: src/types/app-types.ts
+================
+/**
+ * @description
+ * This file defines the core TypeScript types and interfaces used throughout the MeetingWeaver AI application,
+ * particularly for defining the structure of the Redux state slices.
+ *
+ * Key interfaces:
+ * - ContextState: Defines the shape of the project/company context state.
+ * - SlideNotesState: Defines the shape of the slide/meeting notes state.
+ * - TranscriptState: Defines the shape of the meeting transcript state, including original and cleaned versions.
+ * - ModalState: Defines the shape of the state managing the visibility of various modals.
+ *
+ * @dependencies
+ * - None
+ *
+ * @notes
+ * - These interfaces ensure type safety when interacting with the Redux store.
+ */
+
+/**
+ * @description Represents the state slice for the project and company context.
+ */
+export interface ContextState {
+  /**
+   * @description The raw text content entered by the user in the context modal.
+   */
+  text: string;
+}
+
+/**
+ * @description Represents the state slice for the slide and meeting notes.
+ */
+export interface SlideNotesState {
+  /**
+   * @description The text content of the slide/meeting notes text area.
+   */
+  text: string;
+}
+
+/**
+ * @description Represents the state slice for the meeting transcript.
+ */
+export interface TranscriptState {
+  /**
+   * @description The currently displayed text in the transcript text area (can be original or cleaned).
+   */
+  displayText: string;
+  /**
+   * @description The original transcript text stored before the 'Clean ✨' operation was performed.
+   * Null if no cleaning has been done or if 'Undo' was used.
+   */
+  originalText: string | null;
+  /**
+   * @description Flag indicating if the 'Clean ✨' operation has been successfully performed
+   * since the last manual edit or 'Undo'. Used to enable/disable the 'Undo' button.
+   */
+  isCleaned: boolean;
+  /**
+   * @description Flag indicating if the 'Clean ✨' operation (API call) is currently in progress.
+   * Used to disable the 'Clean ✨' button.
+   */
+  isLoading: boolean;
+  /**
+   * @description Stores any error message resulting from the 'Clean ✨' API call.
+   * Null if there is no error.
+   */
+  error: string | null;
+}
+
+/**
+ * @description Represents the state slice managing the visibility of all modals in the application.
+ */
+export interface ModalState {
+  /**
+   * @description Controls the visibility of the Project & Company Context modal.
+   */
+  isContextModalOpen: boolean;
+  /**
+   * @description Controls the visibility of the Image-to-Text Extraction modal.
+   */
+  isImageExtractModalOpen: boolean;
+  /**
+   * @description Controls the visibility of the Add Context Line modal for transcripts.
+   */
+  isAddContextLineModalOpen: boolean;
+  /**
+   * @description Controls the visibility of the Generate Note Builder Prompt modal.
+   */
+  isGeneratePromptModalOpen: boolean;
+}
+
+================
+File: src/types/index.ts
+================
+/**
+ * @description
+ * Barrel file for exporting all core application types.
+ * This makes importing types more convenient elsewhere in the application.
+ *
+ * @dependencies
+ * - ./app-types: Contains the actual type definitions.
+ *
+ * @notes
+ * - Simplifies import statements, e.g., import type { ContextState } from '~/types';
+ */
+
+export * from './app-types';
+
+================
+File: src/utils/cn.ts
+================
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+================
+File: src/utils/constants.ts
+================
+/**
+ * @description
+ * This file stores constant values used throughout the MeetingWeaver AI application.
+ * Centralizing constants improves maintainability and reduces magic strings/numbers.
+ *
+ * Key constants:
+ * - LocalStorage Keys: For persisting application state.
+ * - Text Separators: Standardized strings used for navigation and content splitting.
+ * - Templates: Predefined text structures for modals and prompt generation.
+ *
+ * @dependencies
+ * - None
+ *
+ * @notes
+ * - Keep constants organized and clearly named.
+ */
+
+// LocalStorage Keys
+export const LS_CONTEXT_KEY = "meetingweaver_context";
+export const LS_SLIDE_NOTES_KEY = "meetingweaver_slide_notes";
+export const LS_TRANSCRIPT_DISPLAY_KEY = "meetingweaver_transcript_display";
+export const LS_TRANSCRIPT_ORIGINAL_KEY = "meetingweaver_transcript_original";
+
+// Text Separators & Prefixes
+/**
+ * @description Separator used in the Slide/Meeting Notes text area. Also used in transcript context lines.
+ */
+export const SLIDE_NOTES_SEPARATOR = "##########";
+/**
+ * @description Prefix used for context lines added within the Meeting Transcript text area.
+ */
+export const TRANSCRIPT_CONTEXT_PREFIX = "## ";
+
+// Templates
+/**
+ * @description Default template pre-populated in the Project & Company Context modal.
+ * Loaded from markdown file for better maintainability.
+ */
+export const CONTEXT_TEMPLATE = `# Meeting Name
+
+# Company Context
+
+# Our Team in the meeting
+
+# Client Team in the meeting
+
+# Meeting Agenda - We don't always get to all the topics
+
+# Nuance & Extra Context`;
+
+/**
+ * @description Template used for generating the final Note Builder Prompt.
+ * Placeholders (<PLACEHOLDER_NAME>) will be replaced with actual content.
+ * Loaded from markdown file for better maintainability.
+ */
+export const PROMPT_TEMPLATE = `Assume the role of detailed meeting note taker and trade promotion management software consultant.
+
+I will  feed you the following information about my company and today's meeting under the following headers and I want you to ask any clarifying follow up questions to get better context.
+
+Once receiving answers please sift through banter and provide a detailed, comprehensive set of notes on today's meeting in the following output format:
+
+# Action Items (Client)
+
+# Action Items (Our Team)
+
+# Circle Back Items
+
+# Full Detailed Meeting Notes
+
+###########################################################################################################################################################
+
+# Project/Company/Client Context
+
+<PROJECT_COMPANY_CONTEXT>
+
+# Slide Notes
+
+<SLIDE_NOTES>
+
+###########################################################################################################################################################
+
+#Meeting Transcript
+
+<MEETING_TRANSCRIPT>`;
+
+================
+File: src/utils/feedback.ts
+================
+import { prisma } from "./prisma";
+import { getAuth } from "@clerk/tanstack-start/server";
+import { z } from "zod";
+import { getWebRequest } from "@tanstack/react-start/server";
+import { createServerFn } from "@tanstack/react-start";
+
+// Define validation schema for feedback submission
+export const feedbackSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  feedback: z.string().min(1, "Feedback is required"),
+  image_data: z.string().nullable().optional(),
+});
+
+// Type for feedback submission
+export type FeedbackInput = z.infer<typeof feedbackSchema>;
+
+// Create serverFn for submitting feedback
+export const submitFeedback = createServerFn({ method: 'POST' })
+  .validator((input: FeedbackInput) => feedbackSchema.parse(input))
+  .handler(async ({ data }) => {
+    try {
+      // Get auth data from Clerk
+      const req = getWebRequest();
+      if (!req) {
+        throw new Error("No request object available");
+      }
+      
+      const auth = await getAuth(req);
+      if (!auth.userId) {
+        throw new Error("User not authenticated");
+      }
+      
+      // Create feedback in database
+      const feedback = await prisma.feedback.create({
+        data: {
+          title: data.title,
+          feedback: data.feedback,
+          image_data: data.image_data || null,
+          userId: auth.userId,
+        },
+      });
+      
+      return { success: true, feedbackId: feedback.id };
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "An unknown error occurred" 
+      };
+    }
+  });
+
+================
+File: src/utils/localStorage.ts
+================
+/**
+ * @description
+ * Provides utility functions for interacting with the browser's localStorage.
+ * Includes basic error handling for common issues like quota limits.
+ *
+ * Key features:
+ * - getItem: Safely retrieves an item from localStorage.
+ * - setItem: Safely saves an item to localStorage.
+ *
+ * @dependencies
+ * - react-hot-toast: For displaying error messages to the user.
+ *
+ * @notes
+ * - Errors during localStorage access (e.g., storage disabled, quota exceeded)
+ *   are caught, logged, and optionally shown as a toast notification.
+ * - These functions assume string values are stored. JSON parsing/stringifying
+ *   should happen before calling setItem or after calling getItem if storing objects.
+ */
+import toast from "react-hot-toast";
+
+/**
+ * @description Safely retrieves an item from localStorage by key.
+ * @param key - The key of the item to retrieve.
+ * @returns The stored string value, or null if the key doesn't exist or localStorage is unavailable/errors occur.
+ */
+export function getItem(key: string): string | null {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return window.localStorage.getItem(key);
+    }
+    return null; // Indicate localStorage not available
+  } catch (error) {
+    console.error(`Error reading localStorage key "${key}":`, error);
+    // Optional: Show a less intrusive error, as reading failure might be less critical initially
+    // toast.error(`Failed to load data for ${key}. Storage might be unavailable.`);
+    return null; // Return null on error
+  }
+}
+
+/**
+ * @description Safely saves an item to localStorage.
+ * @param key - The key under which to store the value.
+ * @param value - The string value to store.
+ * @returns void
+ */
+export function setItem(key: string, value: string): void {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    } else {
+      console.warn("localStorage not available, skipping setItem.");
+    }
+  } catch (error) {
+    console.error(`Error setting localStorage key "${key}":`, error);
+    // Show a toast notification as saving failure is usually more important for the user
+    toast.error(
+      `Failed to save data for ${key}. Storage might be full or unavailable.`
+    );
+  }
+}
+
+================
+File: src/utils/seo.ts
+================
+export const seo = ({
+  title,
+  description,
+  keywords,
+  image,
+}: {
+  title: string
+  description?: string
+  image?: string
+  keywords?: string
+}) => {
+  const tags = [
+    { title },
+    { name: 'description', content: description },
+    { name: 'keywords', content: keywords },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:creator', content: '@tannerlinsley' },
+    { name: 'twitter:site', content: '@tannerlinsley' },
+    { name: 'og:type', content: 'website' },
+    { name: 'og:title', content: title },
+    { name: 'og:description', content: description },
+    ...(image
+      ? [
+          { name: 'twitter:image', content: image },
+          { name: 'twitter:card', content: 'summary_large_image' },
+          { name: 'og:image', content: image },
+        ]
+      : []),
+  ]
+
+  return tags
+}
+
+================
+File: src/utils/textUtils.ts
+================
+/**
+ * @description
+ * This file provides utility functions for common text manipulations required
+ * across the MeetingWeaver AI application. This includes tasks like copying text
+ * to the clipboard, inserting text at specific positions, and navigating within
+ * text areas based on separators or prefixes.
+ *
+ * Key features:
+ * - Copying text to the clipboard with user feedback.
+ * - Inserting text at a given cursor position.
+ * - Finding nearest separator/prefix lines for navigation.
+ *
+ * @dependencies
+ * - react-hot-toast: For providing user feedback on clipboard operations.
+ *
+ * @notes
+ * - Functions related to cursor manipulation and navigation will be added in subsequent steps.
+ * - Error handling for clipboard operations is included.
+ */
+
+// BEGIN WRITING FILE CODE
+import toast from 'react-hot-toast';
+
+/**
+ * @description Copies the provided text to the user's clipboard using the
+ * navigator.clipboard API. Shows toast notifications for success or failure.
+ * @param text - The string to be copied to the clipboard.
+ * @returns Promise<void> - Resolves when the copy operation is attempted.
+ */
+export async function copyToClipboard(text: string): Promise<void> {
+  if (!navigator.clipboard) {
+    toast.error('Clipboard API not available in this browser.');
+    console.error('Clipboard API not supported');
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success('Text copied to clipboard!');
+  } catch (err) {
+    toast.error('Failed to copy text to clipboard.');
+    console.error('Failed to copy text: ', err);
+  }
+}
+
+/**
+ * @description Inserts text at a specific cursor position within a given string.
+ * Calculates the new text content and the expected cursor position after insertion.
+ * @param currentText - The original text string.
+ * @param textToInsert - The string to insert into the currentText.
+ * @param cursorPosition - The index in currentText where insertion should occur.
+ *                         If null or undefined, insertion happens at the end.
+ * @returns An object containing:
+ *          - newText: The resulting string after insertion.
+ *          - newCursorPosition: The calculated cursor position immediately after the inserted text.
+ */
+export function insertTextAtCursor(
+  currentText: string,
+  textToInsert: string,
+  cursorPosition: number | null | undefined
+): { newText: string; newCursorPosition: number } {
+  // Handle null/undefined cursor position by defaulting to the end of the text
+  const position = cursorPosition ?? currentText.length;
+
+  // Ensure position is within valid bounds
+  const validPosition = Math.max(0, Math.min(position, currentText.length));
+
+  // Construct the new text string
+  const newText =
+    currentText.slice(0, validPosition) +
+    textToInsert +
+    currentText.slice(validPosition);
+
+  // Calculate the new cursor position (end of the inserted text)
+  const newCursorPosition = validPosition + textToInsert.length;
+
+  return { newText, newCursorPosition };
+}
+
+
+/**
+ * @description Finds the starting index of the nearest line that exactly matches the separator,
+ * searching upwards or downwards from the current cursor position.
+ * @param text - The text content to search within.
+ * @param currentPosition - The starting cursor position index.
+ * @param separator - The exact string that constitutes the separator line.
+ * @param direction - The direction to search ('up' or 'down').
+ * @returns The starting index of the found line, or null if no such line is found.
+ */
+export function findNearestSeparatorLine(
+    text: string,
+    currentPosition: number,
+    separator: string,
+    direction: 'up' | 'down'
+): number | null {
+    const lines = text.split('\n');
+    // Determine the line index the cursor is currently on or before
+    let currentLineIndex = text.substring(0, currentPosition).split('\n').length - 1;
+
+    if (direction === 'up') {
+        // Search backwards from the line *before* the current one
+        for (let i = currentLineIndex - 1; i >= 0; i--) {
+            if (lines[i].trim() === separator) { // Check if the line *exactly* matches the separator (ignoring potential whitespace)
+                // Calculate the starting index of this line
+                let index = 0;
+                for (let j = 0; j < i; j++) {
+                    index += lines[j].length + 1; // Add line length + 1 for newline character
+                }
+                return index;
+            }
+        }
+        return null; // No separator found above
+    } else { // direction === 'down'
+        // Search forwards from the line *after* the current one
+        for (let i = currentLineIndex + 1; i < lines.length; i++) {
+             if (lines[i].trim() === separator) { // Check if the line *exactly* matches the separator
+                // Calculate the starting index of this line
+                let index = 0;
+                for (let j = 0; j < i; j++) {
+                    index += lines[j].length + 1; // Add line length + 1 for newline character
+                }
+                return index;
+            }
+        }
+        return null; // No separator found below
+    }
+}
+
+
+/**
+ * @description Finds the index of the nearest line starting with a specific prefix,
+ * searching upwards or downwards from the current cursor position.
+ * (To be implemented in Step 21)
+ * @param text - The text content to search within.
+ * @param currentPosition - The starting cursor position index.
+ * @param prefix - The prefix string the line must start with.
+ * @param direction - The direction to search ('up' or 'down').
+ * @returns The starting index of the found line, or null if no such line is found.
+ */
+// export function findNearestPrefixedLine(text: string, currentPosition: number, prefix: string, direction: 'up' | 'down'): number | null {
+//   // Implementation in Step 21
+//   return null;
+// }
+
+/**
+ * @description Triggers a browser download for the given text content.
+ * (To be implemented in Step 19)
+ * @param text - The text content to save.
+ * @param filename - The desired name for the downloaded file.
+ */
+// export function saveTextToFile(text: string, filename: string): void {
+//  // Implementation in Step 19
+// }
+
+================
+File: tailwind.config.mjs
+================
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: "class",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+};
+
+================
+File: tsconfig.json
+================
+{
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "src/routes/api/stripe/webhooks.ts.old",
+    "src/routes/ai-test.tsx.old"
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "noEmit": true
+  }
+}
+
+================
+File: vite.config.ts
+================
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+});
+
+
+
+================================================================
+End of Codebase
+================================================================
