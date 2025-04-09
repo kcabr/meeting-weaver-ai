@@ -100,7 +100,7 @@ export function SlideNotesPanel() {
     if (textareaRef.current) {
       const cursorPosition = textareaRef.current.selectionStart;
       // Insert with surrounding newlines for proper line separation
-      const textToInsert = `\n${SLIDE_NOTES_SEPARATOR}\n`;
+      const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
       const calculatedNextPosition = cursorPosition + textToInsert.length;
 
       dispatch(
@@ -109,7 +109,7 @@ export function SlideNotesPanel() {
       setNextCursorPosition(calculatedNextPosition);
     } else {
       console.warn("Textarea ref not available for Add Line action.");
-      const textToInsert = `\n${SLIDE_NOTES_SEPARATOR}\n`;
+      const textToInsert = `\n\n${SLIDE_NOTES_SEPARATOR}\n\n`;
       const cursorPosition = slideNotesText.length;
       const calculatedNextPosition = cursorPosition + textToInsert.length;
       dispatch(
@@ -181,7 +181,7 @@ export function SlideNotesPanel() {
   };
 
   /**
-   * @description Handles the click event for the "Img-Txt Extract (Modal)" button.
+   * @description Handles the click event for the "Img-Txt Extract" button.
    */
   const handleImageExtract = () => {
     const currentPosition =
@@ -220,10 +220,10 @@ export function SlideNotesPanel() {
           variant="outline"
           size="icon"
           onClick={handleImageExtract}
-          title="Img-Txt Extract (Modal)"
+          title="Img-Txt Extract"
         >
           <ImageIcon className="h-4 w-4" />
-          <span className="sr-only">Img-Txt Extract (Modal)</span>
+          <span className="sr-only">Img-Txt Extract</span>
         </Button>
         <Button
           variant="outline"

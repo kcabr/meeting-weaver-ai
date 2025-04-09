@@ -25,7 +25,8 @@ export const LS_TRANSCRIPT_ORIGINAL_KEY = "meetingweaver_transcript_original";
 /**
  * @description Separator used in the Slide/Meeting Notes text area. Also used in transcript context lines.
  */
-export const SLIDE_NOTES_SEPARATOR = "##########";
+export const SLIDE_NOTES_SEPARATOR =
+  "##################################################";
 /**
  * @description Prefix used for context lines added within the Meeting Transcript text area.
  */

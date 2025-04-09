@@ -203,7 +203,7 @@ export function TranscriptPanel() {
   };
 
   /**
-   * @description Handles the click event for the "Add Context Line (Modal)" button.
+   * @description Handles the click event for the "Add Context Line" button.
    */
   const handleAddContextLine = () => {
     const currentPosition =
@@ -315,10 +315,10 @@ export function TranscriptPanel() {
           variant="outline"
           size="icon"
           onClick={handleAddContextLine}
-          title="Add Context Line (Modal)"
+          title="Add Context Line"
         >
           <MessageSquarePlus className="h-4 w-4" />
-          <span className="sr-only">Add Context Line (Modal)</span>
+          <span className="sr-only">Add Context Line</span>
         </Button>
         <Button
           variant="outline"

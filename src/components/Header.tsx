@@ -92,7 +92,7 @@ export function Header() {
           )}
           onClick={handleOpenContextModal}
         >
-          Project & Company Context (Modal)
+          Project & Company Context
         </Button>
       </div>
     </header>
