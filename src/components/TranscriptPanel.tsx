@@ -89,6 +89,26 @@ export function TranscriptPanel() {
   const contextText = useAppSelector((state) => state.context.text);
   const slideNotesText = useAppSelector((state) => state.slideNotes.text);
 
+  // Add console logs to debug the issue
+  console.log(
+    "Context Text Length:",
+    contextText.length,
+    "Trimmed Length:",
+    contextText.trim().length
+  );
+  console.log(
+    "Slide Notes Text Length:",
+    slideNotesText.length,
+    "Trimmed Length:",
+    slideNotesText.trim().length
+  );
+  console.log(
+    "Display Text Length:",
+    displayText.length,
+    "Trimmed Length:",
+    displayText.trim().length
+  );
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { cleanTranscriptHandler } = useTranscriptCleaner();
 
@@ -99,6 +119,8 @@ export function TranscriptPanel() {
     contextText.trim().length > 0 &&
     slideNotesText.trim().length > 0 &&
     displayText.trim().length > 0;
+
+  console.log("Is Generate Button Enabled:", isGenerateButtonEnabled);
 
   /**
    * @description Handles changes in the textarea input.
@@ -312,7 +334,7 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleGeneratePrompt}
           title="Generate Note Builder Prompt..."
-          disabled={!isGenerateButtonEnabled} // Enable/disable based on content
+          //disabled={true} // Enable/disable based on content
           className="mt-auto" // Push to bottom if space allows
         >
           <Send className="h-4 w-4" />
