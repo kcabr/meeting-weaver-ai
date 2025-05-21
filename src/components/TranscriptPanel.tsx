@@ -120,7 +120,13 @@ export function TranscriptPanel() {
     slideNotesText.trim().length > 0 &&
     displayText.trim().length > 0;
 
-  console.log("Is Generate Button Enabled:", isGenerateButtonEnabled);
+  console.log(
+    "Is Generate Button Enabled:",
+    isGenerateButtonEnabled,
+    contextText.trim().length,
+    slideNotesText.trim().length,
+    displayText.trim().length
+  );
 
   /**
    * @description Handles changes in the textarea input.
@@ -165,8 +171,18 @@ export function TranscriptPanel() {
       );
 
       if (newPosition !== null) {
+        // Find the end of the context line (next newline or end of text)
+        let selectionEndPosition = text.indexOf("\n", newPosition);
+        if (selectionEndPosition === -1) {
+          selectionEndPosition = text.length; // End of text if no newline found
+        }
+
         textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        // Select the entire context line
+        textareaRef.current.setSelectionRange(
+          newPosition,
+          selectionEndPosition
+        );
       } else {
         toast("No context line (##) found above.", {
           icon: "🤷",
@@ -191,8 +207,18 @@ export function TranscriptPanel() {
       );
 
       if (newPosition !== null) {
+        // Find the end of the context line (next newline or end of text)
+        let selectionEndPosition = text.indexOf("\n", newPosition);
+        if (selectionEndPosition === -1) {
+          selectionEndPosition = text.length; // End of text if no newline found
+        }
+
         textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        // Select the entire context line
+        textareaRef.current.setSelectionRange(
+          newPosition,
+          selectionEndPosition
+        );
       } else {
         toast("No context line (##) found below.", {
           icon: "🤷",
@@ -334,7 +360,7 @@ export function TranscriptPanel() {
           size="icon"
           onClick={handleGeneratePrompt}
           title="Generate Note Builder Prompt..."
-          //disabled={true} // Enable/disable based on content
+          disabled={false} //{!isGenerateButtonEnabled} // Enable/disable based on content
           className="mt-auto" // Push to bottom if space allows
         >
           <Send className="h-4 w-4" />

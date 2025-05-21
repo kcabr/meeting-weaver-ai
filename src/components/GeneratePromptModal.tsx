@@ -32,7 +32,7 @@
  * - Copy functionality calls the 'copyToClipboard' utility.
  */
 
-import React, { useMemo } from "react"; // Removed useRef as it's not strictly needed for copy
+import React, { useMemo, useState } from "react"; // Removed useRef as it's not strictly needed for copy
 import {
   Dialog,
   DialogContent,
@@ -44,11 +44,22 @@ import {
 } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select"; // Added Select imports
 import { useAppSelector, useAppDispatch } from "~/store/hooks";
 import { closeGeneratePromptModal } from "~/store/slices/modalSlice";
 import { copyToClipboard } from "~/utils/textUtils";
-import { PROMPT_TEMPLATE } from "~/utils/constants";
-import { Copy as CopyIcon } from "lucide-react";
+import {
+  PROMPT_TEMPLATE_DESIGN,
+  PROMPT_TEMPLATE_TRAINING,
+} from "~/utils/constants";
+import { TextareaWithCopy } from "~/components/TextareaWithCopy"; // Added import
+import { TokenPill } from "~/components/TokenPill"; // Added import
 
 // BEGIN WRITING FILE CODE
 export function GeneratePromptModal() {
@@ -56,6 +67,7 @@ export function GeneratePromptModal() {
   const isOpen = useAppSelector(
     (state) => state.modals.isGeneratePromptModalOpen
   );
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("Design"); // Added state for selected template
 
   const contextText = useAppSelector((state) => state.context.text);
   const slideNotesText = useAppSelector((state) => state.slideNotes.text);
@@ -67,25 +79,32 @@ export function GeneratePromptModal() {
    * @description Computes the final prompt string.
    */
   const finalPrompt = useMemo(() => {
-    let prompt = PROMPT_TEMPLATE;
+    let prompt: string;
+    switch (selectedTemplate) {
+      case "Design":
+        prompt = PROMPT_TEMPLATE_DESIGN;
+        break;
+      case "Training":
+        prompt = PROMPT_TEMPLATE_TRAINING;
+        break;
+      default:
+        prompt = PROMPT_TEMPLATE_DESIGN; // Default to Design
+        break;
+    }
     prompt = prompt.replace("<PROJECT_COMPANY_CONTEXT>", contextText.trim());
     prompt = prompt.replace("<SLIDE_NOTES>", slideNotesText.trim());
-    prompt = prompt.replace("<MEETING_TRANSCRIPT>", transcriptDisplayText.trim());
+    prompt = prompt.replace(
+      "<MEETING_TRANSCRIPT>",
+      transcriptDisplayText.trim()
+    );
     return prompt;
-  }, [contextText, slideNotesText, transcriptDisplayText]);
+  }, [contextText, slideNotesText, transcriptDisplayText, selectedTemplate]); // Added selectedTemplate to dependency array
 
   /**
    * @description Handles closing the dialog.
    */
   const handleClose = () => {
     dispatch(closeGeneratePromptModal());
-  };
-
-  /**
-   * @description Handles the "Copy to Clipboard" button click.
-   */
-  const handleCopyPrompt = () => {
-    copyToClipboard(finalPrompt);
   };
 
   return (
@@ -101,7 +120,24 @@ export function GeneratePromptModal() {
         </DialogHeader>
         {/* Use flex-grow on the container to push footer down */}
         <div className="grid gap-4 py-4 flex-grow">
-          <Textarea
+          <div className="flex justify-between items-center">
+            {" "}
+            {/* Container for Select and TokenPill */}
+            <Select
+              value={selectedTemplate}
+              onValueChange={setSelectedTemplate}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a template" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Design">Design</SelectItem>
+                <SelectItem value="Training">Training</SelectItem>
+              </SelectContent>
+            </Select>
+            <TokenPill text={finalPrompt} /> {/* Added TokenPill */}
+          </div>
+          <TextareaWithCopy
             id="generated-prompt-textarea"
             value={finalPrompt}
             readOnly
@@ -110,15 +146,10 @@ export function GeneratePromptModal() {
             aria-label="Generated Prompt"
           />
         </div>
-        <DialogFooter className="sm:justify-between mt-auto"> {/* Pushed footer */}
-          <Button
-            variant="outline"
-            onClick={handleCopyPrompt}
-            className="flex items-center gap-2"
-          >
-            <CopyIcon className="h-4 w-4" />
-            Copy to Clipboard
-          </Button>
+        <DialogFooter className="sm:justify-end mt-auto">
+          {" "}
+          {/* Changed sm:justify-between to sm:justify-end */}
+          {/* Removed the old Copy to Clipboard button */}
           <DialogClose asChild>
             <Button variant="secondary">Close</Button>
           </DialogClose>

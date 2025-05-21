@@ -149,8 +149,13 @@ export function SlideNotesPanel() {
       );
 
       if (newPosition !== null) {
+        const selectionEndPosition = newPosition + SLIDE_NOTES_SEPARATOR.length;
         textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        // Select the entire separator string
+        textareaRef.current.setSelectionRange(
+          newPosition,
+          selectionEndPosition
+        );
       } else {
         toast("No separator found above.", { icon: "🤷", duration: 1500 });
       }
@@ -172,8 +177,13 @@ export function SlideNotesPanel() {
       );
 
       if (newPosition !== null) {
+        const selectionEndPosition = newPosition + SLIDE_NOTES_SEPARATOR.length;
         textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        // Select the entire separator string
+        textareaRef.current.setSelectionRange(
+          newPosition,
+          selectionEndPosition
+        );
       } else {
         toast("No separator found below.", { icon: "🤷", duration: 1500 });
       }
