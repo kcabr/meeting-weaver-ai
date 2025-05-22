@@ -20,6 +20,10 @@ export const LS_CONTEXT_KEY = "meetingweaver_context";
 export const LS_SLIDE_NOTES_KEY = "meetingweaver_slide_notes";
 export const LS_TRANSCRIPT_DISPLAY_KEY = "meetingweaver_transcript_display";
 export const LS_TRANSCRIPT_ORIGINAL_KEY = "meetingweaver_transcript_original";
+export const LS_MEETING_NAME_KEY = "meetingweaver_meeting_name";
+export const LS_MEETING_AGENDA_KEY = "meetingweaver_meeting_agenda";
+export const LS_OUR_TEAM_KEY = "meetingweaver_our_team";
+export const LS_CLIENT_TEAM_KEY = "meetingweaver_client_team";
 
 // Text Separators & Prefixes
 /**
@@ -37,15 +41,11 @@ export const TRANSCRIPT_CONTEXT_PREFIX = "## ";
  * @description Default template pre-populated in the Project & Company Context modal.
  * Loaded from markdown file for better maintainability.
  */
-export const CONTEXT_TEMPLATE = `# Meeting Name
+export const CONTEXT_TEMPLATE = `# Project Context
 
-# Company Context
+# Our Company Context 
 
-# Our Team in the meeting
-
-# Client Team in the meeting
-
-# Meeting Agenda - We don't always get to all the topics
+# Client  Context
 
 # Nuance & Extra Context`;
 
@@ -62,15 +62,17 @@ I will feed you information about my company (Xtel, created software also called
 
 # Meeting Name
 
-# Our Company Context
-
-# Client Context
+# Meeting Agenda - We don't always get to all the topics or sometimes skip ahead
 
 # Our Team in the meeting
 
 # Client Team in the meeting
 
-# Meeting Agenda - We don't always get to all the topics
+# Project Context
+
+# Our Company Context 
+
+# Client  Context
 
 # Nuance & Extra Context
 
@@ -84,6 +86,10 @@ Before you build and respond with meeting notes I want you to ask any clarifying
 Analyze the provided meeting transcript. Extract key decisions, action items (with owners and deadlines if mentioned), and major discussion points. Exclude off-topic chatter and filler conversation. 
 
 The final output should match this format:
+
+# Meeting Name
+
+# Meeting Coverage - Build a table with 2 columns; Left side has the agenda and right side has what was actually covered. Keep summary short and concise.
 
 # Action Items (Client)
 
@@ -123,18 +129,27 @@ This is a design meeting. Below is an example of the format I would like for the
     *   Question raised about handling ship dates for accruals when shipments occur earlier than planned event ship dates (e.g., April 27th ship for May 1st event start). Xtel explained accrual follows event dates; adjustments might involve changing event dates or potentially creating short secondary events (needs more discussion in requirements). Using LE spend calculation might mitigate some timing issues if volume forecasts are accurate.
 
 
-## MEETING CONTEXT/NOTES START ####################################################################################################################################
+## MEETING CONTEXT/DATA START ####################################################################################################################################
 
+## Meeting Name
+<MEETING_NAME>
+
+## Meeting Agenda - We don't always get to all the topics or sometimes skip ahead
+<MEETING_AGENDA>
+
+## Our Team in the meeting
+<OUR_TEAM>
+
+## Client Team in the meeting
+<CLIENT_TEAM>
+
+## Project, Our Company, Client Context #####################################################################################################################################################
 <PROJECT_COMPANY_CONTEXT>
 
-# Slide Notes
-
+## SLIDE NOTES ####################################################################################################################################################
 <SLIDE_NOTES>
 
-###########################################################################################################################################################
-
-# Meeting Transcript - I will use #s to add context within the transcript and to explain when we are moving on to another section.
-
+## MEETING TRANSCRIPT #############################################################################################################################################
 <MEETING_TRANSCRIPT>`;
 
 export const PROMPT_TEMPLATE_TRAINING = `Assume the role of detailed meeting note taker and trade promotion management software consultant.
@@ -145,15 +160,17 @@ I will feed you information about my company (Xtel, created software also called
 
 # Meeting Name
 
-# Our Company Context
-
-# Client Context
+# Meeting Agenda - We don't always get to all the topics or sometimes skip ahead
 
 # Our Team in the meeting
 
 # Client Team in the meeting
 
-# Meeting Agenda - We don't always get to all the topics
+# Project Context
+
+# Our Company Context 
+
+# Client  Context
 
 # Nuance & Extra Context
 
@@ -167,6 +184,10 @@ Before you build and respond with meeting notes I want you to ask any clarifying
 Analyze the provided meeting transcript. Extract key decisions, action items (with owners and deadlines if mentioned), and major discussion points. Exclude off-topic chatter and filler conversation. 
 
 The final output should match this format:
+
+# Meeting Name
+
+# Meeting Coverage - Build a table with 2 columns; Left side has the agenda and right side has what was actually covered. Keep summary short and concise.
 
 # Action Items (Client)
 
@@ -196,7 +217,7 @@ Break up the meeting into sections. Below is an example of the format for a sect
 
 **Client Input & Discussion ([List key client participants if different from main attendees list, or re-iterate e.g., Amy L., Mike K.]):**
 *   **General Feedback:**
-    *   [Summarize client's overall impressions of the software shown (e.g., "Positive feedback on the UI intuitiveness compared to old system.") and any suggestions for system improvements (non-bugs) (e.g., "Requested YTD spend visibility on budget allocation screen."). Include feedback on the training delivery itself (e.g., "Appreciated the hands-on approach; requested a quick reference guide for icons.").
+    *   [Summarize client's overall impressions of the software shown (e.g., "Positive feedback on the UI intuitiveness compared to old system.") and any suggestions for system improvements (non-bugs) (e.g., "Requested YTD spend visibility on budget allocation screen."). Include feedback on the training delivery itself (e.g., "Appreciated the hands-on approach; requested a quick reference guide for icons.").]
 *   **Client Struggles/Areas of Confusion:** *(Ignore this section if no notable issues)*
     *   [e.g., Initial confusion differentiating 'Planned Uplift' vs. 'Actual Uplift' fields, requiring further explanation.]
     *   [e.g., Some difficulty remembering the exact sequence for linking child promotions without guidance.]
@@ -206,16 +227,27 @@ Break up the meeting into sections. Below is an example of the format for a sect
     *   [e.g., Feature request: Dashboard widget for top 5 performing promotions by ROI.]
     *   [e.g., Inquiry about integration possibilities with [Client's Other Tool Name].]
 
-## MEETING CONTEXT/NOTES START ####################################################################################################################################
+## MEETING CONTEXT/DATA START ####################################################################################################################################
 
+## Meeting Name
+<MEETING_NAME>
+
+## Meeting Agenda - We don't always get to all the topics or sometimes skip ahead
+<MEETING_AGENDA>
+
+## Our Team in the meeting
+<OUR_TEAM>
+
+## Client Team in the meeting
+<CLIENT_TEAM>
+
+## Project, Our Company, Client Context #####################################################################################################################################################
 <PROJECT_COMPANY_CONTEXT>
 
-# Slide Notes
-
+## SLIDE NOTES ####################################################################################################################################################
 <SLIDE_NOTES>
 
-###########################################################################################################################################################
-
+## MEETING TRANSCRIPT #############################################################################################################################################
 <MEETING_TRANSCRIPT>`;
 
 export const PROMPT_TEMPLATE_GENERAL_CLIENT = `Assume the role of detailed meeting note taker and trade promotion management software consultant.
@@ -226,15 +258,17 @@ I will feed you information about my company (Xtel, created software also called
 
 # Meeting Name
 
-# Our Company Context
-
-# Client Context
+# Meeting Agenda - We don't always get to all the topics or sometimes skip ahead
 
 # Our Team in the meeting
 
 # Client Team in the meeting
 
-# Meeting Agenda - We don't always get to all the topics
+# Project Context
+
+# Our Company Context 
+
+# Client  Context
 
 # Nuance & Extra Context
 
@@ -372,15 +406,25 @@ Below is an example of the output format for the Full Detailed Meeting Notes:
 
 ---
 
+## MEETING CONTEXT/DATA START ####################################################################################################################################
 
-## MEETING CONTEXT/NOTES START ####################################################################################################################################
+## Meeting Name
+<MEETING_NAME>
 
+## Meeting Agenda - We don't always get to all the topics or sometimes skip ahead
+<MEETING_AGENDA>
+
+## Our Team in the meeting
+<OUR_TEAM>
+
+## Client Team in the meeting
+<CLIENT_TEAM>
+
+## Project, Our Company, Client Context #####################################################################################################################################################
 <PROJECT_COMPANY_CONTEXT>
 
 ## SLIDE NOTES ####################################################################################################################################################
-
 <SLIDE_NOTES>
 
 ## MEETING TRANSCRIPT #############################################################################################################################################
-
 <MEETING_TRANSCRIPT>`;

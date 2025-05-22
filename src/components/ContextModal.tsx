@@ -94,8 +94,9 @@ export function ContextModal() {
         <DialogHeader>
           <DialogTitle>Project & Company Context</DialogTitle>
           <DialogDescription>
-            Provide background information about the project, company,
-            attendees, and meeting goals. This context helps in generating more
+            Provide background information about the project and company.
+            Specific meeting details like name, agenda, and attendees will be
+            managed separately. This general context helps in generating more
             relevant notes later.
           </DialogDescription>
         </DialogHeader>

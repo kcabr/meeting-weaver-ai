@@ -17,12 +17,13 @@
  * - Middleware (like thunks for async actions or logging) can be added here if needed in the future.
  */
 
-import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './slices/userSlice';
-import contextReducer from './slices/contextSlice';
-import slideNotesReducer from './slices/slideNotesSlice';
-import transcriptReducer from './slices/transcriptSlice';
-import modalReducer from './slices/modalSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./slices/userSlice";
+import contextReducer from "./slices/contextSlice";
+import slideNotesReducer from "./slices/slideNotesSlice";
+import transcriptReducer from "./slices/transcriptSlice";
+import modalReducer from "./slices/modalSlice";
+import meetingDetailsReducer from "./slices/meetingDetailsSlice";
 
 /**
  * @description The main Redux store configuration.
@@ -34,6 +35,7 @@ export const store = configureStore({
     slideNotes: slideNotesReducer,
     transcript: transcriptReducer,
     modals: modalReducer,
+    meetingDetails: meetingDetailsReducer,
   },
   // Middleware can be added here if needed, e.g., for async thunks
   // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(myMiddleware),

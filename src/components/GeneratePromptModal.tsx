@@ -32,7 +32,7 @@
  * - Copy functionality calls the 'copyToClipboard' utility.
  */
 
-import React, { useMemo, useState } from "react"; // Removed useRef as it's not strictly needed for copy
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -50,25 +50,28 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select"; // Added Select imports
+} from "~/components/ui/select";
 import { useAppSelector, useAppDispatch } from "~/store/hooks";
 import { closeGeneratePromptModal } from "~/store/slices/modalSlice";
-import { copyToClipboard } from "~/utils/textUtils";
 import {
   PROMPT_TEMPLATE_DESIGN,
   PROMPT_TEMPLATE_TRAINING,
   PROMPT_TEMPLATE_GENERAL_CLIENT,
 } from "~/utils/constants";
-import { TextareaWithCopy } from "~/components/TextareaWithCopy"; // Added import
-import { TokenPill } from "~/components/TokenPill"; // Added import
+import { TextareaWithCopy } from "~/components/TextareaWithCopy";
+import { TokenPill } from "~/components/TokenPill";
 
-// BEGIN WRITING FILE CODE
 export function GeneratePromptModal() {
   const dispatch = useAppDispatch();
   const isOpen = useAppSelector(
     (state) => state.modals.isGeneratePromptModalOpen
   );
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("Design"); // Added state for selected template
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("Design");
+
+  // Fetch meeting details from Redux store
+  const { meetingName, meetingAgenda, ourTeam, clientTeam } = useAppSelector(
+    (state) => state.meetingDetails
+  );
 
   const contextText = useAppSelector((state) => state.context.text);
   const slideNotesText = useAppSelector((state) => state.slideNotes.text);
@@ -95,6 +98,12 @@ export function GeneratePromptModal() {
         prompt = PROMPT_TEMPLATE_DESIGN; // Default to Design
         break;
     }
+    // Replace new placeholders
+    prompt = prompt.replace("<MEETING_NAME>", meetingName.trim());
+    prompt = prompt.replace("<MEETING_AGENDA>", meetingAgenda.trim());
+    prompt = prompt.replace("<OUR_TEAM>", ourTeam.trim());
+    prompt = prompt.replace("<CLIENT_TEAM>", clientTeam.trim());
+    // Existing replacements
     prompt = prompt.replace("<PROJECT_COMPANY_CONTEXT>", contextText.trim());
     prompt = prompt.replace("<SLIDE_NOTES>", slideNotesText.trim());
     prompt = prompt.replace(
@@ -102,7 +111,16 @@ export function GeneratePromptModal() {
       transcriptDisplayText.trim()
     );
     return prompt;
-  }, [contextText, slideNotesText, transcriptDisplayText, selectedTemplate]); // Added selectedTemplate to dependency array
+  }, [
+    contextText,
+    slideNotesText,
+    transcriptDisplayText,
+    selectedTemplate,
+    meetingName,
+    meetingAgenda,
+    ourTeam,
+    clientTeam,
+  ]);
 
   /**
    * @description Handles closing the dialog.
@@ -113,7 +131,6 @@ export function GeneratePromptModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      {/* Adjusted width for better prompt visibility */}
       <DialogContent className="sm:max-w-lg md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Generated Note Builder Prompt</DialogTitle>
@@ -122,11 +139,8 @@ export function GeneratePromptModal() {
             Large Language Model (LLM).
           </DialogDescription>
         </DialogHeader>
-        {/* Use flex-grow on the container to push footer down */}
         <div className="grid gap-4 py-4 flex-grow">
           <div className="flex justify-between items-center">
-            {" "}
-            {/* Container for Select and TokenPill */}
             <Select
               value={selectedTemplate}
               onValueChange={setSelectedTemplate}
@@ -142,21 +156,17 @@ export function GeneratePromptModal() {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <TokenPill text={finalPrompt} /> {/* Added TokenPill */}
+            <TokenPill text={finalPrompt} />
           </div>
           <TextareaWithCopy
             id="generated-prompt-textarea"
             value={finalPrompt}
             readOnly
-            // Adjusted min-height and added h-full
             className="min-h-[400px] h-full resize-y font-mono text-xs bg-muted/50"
             aria-label="Generated Prompt"
           />
         </div>
         <DialogFooter className="sm:justify-end mt-auto">
-          {" "}
-          {/* Changed sm:justify-between to sm:justify-end */}
-          {/* Removed the old Copy to Clipboard button */}
           <DialogClose asChild>
             <Button variant="secondary">Close</Button>
           </DialogClose>
@@ -165,4 +175,3 @@ export function GeneratePromptModal() {
     </Dialog>
   );
 }
-// END WRITING FILE CODE

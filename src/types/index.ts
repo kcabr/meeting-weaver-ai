@@ -10,4 +10,20 @@
  * - Simplifies import statements, e.g., import type { ContextState } from '~/types';
  */
 
-export * from './app-types';
+export * from "./app-types";
+
+// Interface for the state managed by contextSlice.ts
+export interface ContextState {
+  text: string;
+}
+
+// Interface for the state managed by meetingDetailsSlice.ts
+export interface MeetingDetailsState {
+  meetingName: string;
+  meetingAgenda: string;
+  ourTeam: string;
+  clientTeam: string;
+}
+
+// Interface for the state managed by modalSlice.ts
+// ... existing code ...
