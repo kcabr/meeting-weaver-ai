@@ -170,11 +170,9 @@ The final output should match this format:
 
 # Action Items (Client)
 
-# Action Items (US)
+# Action Items (US - Xtel)
 
 # Open Questions / Circle Back Items
-
-# Bugs / Issues found in system during training
 
 # Full Detailed Meeting Notes
 
@@ -182,22 +180,31 @@ The final output should match this format:
 
 This is a training session. You don't need to take fully detailed notes on what we are saying. A summary of the training portion is all that is needed. 
 
-I am more interested in the client's feedback and questions.
+I am more interested in the client's feedback, questions, and issues as well as system issues occuring during the demo.
 
 Break up the meeting into sections. Below is an example of the format for a section that I would like for the Full Detailed Meeting Notes. You discuss the Presentation then review client input & discussion.:
 
-**4. Accruals**
-*   **Xtel Presentation (Kevin G., Doug S.):**
-    *   **Training Summary:** Slightly detailed accruals training summary here
-    *   **Bugs / Issues found in system during training:** Bugs / Issues found in system during training here
-*   **Client Input & Discussion (Amy L., Mike K., Conference Room):**
-    *   **Decision:** Confirmed accruals *will* be calculated in Xtel.
-    *   **Current Process:** Post currently accrues based on total shipments * LE volume * blended rate (fund-based/top-down). They use a "guardrail" method based on total company sales/spend rates because the current system isn't accurate enough for liability.
-    *   Acknowledged the shift to event-based accrual is a **major change** for Finance. Requires further internal discussion and a dedicated deep-dive session with Xtel. Action Item for Finance.
-    *   Clarified understanding that "Mechanic" in Xtel context refers to the Tactic (e.g., Off Invoice, Lump Sum, Scan). Accrual rules are generally consistent across customers for the same tactic.
-    *   Confirmed Sales team primarily cares about fund generation ("deposit"), not the detailed financial liability accrual, though visibility is available.
-    *   Question raised about handling ship dates for accruals when shipments occur earlier than planned event ship dates (e.g., April 27th ship for May 1st event start). Xtel explained accrual follows event dates; adjustments might involve changing event dates or potentially creating short secondary events (needs more discussion in requirements). Using LE spend calculation might mitigate some timing issues if volume forecasts are accurate.
+## 1. Section Name
+**Xtel-Led Training & System Interaction:**
+*   **Training Summary & Key Areas Covered:**
+    *   [Briefly state the main objectives for the session (e.g., "Focused on promotion creation, budget allocation, and approval workflows."). Then, list the key modules/features demonstrated and practiced (e.g., "Covered: Navigating promotion setup, inputting mandatory fields, product selection, budget allocation to promotions, and initiating the approval process."). Mention any significant client engagement or successful practice if it's a key takeaway, e.g., "Clients successfully created several test promotions."].
+*   **Bugs / Issues Identified in System During Training:**
+    *   [e.g., System became unresponsive when selecting over 50 products for a promotion.]
+    *   [e.g., Typo ("Aproval") found on the 'Budget Summary' screen.]
+    *   [e.g., Filter for 'Promotion Type' did not correctly apply in one instance.]
+    *   *(List each distinct bug/issue observed as a concise point.)*
 
+**Client Input & Discussion ([List key client participants if different from main attendees list, or re-iterate e.g., Amy L., Mike K.]):**
+*   **General Feedback:**
+    *   [Summarize client's overall impressions of the software shown (e.g., "Positive feedback on the UI intuitiveness compared to old system.") and any suggestions for system improvements (non-bugs) (e.g., "Requested YTD spend visibility on budget allocation screen."). Include feedback on the training delivery itself (e.g., "Appreciated the hands-on approach; requested a quick reference guide for icons.").
+*   **Client Struggles/Areas of Confusion:** *(Ignore this section if no notable issues)*
+    *   [e.g., Initial confusion differentiating 'Planned Uplift' vs. 'Actual Uplift' fields, requiring further explanation.]
+    *   [e.g., Some difficulty remembering the exact sequence for linking child promotions without guidance.]
+*   **Other Client Comments & Questions:**
+    *   [e.g., Q: "Can approval workflows be customized?" (Xtel: Yes, configurable / admin training).]
+    *   [e.g., Q: "How are exchange rates handled for international promotions?" (Xtel: Daily pull, manual override possible).]
+    *   [e.g., Feature request: Dashboard widget for top 5 performing promotions by ROI.]
+    *   [e.g., Inquiry about integration possibilities with [Client's Other Tool Name].]
 
 ## MEETING CONTEXT/NOTES START ####################################################################################################################################
 
@@ -208,7 +215,5 @@ Break up the meeting into sections. Below is an example of the format for a sect
 <SLIDE_NOTES>
 
 ###########################################################################################################################################################
-
-# Meeting Transcript - I will use #s to add context within the transcript and to explain when we are moving on to another section.
 
 <MEETING_TRANSCRIPT>`;
