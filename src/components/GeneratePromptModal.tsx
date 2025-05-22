@@ -57,6 +57,7 @@ import { copyToClipboard } from "~/utils/textUtils";
 import {
   PROMPT_TEMPLATE_DESIGN,
   PROMPT_TEMPLATE_TRAINING,
+  PROMPT_TEMPLATE_GENERAL_CLIENT,
 } from "~/utils/constants";
 import { TextareaWithCopy } from "~/components/TextareaWithCopy"; // Added import
 import { TokenPill } from "~/components/TokenPill"; // Added import
@@ -86,6 +87,9 @@ export function GeneratePromptModal() {
         break;
       case "Training":
         prompt = PROMPT_TEMPLATE_TRAINING;
+        break;
+      case "General Client Meeting":
+        prompt = PROMPT_TEMPLATE_GENERAL_CLIENT;
         break;
       default:
         prompt = PROMPT_TEMPLATE_DESIGN; // Default to Design
@@ -133,6 +137,9 @@ export function GeneratePromptModal() {
               <SelectContent>
                 <SelectItem value="Design">Design</SelectItem>
                 <SelectItem value="Training">Training</SelectItem>
+                <SelectItem value="General Client Meeting">
+                  General Client Meeting
+                </SelectItem>
               </SelectContent>
             </Select>
             <TokenPill text={finalPrompt} /> {/* Added TokenPill */}

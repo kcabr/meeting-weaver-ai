@@ -217,3 +217,170 @@ Break up the meeting into sections. Below is an example of the format for a sect
 ###########################################################################################################################################################
 
 <MEETING_TRANSCRIPT>`;
+
+export const PROMPT_TEMPLATE_GENERAL_CLIENT = `Assume the role of detailed meeting note taker and trade promotion management software consultant.
+
+###########################################################################################################################################################
+
+I will feed you information about my company (Xtel, created software also called Xtel) under the following headers
+
+# Meeting Name
+
+# Our Company Context
+
+# Client Context
+
+# Our Team in the meeting
+
+# Client Team in the meeting
+
+# Meeting Agenda - We don't always get to all the topics
+
+# Nuance & Extra Context
+
+# Slide Notes
+
+###########################################################################################################################################################
+
+Below the slide notes will begin the meeting transcript. Consume everything for the best context. 
+Before you build and respond with meeting notes I want you to ask any clarifying follow up questions to get better context.
+
+Analyze the provided meeting transcript. Extract key decisions, action items (with owners and deadlines if mentioned), and major discussion points. Exclude off-topic chatter and filler conversation. 
+
+This is a general meeting with the client.  
+
+I am interested in the general discussion, client's feedback, questions, action items and general dynamic and sentiment analysis of the meeting.
+
+Below is an example of the output format for the Full Detailed Meeting Notes:
+
+## Full Detailed Meeting Notes Format ##########################################################################################################################
+
+**Meeting Purpose/Objective(s):**
+*   [e.g., To discuss Q2 performance and plan Q3 initiatives.]
+*   [e.g., To gather feedback on the latest prototype and address outstanding questions.]
+*   [e.g., General project update and alignment on next steps.]
+
+# General Back and Forth Dynamic / Feel / Sentiment Analysis
+
+# Summary of Client Conflict / Disagreement / Concerns / Issues
+
+---
+
+**1. Overall Meeting Summary & Key Outcomes:**
+*   [Provide a 2-3 sentence high-level overview of the meeting's flow, main achievements, and any critical decisions or roadblocks. This is the "executive summary" of the meeting.]
+*   [e.g., Productive discussion focused on X and Y. Client provided positive feedback on Z, raised concerns about A. Key decisions included B. Next steps involve C.]
+
+---
+
+**2. Key Discussion Topics & Client Interaction:**
+
+    *(Repeat this section for each major topic covered. The example you provided for "Xtel-Led Training & System Interaction" can be adapted for any topic, like "Project Roadmap Review," "Marketing Campaign Performance," "New Feature Proposal," etc.)*
+
+    ---
+    **2.1. Topic: [Specific Name of the Discussion Point, e.g., "Review of Q2 Sales Performance Dashboard"]**
+
+    *   **A. Topic Presentation & Key Information Shared (Our Side):**
+        *   **Objectives for this Topic:** [e.g., "To present the new Q2 sales dashboard and explain key metrics.", "To walk through the proposed solution for issue X."]
+        *   **Key Points Covered/Demonstrated:**
+            *   [e.g., "Showcased new filtering capabilities on the dashboard."]
+            *   [e.g., "Highlighted 15% growth in region Y."]
+            *   [e.g., "Explained the three phases of the proposed feature rollout."]
+        *   **Issues/Observations During Presentation (if applicable):**
+            *   [e.g., "Minor lag observed when loading the 'All Products' view on the demo dashboard."]
+            *   [e.g., "Realized a data point for 'Market Share' was missing from the presentation slide."]
+
+    *   **B. Client Input & Discussion on this Topic:**
+        *   **Key Client Participants for this Topic:** [List if specific individuals drove the discussion, e.g., "Sarah (Marketing Lead), John (Sales Ops)"]
+        *   **General Feedback & Reactions:**
+            *   [e.g., "Client expressed enthusiasm for the improved UI of the dashboard."]
+            *   [e.g., "They found the phased rollout approach sensible but had questions about timelines."]
+            *   [e.g., "Requested clarification on how metric X was calculated."]
+        *   **Client Questions & Our Responses:**
+            *   **Q:** "[Client's exact or paraphrased question]" (Asked by: [Client Name, if notable])
+            *   **A:** "[Our team's response, key points made]" (Answered by: [Our Team Member])
+            *   **Q:** "[Another question]"
+            *   **A:** "[Response]"
+        *   **Client Concerns / Points of Confusion / Areas of Disagreement:**
+            *   [e.g., "Initial confusion regarding the term 'Projected Uplift'; required further explanation."]
+            *   [e.g., "Concern raised about the resource implications for Phase 2 of the rollout."]
+            *   [e.g., "Disagreement on the priority of feature Y versus feature Z."]
+        *   **Client Suggestions / Requests / Ideas:**
+            *   [e.g., "Suggested adding a 'YTD Comparison' view to the dashboard."]
+            *   [e.g., "Requested a follow-up session specifically on the technical architecture."]
+            *   [e.g., "Inquired about potential integration with their CRM system."]
+
+    ---
+    **2.2. Topic: [Next Discussion Point, e.g., "Planning for Q3 Marketing Campaign"]**
+    *   **A. Topic Presentation & Key Information Shared (Our Side):**
+        *   ...
+    *   **B. Client Input & Discussion on this Topic:**
+        *   ...
+    ---
+    *(Continue for all significant topics)*
+
+---
+
+**3. General Client Feedback & Open Discussion (Not tied to a specific topic above):**
+*   [e.g., Client appreciated the collaborative approach of the meeting.]
+*   [e.g., General questions about overall project timelines or budget not covered elsewhere.]
+*   [e.g., Feedback on the communication frequency.]
+
+---
+
+**4. Decisions Made:**
+*   **Decision 1:** [e.g., To proceed with Option A for the new feature design.] (Rationale: [Brief reason])
+*   **Decision 2:** [e.g., Postpone discussion on X until more data is available.]
+*   [If no decisions were made, state "No formal decisions made in this meeting."]
+
+---
+
+**5. Action Items:**
+| # | Action Item                                      | Owner(s)         | Due Date     | Status      | Notes                                     |
+|---|--------------------------------------------------|------------------|--------------|-------------|-------------------------------------------|
+| 1 | [e.g., Send revised project timeline to client]  | [Your Team Name] | [YYYY-MM-DD] | Open        |                                           |
+| 2 | [e.g., Client to provide feedback on proposal X] | [Client Name]    | [YYYY-MM-DD] | Open        |                                           |
+| 3 | [e.g., Schedule follow-up technical deep-dive]   | [Your Team Name] | [YYYY-MM-DD] | Open        | Coordinate with Client's technical lead |
+|   |                                                  |                  |              |             |                                           |
+
+---
+
+**6. Meeting Dynamics & Sentiment Analysis:**
+*   **Overall Client Sentiment:** [e.g., Positive, Generally Positive with some concerns, Neutral, Cautious, Mixed, Negative – briefly explain why.]
+    *   [e.g., "Client seemed very receptive to the new dashboard, but cautious about the aggressive timeline for the Q3 campaign."]
+*   **Engagement Levels:**
+    *   **Client:** [e.g., Highly engaged, actively participated, some members quiet, mainly listening]
+    *   **Our Team:** [e.g., Proactive in leading discussion, responsive to questions]
+*   **Key Observations on Group Dynamics:**
+    *   [e.g., Good rapport between teams.]
+    *   [e.g., [Client Name A] seemed to be the primary decision-maker/influencer for the client.]
+    *   [e.g., Some tension observed when discussing budget constraints.]
+    *   [e.g., Client team seemed aligned internally / Client team had differing opinions on X.]
+*   **Any Unspoken Concerns or Undercurrents Noted:**
+    *   [e.g., "Felt like the client might be under internal pressure regarding budget, though not explicitly stated."]
+    *   [e.g., "Slight hesitation from client when discussing data migration – might need to probe further."]
+*   **Meeting Effectiveness:**
+    *   [e.g., Achieved all stated objectives.]
+    *   [e.g., Good progress made, but some topics need more time.]
+    *   [e.g., Ran over time, could have been more focused.]
+
+---
+
+**7. Next Steps & Follow-up:**
+*   [e.g., Next scheduled meeting: YYYY-MM-DD to discuss Z.]
+*   [e.g., Our team to circulate these notes and the updated action item list by EOD tomorrow.]
+*   [e.g., Client to review and provide feedback on [Document Name] by [Date].]
+
+---
+
+
+## MEETING CONTEXT/NOTES START ####################################################################################################################################
+
+<PROJECT_COMPANY_CONTEXT>
+
+## SLIDE NOTES ####################################################################################################################################################
+
+<SLIDE_NOTES>
+
+## MEETING TRANSCRIPT #############################################################################################################################################
+
+<MEETING_TRANSCRIPT>`;
